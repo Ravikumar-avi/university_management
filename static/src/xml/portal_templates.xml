@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <templates xml:space="preserve">
+
+        <!-- ========================================
+             STUDENT PORTAL LAYOUT
+             ======================================== -->
+        <t t-name="university_management.student_portal_layout">
+            <t t-call="portal.portal_layout">
+                <div class="student-portal">
+
+                    <!-- Portal Header -->
+                    <div class="portal-header">
+                        <div class="portal-header-content">
+                            <div class="student-info">
+                                <img t-if="student.photo"
+                                     t-attf-src="data:image/png;base64,{{student.photo}}"
+                                     class="student-avatar" alt="Student Photo"/>
+                                <img t-else=""
+                                     src="/university_management/static/src/img/default_avatar.png"
+                                     class="student-avatar" alt="Student Photo"/>
+
+                                <div class="student-details">
+                                    <h2><t t-esc="student.name"/></h2>
+                                    <div class="student-meta">
+                                        <span>
+                                            <i class="fa fa-id-card"/>
+                                            <t t-esc="student.registration_number"/>
+                                        </span>
+                                        <span>
+                                            <i class="fa fa-graduation-cap"/>
+                                            <t t-esc="student.program_id.name"/>
+                                        </span>
+                                        <span>
+                                            <i class="fa fa-calendar"/>
+                                            Semester <t t-esc="student.current_semester_id.name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="quick-stats">
+                                <div class="quick-stat-item">
+                                    <span class="quick-stat-value">
+                                        <t t-esc="'%.2f' % student.cgpa"/>
+                                    </span>
+                                    <span class="quick-stat-label">CGPA</span>
+                                </div>
+                                <div class="quick-stat-item">
+                                    <span class="quick-stat-value">
+                                        <t t-esc="'%.1f' % student.attendance_percentage"/>%
+                                    </span>
+                                    <span class="quick-stat-label">Attendance</span>
+                                </div>
+                                <div class="quick-stat-item">
+                                    <span class="quick-stat-value">
+                                        <t t-esc="student.backlogs"/>
+                                    </span>
+                                    <span class="quick-stat-label">Backlogs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portal Navigation -->
+                    <nav class="portal-nav">
+                        <div class="portal-nav-container">
+                            <a href="/my/student/dashboard"
+                               t-attf-class="portal-nav-item {{active_menu == 'dashboard' and 'active' or ''}}">
+                                <i class="fa fa-dashboard"/> Dashboard
+                            </a>
+                            <a href="/my/profile"
+                               t-attf-class="portal-nav-item {{active_menu == 'profile' and 'active' or ''}}">
+                                <i class="fa fa-user"/> Profile
+                            </a>
+                            <a href="/my/attendance"
+                               t-attf-class="portal-nav-item {{active_menu == 'attendance' and 'active' or ''}}">
+                                <i class="fa fa-calendar-check-o"/> Attendance
+                            </a>
+                            <a href="/my/timetable"
+                               t-attf-class="portal-nav-item {{active_menu == 'timetable' and 'active' or ''}}">
+                                <i class="fa fa-clock-o"/> Timetable
+                            </a>
+                            <a href="/my/fees"
+                               t-attf-class="portal-nav-item {{active_menu == 'fees' and 'active' or ''}}">
+                                <i class="fa fa-money"/> Fees
+                            </a>
+                            <a href="/my/results"
+                               t-attf-class="portal-nav-item {{active_menu == 'results' and 'active' or ''}}">
+                                <i class="fa fa-trophy"/> Results
+                            </a>
+                            <a href="/my/assignments"
+                               t-attf-class="portal-nav-item {{active_menu == 'assignments' and 'active' or ''}}">
+                                <i class="fa fa-tasks"/> Assignments
+                            </a>
+                            <a href="/my/library"
+                               t-attf-class="portal-nav-item {{active_menu == 'library' and 'active' or ''}}">
+                                <i class="fa fa-book"/> Library
+                            </a>
+                            <a href="/my/events"
+                               t-attf-class="portal-nav-item {{active_menu == 'events' and 'active' or ''}}">
+                                <i class="fa fa-calendar"/> Events
+                            </a>
+                        </div>
+                    </nav>
+
+                    <!-- Portal Content -->
+                    <div class="portal-content">
+                        <t t-raw="0"/>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+
+        <!-- ========================================
+             STUDENT DASHBOARD
+             ======================================== -->
+        <t t-name="university_management.student_dashboard">
+            <t t-call="university_management.student_portal_layout">
+                <t t-set="active_menu" t-value="'dashboard'"/>
+
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Academic Overview</h3>
+                    </div>
+
+                    <!-- Academic Stats -->
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <i class="stat-icon fa fa-graduation-cap"/>
+                            <div class="stat-value"><t t-esc="'%.2f' % student.cgpa"/></div>
+                            <div class="stat-label">Current CGPA</div>
+                        </div>
+
+                        <div class="stat-card stat-card-success">
+                            <i class="stat-icon fa fa-check-circle"/>
+                            <div class="stat-value"><t t-esc="'%.1f' % student.attendance_percentage"/>%</div>
+                            <div class="stat-label">Attendance</div>
+                        </div>
+
+                        <div class="stat-card stat-card-warning">
+                            <i class="stat-icon fa fa-exclamation-triangle"/>
+                            <div class="stat-value"><t t-esc="student.backlogs"/></div>
+                            <div class="stat-label">Active Backlogs</div>
+                        </div>
+
+                        <div class="stat-card stat-card-info">
+                            <i class="stat-icon fa fa-book"/>
+                            <div class="stat-value"><t t-esc="len(student.current_semester_id.subject_ids)"/></div>
+                            <div class="stat-label">Current Subjects</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Attendance -->
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Recent Attendance</h3>
+                        <a href="/my/attendance" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+
+                    <t t-if="recent_attendance">
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="recent_attendance" t-as="att">
+                                        <tr>
+                                            <td><t t-esc="att.date"/></td>
+                                            <td><t t-esc="att.subject_id.name"/></td>
+                                            <td>
+                                                <span t-if="att.state == 'present'"
+                                                      class="badge badge-success">Present</span>
+                                                <span t-if="att.state == 'absent'"
+                                                      class="badge badge-danger">Absent</span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <p class="text-muted">No attendance records found.</p>
+                    </t>
+                </div>
+
+        <!-- ========================================
+             ATTENDANCE PAGE
+             ======================================== -->
+        <t t-name="university_management.student_attendance">
+            <t t-call="university_management.student_portal_layout">
+                <t t-set="active_menu" t-value="'attendance'"/>
+
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Attendance Overview</h3>
+                    </div>
+
+                    <!-- Attendance Cards -->
+                    <div class="attendance-overview">
+                        <div t-attf-class="attendance-card {{student.attendance_percentage >= 75 and 'success' or (student.attendance_percentage >= 60 and 'warning' or 'danger')}}">
+                            <div class="attendance-label">Overall Attendance</div>
+                            <div class="attendance-percentage">
+                                <t t-esc="'%.1f' % student.attendance_percentage"/>%
+                            </div>
+                            <div class="attendance-details">
+                                <div class="attendance-stat">
+                                    <div class="attendance-stat-value"><t t-esc="student.classes_attended"/></div>
+                                    <div class="attendance-stat-label">Present</div>
+                                </div>
+                                <div class="attendance-stat">
+                                    <div class="attendance-stat-value"><t t-esc="student.classes_absent"/></div>
+                                    <div class="attendance-stat-label">Absent</div>
+                                </div>
+                                <div class="attendance-stat">
+                                    <div class="attendance-stat-value"><t t-esc="student.total_classes_conducted"/></div>
+                                    <div class="attendance-stat-label">Total</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject-wise Attendance -->
+                    <h4 class="mt-4 mb-3">Subject-wise Attendance</h4>
+                    <div class="subject-attendance-list">
+                        <t t-foreach="subject_attendance" t-as="subj_att">
+                            <div class="subject-attendance-item">
+                                <div class="subject-attendance-header">
+                                    <div class="subject-name"><t t-esc="subj_att.subject"/></div>
+                                    <div t-attf-class="subject-percentage {{subj_att.percentage >= 75 and 'text-success' or (subj_att.percentage >= 60 and 'text-warning' or 'text-danger')}}">
+                                        <t t-esc="'%.1f' % subj_att.percentage"/>%
+                                    </div>
+                                </div>
+                                <div class="subject-attendance-progress">
+                                    <div class="subject-attendance-bar"
+                                         t-attf-style="width: {{subj_att.percentage}}%"/>
+                                </div>
+                                <div class="subject-attendance-info">
+                                    <span>Present: <t t-esc="subj_att.present"/></span>
+                                    <span>Total: <t t-esc="subj_att.total"/></span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+            </t>
+        </t>
+
+        <!-- ========================================
+             FEE PAYMENTS PAGE
+             ======================================== -->
+        <t t-name="university_management.student_fees">
+            <t t-call="university_management.student_portal_layout">
+                <t t-set="active_menu" t-value="'fees'"/>
+
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Fee Payments</h3>
+                    </div>
+
+                    <!-- Fee Summary -->
+                    <div class="fee-summary">
+                        <div class="fee-summary-card total">
+                            <div class="fee-label">Total Fee</div>
+                            <div class="fee-amount total">
+                                ₹<t t-esc="'{:,.2f}'.format(total_fee)"/>
+                            </div>
+                        </div>
+
+                        <div class="fee-summary-card paid">
+                            <div class="fee-label">Paid Amount</div>
+                            <div class="fee-amount paid">
+                                ₹<t t-esc="'{:,.2f}'.format(total_paid)"/>
+                            </div>
+                        </div>
+
+                        <div class="fee-summary-card pending">
+                            <div class="fee-label">Pending Amount</div>
+                            <div class="fee-amount pending">
+                                ₹<t t-esc="'{:,.2f}'.format(total_due)"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee Payments List -->
+                    <h4 class="mt-4 mb-3">Payment History</h4>
+                    <div class="fee-payments-list">
+                        <t t-foreach="fees" t-as="fee">
+                            <div class="fee-payment-item">
+                                <div class="fee-payment-info">
+                                    <h4><t t-esc="fee.fee_type_id.name"/></h4>
+                                    <div class="fee-payment-meta">
+                                        <span><i class="fa fa-calendar"/> <t t-esc="fee.payment_date"/></span>
+                                        <span><i class="fa fa-hashtag"/> <t t-esc="fee.name"/></span>
+                                    </div>
+                                </div>
+                                <div class="fee-payment-amount">
+                                    <div class="fee-amount-value">
+                                        ₹<t t-esc="'{:,.2f}'.format(fee.total_amount)"/>
+                                    </div>
+                                    <span t-if="fee.state == 'paid'" class="fee-status-badge paid">
+                                        <i class="fa fa-check-circle"/> Paid
+                                    </span>
+                                    <span t-if="fee.state == 'pending'" class="fee-status-badge pending">
+                                        <i class="fa fa-clock-o"/> Pending
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+            </t>
+        </t>
+
+        <!-- ========================================
+             TIMETABLE PAGE
+             ======================================== -->
+        <t t-name="university_management.student_timetable">
+            <t t-call="university_management.student_portal_layout">
+                <t t-set="active_menu" t-value="'timetable'"/>
+
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Class Timetable</h3>
+                    </div>
+
+                    <div class="timetable-container">
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Monday</th>
+                                    <th>Tuesday</th>
+                                    <th>Wednesday</th>
+                                    <th>Thursday</th>
+                                    <th>Friday</th>
+                                    <th>Saturday</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="timetable_by_day" t-as="day_schedule">
+                                    <tr>
+                                        <td class="time-slot"><t t-esc="day_schedule.time"/></td>
+                                        <t t-foreach="['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']" t-as="day">
+                                            <t t-set="class_info" t-value="day_schedule.get(day)"/>
+                                            <td t-attf-class="class-slot {{class_info and 'has-class' or ''}}">
+                                                <t t-if="class_info">
+                                                    <div class="class-subject"><t t-esc="class_info.subject"/></div>
+                                                    <div class="class-faculty"><t t-esc="class_info.faculty"/></div>
+                                                    <div class="class-room"><t t-esc="class_info.room"/></div>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </t>
+        </t>
+
+        <!-- ========================================
+             RESULTS PAGE
+             ======================================== -->
+        <t t-name="university_management.student_results">
+            <t t-call="university_management.student_portal_layout">
+                <t t-set="active_menu" t-value="'results'"/>
+
+                <div class="portal-section">
+                    <div class="section-header">
+                        <h3 class="section-title">Examination Results</h3>
+                    </div>
+
+                    <div class="results-grid">
+                        <t t-foreach="results" t-as="result">
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <div class="exam-info">
+                                        <h3><t t-esc="result.examination_id.name"/></h3>
+                                        <p class="exam-date">
+                                            <i class="fa fa-calendar"/>
+                                            <t t-esc="result.examination_id.start_date"/>
+                                        </p>
+                                    </div>
+                                    <div class="result-grade">
+                                        <div class="grade-value"><t t-esc="'%.2f' % result.sgpa"/></div>
+                                        <div class="grade-label">SGPA</div>
+                                    </div>
+                                </div>
+
+                                <div class="subject-results">
+                                    <t t-foreach="result.result_line_ids" t-as="line">
+                                        <div class="subject-result">
+                                            <span class="subject-result-name">
+                                                <t t-esc="line.subject_id.name"/>
+                                            </span>
+                                            <span class="subject-result-marks">
+                                                <t t-esc="line.marks_obtained"/>/<t t-esc="line.max_marks"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <a t-attf-href="/my/marksheet/{{result.id}}/download"
+                                   class="btn btn-primary btn-block mt-3">
+                                    <i class="fa fa-download"/> Download Marksheet
+                                </a>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+            </t>
+        </t>
+
+    </templates>
+</odoo>

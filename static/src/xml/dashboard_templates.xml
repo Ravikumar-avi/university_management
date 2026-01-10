@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <templates xml:space="preserve">
+
+        <!-- ========================================
+             MAIN DASHBOARD TEMPLATE
+             ======================================== -->
+        <t t-name="university_management.UniversityDashboard">
+            <div class="o_university_dashboard">
+
+                <!-- Dashboard Header -->
+                <div class="o_dashboard_header">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h2 class="mb-0">
+                                    <i class="fa fa-dashboard"/>
+                                    <t t-esc="dashboard.dashboard.name"/>
+                                </h2>
+                                <p class="text-muted mb-0">
+                                    <i class="fa fa-clock-o"/> Last updated:
+                                    <t t-esc="moment().format('MMMM DD, YYYY - HH:mm')"/>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <div class="btn-group">
+                                    <button class="btn btn-primary o_dashboard_refresh">
+                                        <i class="fa fa-refresh"/> Refresh
+                                    </button>
+                                    <button class="btn btn-secondary o_dashboard_filter_btn">
+                                        <i class="fa fa-filter"/> Filters
+                                    </button>
+                                    <button class="btn btn-info o_dashboard_customize">
+                                        <i class="fa fa-cog"/> Customize
+                                    </button>
+                                    <button class="btn btn-success o_dashboard_export">
+                                        <i class="fa fa-download"/> Export
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div class="o_dashboard_content container-fluid mt-4">
+
+                    <!-- KPI Cards Section -->
+                    <div class="o_kpi_cards_container row mb-4"></div>
+
+                    <!-- Charts / Widgets Section -->
+                    <div class="o_dashboard_widgets_container row"></div>
+
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             KPI CARD TEMPLATE
+             ======================================== -->
+        <t t-name="DashboardKPICard">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="kpi-card"
+                     t-att-data-action="kpi.action"
+                     t-attf-class="kpi-card {{kpi.color or 'primary'}}">
+                    <div class="kpi-header">
+                        <div class="kpi-icon"
+                             t-attf-class="kpi-icon {{kpi.color or 'primary'}}">
+                            <i class="fa fa-3x"
+                               t-att-class="kpi.icon or 'fa-bar-chart'"/>
+                        </div>
+                    </div>
+                    <div class="kpi-body">
+                        <h2 class="kpi-value">
+                            <t t-if="kpi.prefix" t-esc="kpi.prefix"/>
+                            <t t-esc="kpi.value"/>
+                            <t t-if="kpi.suffix" t-esc="kpi.suffix"/>
+                        </h2>
+                        <p class="kpi-label">
+                            <t t-esc="kpi.label"/>
+                        </p>
+                        <t t-if="kpi.change">
+                            <div t-attf-class="kpi-change {{kpi.change_type}}">
+                                <i t-if="kpi.change_type == 'positive'"
+                                   class="fa fa-arrow-up"/>
+                                <i t-if="kpi.change_type == 'negative'"
+                                   class="fa fa-arrow-down"/>
+                                <t t-esc="kpi.change"/>%
+                                <span class="text-muted ml-2">vs last period</span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             DASHBOARD WIDGET TEMPLATE
+             ======================================== -->
+        <t t-name="DashboardWidget">
+            <div t-attf-class="col-lg-{{widget.width or '6'}} mb-4">
+                <div class="chart-widget" t-att-data-widget-id="widget.id">
+                    <div class="chart-header">
+                        <h4 class="chart-title">
+                            <i t-if="widget.icon" class="fa"
+                               t-att-class="widget.icon"/>
+                            <t t-esc="widget.name"/>
+                        </h4>
+                        <div class="chart-actions">
+                            <button class="chart-action-btn o_widget_action"
+                                    data-action="refresh">
+                                <i class="fa fa-refresh"/>
+                            </button>
+                            <button class="chart-action-btn o_widget_action"
+                                    data-action="expand">
+                                <i class="fa fa-expand"/>
+                            </button>
+                            <button class="chart-action-btn o_widget_action"
+                                    data-action="remove">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas t-att-id="widget.code + '-chart'"
+                                t-att-data-chart-type="widget.type"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             FILTER DIALOG TEMPLATE
+             ======================================== -->
+        <t t-name="DashboardFiltersDialog">
+            <div class="o_dashboard_filters_dialog">
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <select name="date_range" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected="selected">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <select name="academic_year_id" class="form-control">
+                        <option value="">All Years</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <select name="department_id" class="form-control">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Program</label>
+                    <select name="program_id" class="form-control">
+                        <option value="">All Programs</option>
+                    </select>
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             EXPORT DIALOG TEMPLATE
+             ======================================== -->
+        <t t-name="DashboardExportDialog">
+            <div class="o_dashboard_export_dialog">
+                <p>Choose export format for the dashboard:</p>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <i class="fa fa-file-pdf-o fa-2x text-danger"/>
+                        <strong>PDF Export</strong>
+                        <p class="text-muted mb-0">
+                            Export dashboard as PDF document
+                        </p>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fa fa-file-excel-o fa-2x text-success"/>
+                        <strong>Excel Export</strong>
+                        <p class="text-muted mb-0">
+                            Export data as Excel spreadsheet
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             CUSTOMIZE DIALOG TEMPLATE
+             ======================================== -->
+        <t t-name="DashboardCustomizeDialog">
+            <div class="o_dashboard_customize_dialog">
+                <p>Drag widgets to reorder. Check/uncheck to show/hide.</p>
+                <div class="o_widgets_settings">
+                    <t t-foreach="widgets" t-as="widget">
+                        <div class="o_widget_setting card mb-2"
+                             t-att-data-widget-id="widget.id">
+                            <div class="card-body">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox"
+                                           class="custom-control-input"
+                                           name="visible"
+                                           t-att-id="'widget_' + widget.id"
+                                           checked="checked"/>
+                                    <label class="custom-control-label"
+                                           t-att-for="'widget_' + widget.id">
+                                        <strong>
+                                            <t t-esc="widget.name"/>
+                                        </strong>
+                                    </label>
+                                </div>
+                                <input type="hidden" name="order"
+                                       t-att-value="widget.sequence"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+
+        <!-- ========================================
+             CAMERA DIALOG TEMPLATE
+             ======================================== -->
+        <t t-name="CameraDialog">
+            <div class="o_camera_dialog text-center">
+                <video autoplay="autoplay"
+                       style="max-width: 100%; border-radius: 8px;"/>
+            </div>
+        </t>
+
+        <!-- Student Photo Widget Template -->
+<!--        <t t-name="university_management.StudentPhotoWidget">-->
+<!--            <div class="o_student_photo_widget">-->
+<!--                <div class="o_student_photo_preview">-->
+<!--                    <img t-att-src="photoUrl"-->
+<!--                         class="o_student_photo_image"-->
+<!--                         alt="Student Photo"-->
+<!--                         style="max-width: 150px; border-radius: 8px;"/>-->
+<!--                </div>-->
+<!--                <input type="file"-->
+<!--                       accept="image/*"-->
+<!--                       style="display: none;"-->
+<!--                       t-ref="fileInput"-->
+<!--                       t-on-change="onFileChange"/>-->
+<!--                <div class="o_student_photo_actions mt-2">-->
+<!--                    <button class="btn btn-sm btn-primary o_student_photo_upload"-->
+<!--                            type="button"-->
+<!--                            t-on-click="onUploadClick">-->
+<!--                        <i class="fa fa-upload"/> Upload-->
+<!--                    </button>-->
+<!--                    <button class="btn btn-sm btn-info o_student_photo_camera"-->
+<!--                            type="button"-->
+<!--                            t-on-click="onCameraClick">-->
+<!--                        <i class="fa fa-camera"/> Camera-->
+<!--                    </button>-->
+<!--                    <button class="btn btn-sm btn-danger o_student_photo_remove"-->
+<!--                            type="button"-->
+<!--                            t-on-click="onRemoveClick">-->
+<!--                        <i class="fa fa-trash"/> Remove-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </t>-->
+
+        <!-- Camera Dialog Template -->
+<!--        <t t-name="university_management.CameraDialog">-->
+<!--            <div class="o_camera_dialog text-center">-->
+<!--                <video t-ref="video"-->
+<!--                       autoplay="autoplay"-->
+<!--                       style="max-width: 100%; border-radius: 8px;"/>-->
+<!--                <div class="mt-3">-->
+<!--                    <button class="btn btn-primary"-->
+<!--                            type="button"-->
+<!--                            t-on-click="onCapture">-->
+<!--                        <i class="fa fa-camera"/> Capture-->
+<!--                    </button>-->
+<!--                    <button class="btn btn-secondary ms-2"-->
+<!--                            type="button"-->
+<!--                            t-on-click="onCancel">-->
+<!--                        Cancel-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </t>-->
+
+    </templates>
+</odoo>
