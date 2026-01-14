@@ -73,3 +73,8 @@ class StudentAttendance(models.Model):
         for record in self:
             if record.time_in and record.time_out and record.time_out <= record.time_in:
                 raise ValidationError(_('Time Out must be after Time In!'))
+
+    def action_print_receipt(self):
+        """Print Attendance report"""
+        self.write({'receipt_printed': True})
+        return self.env.ref('university_management.report_attendance').report_action(self)

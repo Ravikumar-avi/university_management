@@ -50,6 +50,11 @@
               action="action_university_course"
               sequence="40"/>
 
+    <menuitem id="menu_university_classroom_root"
+              name="Classrooms"
+              parent="menu_academic"
+              action="action_university_classroom"/>
+
     <menuitem id="menu_university_semester"
               name="Semesters"
               parent="menu_academic"

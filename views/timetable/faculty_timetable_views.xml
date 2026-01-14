@@ -18,7 +18,7 @@
                 <field name="end_time" widget="float_time"/>
                 <field name="subject_id"/>
                 <field name="batch_id"/>
-                <field name="room_number" optional="show"/>
+                <field name="room_number_id" optional="show"/>
             </list>
         </field>
     </record>
@@ -32,7 +32,7 @@
                 <field name="faculty_id"/>
                 <field name="subject_id"/>
                 <field name="batch_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
 
                 <separator/>
 
@@ -90,7 +90,7 @@
                 <field name="end_time"/>
                 <field name="subject_id"/>
                 <field name="batch_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
 
                 <templates>
                     <t t-name="kanban-box">
@@ -136,13 +136,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="row" t-if="record.room_number.raw_value">
+                                    <div class="row" t-if="record.room_number_id.raw_value">
                                         <div class="col-12">
                                             <div class="bg-light p-2 rounded">
                                                 <small class="text-muted d-block">Room</small>
                                                 <small>
                                                     <i class="fa fa-map-marker text-danger"/>
-                                                    <field name="room_number"/>
+                                                    <field name="room_number_id"/>
                                                 </small>
                                             </div>
                                         </div>
@@ -162,8 +162,8 @@
         <field name="model">faculty.timetable</field>
         <field name="arch" type="xml">
             <calendar string="Faculty Schedule Calendar"
-                      date_start="start_time"
-                      date_stop="end_time"
+                      date_start="start_datetime"
+                      date_stop="end_datetime"
                       mode="week"
                       quick_create="0"
                       create="0"
@@ -176,7 +176,7 @@
                 <field name="subject_id"/>
                 <field name="faculty_id"/>
                 <field name="batch_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="day_of_week" filters="1" invisible="1"/>
             </calendar>
         </field>
@@ -225,13 +225,13 @@
                 readonly), 6 day_of_week options readonly (monday/Monday, tuesday/Tuesday, wednesday/Wednesday,
                 thursday/Thursday, friday/Friday, saturday/Saturday), start_time (float readonly, float_time
                 widget), end_time (float readonly, float_time widget), subject_id (Many2one to university.subject
-                readonly), batch_id (Many2one to university.batch readonly), room_number (char readonly). List
+                readonly), batch_id (Many2one to university.batch readonly), room_number_id (char readonly). List
                 view with create/edit/delete disabled (false), ordered by faculty_id/day_of_week/start_time,
-                float_time widgets for start_time/end_time, optional room_number. Kanban view grouped by
+                float_time widgets for start_time/end_time, optional room_number_id. Kanban view grouped by
                 faculty_id showing subject_id as title with day_of_week badge (primary background), centered
                 time alert (info background, clock icon, h5 start_time-end_time float_time widgets), batch_id
-                card (light background, users icon success, "Batch" label), conditional room_number card (light
-                background, map-marker icon danger, "Room" label, shown if room_number exists),
+                card (light background, users icon success, "Batch" label), conditional room_number_id card (light
+                background, map-marker icon danger, "Room" label, shown if room_number_id exists),
                 create/edit/delete disabled. Calendar view with date_start/date_stop using start_time/end_time,
                 mode week, color by faculty_id, day_of_week filters, event_open_popup, scales week only,
                 create/edit/delete disabled. Pivot view with faculty_id as row, day_of_week as col, subject_id
@@ -240,7 +240,7 @@
                 days (monday-saturday)/group by faculty-day-subject-batch. Searchpanel for faculty_id and
                 day_of_week multi-select. Default filter: grouped by Faculty. SQL VIEW created in init() method
                 using tools.drop_view_if_exists and CREATE OR REPLACE VIEW selecting ROW_NUMBER() OVER() as id,
-                faculty_id, day_of_week, start_time, end_time, subject_id, batch_id, room_number FROM
+                faculty_id, day_of_week, start_time, end_time, subject_id, batch_id, room_number_id FROM
                 class_timetable WHERE active=true. Complete read-only faculty schedule view for teaching load
                 analysis and schedule management.
             </p>

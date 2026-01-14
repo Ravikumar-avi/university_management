@@ -25,8 +25,8 @@ class FeeStructure(models.Model):
 
     # Fee Category (Link to sale.product)
     product_id = fields.Many2one('product.product', string='Fee Product',
-                                 domain=[('can_be_expensed', '=', False)],
-                                 help='Link to product for invoicing')
+                                 domain=[('type', '=', 'service'), ('sale_ok', '=', True)],
+                                 help='Link to product for invoicing (should be a saleable service)')
 
     # Fee Components
     fee_line_ids = fields.One2many('fee.structure.line', 'fee_structure_id',

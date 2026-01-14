@@ -221,8 +221,7 @@
         <field name="model">university.course</field>
         <field name="arch" type="xml">
             <list string="University Courses"
-                  default_order="semester_id, name"
-                  multi_edit="1">
+                  default_order="semester_id, name">
                 <field name="code"/>
                 <field name="name"/>
                 <field name="program_id"/>

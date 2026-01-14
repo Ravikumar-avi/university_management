@@ -85,6 +85,7 @@
         'views/academic/university_program_views.xml',
         'views/academic/university_department_views.xml',
         'views/academic/university_course_views.xml',
+        'views/academic/university_classroom_views.xml',
         'views/academic/university_subject_views.xml',
         'views/academic/university_semester_views.xml',
         'views/academic/university_academic_year_views.xml',
@@ -238,7 +239,6 @@
 
         'templates/studentportal/studentdashboard_templates.xml',
         'templates/parentportal/parentdashboard_templates.xml',
-        'templates/facultyportal/facultydashboard_templates.xml',
 
         # Menu
         'views/menu_views.xml',

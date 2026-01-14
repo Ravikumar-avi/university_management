@@ -8,7 +8,7 @@ class ClassTimetable(models.Model):
     _name = 'class.timetable'
     _description = 'Class Timetable/Schedule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'day_of_week, start_time'
+    _order = 'day_of_week, start_datetime'
 
     name = fields.Char(string='Reference', compute='_compute_name', store=True)
 
@@ -38,6 +38,10 @@ class ClassTimetable(models.Model):
     end_time = fields.Float(string='End Time', required=True)
     duration = fields.Float(string='Duration (Hours)', compute='_compute_duration', store=True)
 
+    # fields used by calendar
+    start_datetime = fields.Datetime(string='Start Datetime', required=True)
+    end_datetime = fields.Datetime(string='End Datetime', required=True)
+
     # Subject & Course
     course_id = fields.Many2one('university.course', string='Course', required=True)
     subject_id = fields.Many2one(related='course_id.subject_id', string='Subject', store=True)
@@ -54,14 +58,14 @@ class ClassTimetable(models.Model):
                                  required=True, tracking=True)
 
     # Room
-    room_number = fields.Char(string='Room/Lab Number')
-    building = fields.Char(string='Building')
+    room_number_id = fields.Many2one('university.classroom', string='Room/Lab Number')
+    building_name_id = fields.Many2one('university.classroom', string='Building Name')
 
     # Status
     active = fields.Boolean(string='Active', default=True)
 
     _sql_constraints = [
-        ('unique_slot', 'unique(batch_id, day_of_week, start_time, room_number)',
+        ('unique_slot', 'unique(batch_id, day_of_week, start_time, room_number_id)',
          'Time slot already allocated for this batch/room!'),
     ]
 
@@ -97,3 +101,12 @@ class ClassTimetable(models.Model):
             ])
             if conflicts:
                 raise ValidationError(_(f'Faculty {record.faculty_id.name} already has a class at this time!'))
+
+    @api.onchange('start_datetime', 'end_datetime')
+    def _onchange_datetimes(self):
+        """Keep float times in sync when user changes calendar event."""
+        for rec in self:
+            if rec.start_datetime:
+                rec.start_time = rec.start_datetime.hour + rec.start_datetime.minute / 60.0
+            if rec.end_datetime:
+                rec.end_time = rec.end_datetime.hour + rec.end_datetime.minute / 60.0

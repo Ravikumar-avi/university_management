@@ -74,9 +74,9 @@
 
                     <group>
                         <group string="Location">
-                            <field name="building_name" placeholder="e.g., Main Block"/>
-                            <field name="floor" placeholder="e.g., 2nd Floor"/>
-                            <field name="room_number" placeholder="e.g., Room 201"/>
+                            <field name="building_name_id" placeholder="e.g., Main Block"/>
+                            <field name="floor_id" placeholder="e.g., 2nd Floor"/>
+                            <field name="room_number_id" placeholder="e.g., Room 201"/>
                         </group>
                         <group string="Lab &amp; Research">
                             <field name="lab_count"/>
@@ -272,7 +272,7 @@
                 <field name="code"/>
                 <field name="hod_id"/>
                 <field name="email"/>
-                <field name="building_name"/>
+                <field name="building_name_id"/>
 
                 <separator/>
 
@@ -313,7 +313,7 @@
 
                 <group expand="0" string="Group By">
                     <filter name="group_by_building" string="Building"
-                            context="{'group_by': 'building_name'}"/>
+                            context="{'group_by': 'building_name_id'}"/>
                     <filter name="group_by_hod" string="HOD"
                             context="{'group_by': 'hod_id'}"/>
                     <filter name="group_by_accreditation" string="Accreditation Status"
@@ -343,7 +343,7 @@
                 <field name="email"/>
                 <field name="phone"/>
                 <field name="website"/>
-                <field name="building_name"/>
+                <field name="building_name_id"/>
                 <field name="total_programs"/>
                 <field name="total_faculty"/>
                 <field name="total_students"/>
@@ -414,10 +414,10 @@
                                     </div>
                                 </div>
 
-                                <div class="row mt-2" t-if="record.building_name.value">
+                                <div class="row mt-2" t-if="record._id.value">
                                     <div class="col-12">
                                         <i class="fa fa-building text-muted"/>
-                                        <field name="building_name"/>
+                                        <field name="building_name_id"/>
                                     </div>
                                 </div>
 

@@ -28,7 +28,7 @@ class LabSchedule(models.Model):
     department_id = fields.Many2one('university.department', string='Department')
 
     # Schedule (linked to class timetable)
-    timetable_ids = fields.One2many('class.timetable', 'room_number',
+    timetable_ids = fields.One2many('class.timetable', 'room_number_id',
                                     string='Lab Schedule',
                                     domain=[('class_type', '=', 'practical')])
 

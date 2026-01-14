@@ -26,9 +26,13 @@ class UniversityDepartment(models.Model):
     website = fields.Char(string='Department Website')
 
     # Location
-    building_name = fields.Char(string='Building Name')
-    floor = fields.Char(string='Floor')
-    room_number = fields.Char(string='Room Number')
+    # building_name = fields.Char(string='Building Name')
+    # floor = fields.Char(string='Floor')
+    # room_number = fields.Char(string='Room Number')
+
+    building_name_id = fields.Many2one('university.classroom', string='Building Name')
+    floor_id = fields.Many2one('university.classroom', string='Floor')
+    room_number_id = fields.Many2one('university.classroom', string='Room Number')
 
     # Programs
     program_ids = fields.One2many('university.program', 'department_id', string='Programs')

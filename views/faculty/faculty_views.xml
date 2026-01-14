@@ -155,7 +155,7 @@
                                     <field name="end_time" widget="float_time"/>
                                     <field name="subject_id"/>
                                     <field name="course_id"/>
-                                    <field name="room_number"/>
+                                    <field name="room_number_id"/>
                                     <field name="class_type"/>
                                 </list>
                             </field>

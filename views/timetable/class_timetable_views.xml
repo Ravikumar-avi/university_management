@@ -49,9 +49,9 @@
                         <group string="Faculty &amp; Venue">
                             <field name="faculty_id"
                                    options="{'no_create': True, 'no_create_edit': True}"/>
-                            <field name="room_number"
+                            <field name="room_number_id"
                                    placeholder="e.g., Room 301, Lab 1"/>
-                            <field name="building"
+                            <field name="building_name_id"
                                    placeholder="e.g., Main Block, Engineering Block"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
@@ -79,8 +79,8 @@
                 <field name="subject_id"/>
                 <field name="class_type" optional="show"/>
                 <field name="faculty_id"/>
-                <field name="room_number" optional="show"/>
-                <field name="building" optional="hide"/>
+                <field name="room_number_id" optional="show"/>
+                <field name="building_name_id" optional="hide"/>
                 <field name="batch_id" optional="show"/>
                 <field name="section" optional="hide"/>
                 <field name="semester_id" optional="hide"/>
@@ -100,7 +100,7 @@
                 <field name="faculty_id"/>
                 <field name="batch_id"/>
                 <field name="department_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
 
                 <separator/>
 
@@ -183,8 +183,8 @@
                 <field name="subject_id"/>
                 <field name="class_type"/>
                 <field name="faculty_id"/>
-                <field name="room_number"/>
-                <field name="building"/>
+                <field name="room_number_id"/>
+                <field name="building_name_id"/>
                 <field name="batch_id"/>
                 <field name="section"/>
                 <field name="active"/>
@@ -240,22 +240,22 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mb-2" t-if="record.room_number.raw_value">
+                                    <div class="row mb-2" t-if="record.room_number_id.raw_value">
                                         <div class="col-6">
                                             <div class="bg-light p-2 rounded">
                                                 <small class="text-muted d-block">Room</small>
                                                 <small>
                                                     <i class="fa fa-map-marker text-danger"/>
-                                                    <field name="room_number"/>
+                                                    <field name="room_number_id"/>
                                                 </small>
                                             </div>
                                         </div>
-                                        <div class="col-6" t-if="record.building.raw_value">
+                                        <div class="col-6" t-if="record.building_name_id.raw_value">
                                             <div class="bg-light p-2 rounded">
                                                 <small class="text-muted d-block">Building</small>
                                                 <small>
                                                     <i class="fa fa-building text-info"/>
-                                                    <field name="building"/>
+                                                    <field name="building_name_id"/>
                                                 </small>
                                             </div>
                                         </div>
@@ -304,8 +304,8 @@
         <field name="model">class.timetable</field>
         <field name="arch" type="xml">
             <calendar string="Timetable Calendar"
-                      date_start="start_time"
-                      date_stop="end_time"
+                      date_start="start_datetime"
+                      date_stop="end_datetime"
                       mode="week"
                       quick_create="0"
                       color="faculty_id"
@@ -314,7 +314,7 @@
                       scales="week">
                 <field name="subject_id"/>
                 <field name="faculty_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="day_of_week" filters="1" invisible="1"/>
             </calendar>
         </field>
@@ -349,19 +349,19 @@
                 subject_id (Many2one related from course_id.subject_id stored readonly). Select class_type (3
                 options required default theory): theory (Theory Class), practical (Practical/Lab), tutorial
                 (Tutorial). Select faculty_id (Many2one to faculty.faculty required tracked, no-create). Enter
-                room_number (char, placeholder "e.g., Room 301, Lab 1"). Enter building (char, placeholder
+                room_number_id (char, placeholder "e.g., Room 301, Lab 1"). Enter building (char, placeholder
                 "e.g., Main Block, Engineering Block"). Check active (boolean default True, boolean_toggle
                 widget). Form view with 2 groups: Academic Information (academic_year_id/semester_id/
                 program_id/department_id/batch_id/section) and Schedule (day_of_week/start_time float_time/
                 end_time float_time/duration readonly float_time), 2 more groups: Subject Details (course_id/
-                subject_id readonly/class_type) and Faculty &amp; Venue (faculty_id/room_number/building/
+                subject_id readonly/class_type) and Faculty &amp; Venue (faculty_id/room_number_id/building/
                 active toggle). List view with float_time widgets for start_time/end_time/duration, muted row
                 decoration for inactive records, optional field controls. Kanban view grouped by day_of_week
                 showing subject_id as title with class_type badge (3-color: primary/blue for theory, success/
                 green for practical, info/light-blue for tutorial), centered time alert (primary background,
                 clock icon, h5 start_time-end_time float_time widgets, small "Duration: duration" text),
-                faculty_id card (light background, user icon primary), conditional 2-card room_number/building
-                (6/6 grid if room_number exists, map-marker icon danger/building icon info), batch_id/section
+                faculty_id card (light background, user icon primary), conditional 2-card room_number_id/building
+                (6/6 grid if room_number_id exists, map-marker icon danger/building icon info), batch_id/section
                 card (light background, users icon success, "Batch/Section" label with conditional section),
                 conditional inactive badge (secondary background, ban icon, shown if not active), opacity-50
                 class for entire card if inactive, activity widget at bottom-right. Calendar view with
@@ -371,7 +371,7 @@
                 inactive/3 class types/6 days/group by day-batch-department-faculty-class_type-semester-
                 academic_year. Searchpanel for academic_year_id, semester_id, department_id, and day_of_week
                 multi-select. Full chatter/activity support. SQL constraint for unique slot (batch_id/
-                day_of_week/start_time/room_number preventing same batch/room at same time). Time validation
+                day_of_week/start_time/room_number_id preventing same batch/room at same time). Time validation
                 constraint via _check_times with api.constrains('start_time','end_time') checking end_time &gt;
                 start_time and 0 &lt;= times &lt;= 24, raising ValidationError. Faculty conflict validation via
                 _check_faculty_conflict with api.constrains('faculty_id','day_of_week','start_time',

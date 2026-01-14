@@ -48,7 +48,7 @@
                                    options="{'no_create': True, 'no_create_edit': True}"/>
                             <field name="classroom_id"
                                    options="{'no_create': True, 'no_create_edit': True}"/>
-                            <field name="room_number" placeholder="e.g., Room 301"/>
+                            <field name="room_number_id" placeholder="e.g., Room 301"/>
                             <field name="class_type" widget="radio"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
@@ -101,7 +101,7 @@
                 <field name="batch_id" optional="hide"/>
                 <field name="faculty_id"/>
                 <field name="classroom_id" optional="show"/>
-                <field name="room_number" optional="show"/>
+                <field name="room_number_id" optional="show"/>
                 <field name="class_type" widget="badge"/>
                 <field name="is_recurring" widget="boolean_toggle"
                        optional="hide"/>
@@ -125,7 +125,7 @@
                 <field name="semester_id"/>
                 <field name="batch_id"/>
                 <field name="classroom_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
 
                 <separator/>
 
@@ -241,7 +241,7 @@
                 <field name="end_time"/>
                 <field name="duration"/>
                 <field name="classroom_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="class_type"/>
                 <field name="is_recurring"/>
                 <field name="start_date"/>
@@ -287,14 +287,14 @@
                                     </div>
                                 </div>
 
-                                <div class="row" t-if="record.classroom_id.value or record.room_number.value">
+                                <div class="row" t-if="record.classroom_id.value or record.room_number_id.value">
                                     <div class="col-12">
                                         <i class="fa fa-map-marker text-danger"/>
                                         <span t-if="record.classroom_id.value">
                                             <field name="classroom_id"/>
                                         </span>
-                                        <span t-if="record.room_number.value">
-                                            - <field name="room_number"/>
+                                        <span t-if="record.room_number_id.value">
+                                            - <field name="room_number_id"/>
                                         </span>
                                     </div>
                                 </div>
@@ -347,7 +347,7 @@
                 <field name="start_time" widget="float_time"/>
                 <field name="end_time" widget="float_time"/>
                 <field name="classroom_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="class_type"/>
             </calendar>
         </field>

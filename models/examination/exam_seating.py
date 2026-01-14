@@ -7,7 +7,7 @@ from odoo.exceptions import ValidationError
 class ExaminationSeating(models.Model):
     _name = 'examination.seating'
     _description = 'Exam Seating Arrangement'
-    _order = 'examination_id, room_number, seat_number'
+    _order = 'examination_id, room_number_id, seat_number'
 
     name = fields.Char(string='Reference', compute='_compute_name', store=True)
 
@@ -30,9 +30,9 @@ class ExaminationSeating(models.Model):
     hall_ticket_id = fields.Many2one('examination.hall.ticket', string='Hall Ticket')
 
     # Seating Details
-    room_number = fields.Char(string='Room Number', required=True)
-    building = fields.Char(string='Building/Block')
-    floor = fields.Char(string='Floor')
+    building_name_id = fields.Many2one('university.classroom', string='Building Name')
+    floor_id = fields.Many2one('university.classroom', string='Floor')
+    room_number_id = fields.Many2one('university.classroom', string='Room Number')
 
     seat_number = fields.Char(string='Seat Number', required=True)
     row_number = fields.Char(string='Row')
@@ -64,16 +64,16 @@ class ExaminationSeating(models.Model):
     remarks = fields.Text(string='Remarks')
 
     _sql_constraints = [
-        ('unique_seat', 'unique(examination_id, timetable_id, room_number, seat_number)',
+        ('unique_seat', 'unique(examination_id, timetable_id, room_number_id, seat_number)',
          'Seat already allocated for this exam!'),
         ('unique_student_exam', 'unique(examination_id, timetable_id, student_id)',
          'Student already has a seat for this exam!'),
     ]
 
-    @api.depends('student_id', 'room_number', 'seat_number')
+    @api.depends('student_id', 'room_number_id', 'seat_number')
     def _compute_name(self):
         for record in self:
-            record.name = f"{record.student_id.registration_number} - {record.room_number}/{record.seat_number}"
+            record.name = f"{record.student_id.registration_number} - {record.room_number_id}/{record.seat_number}"
 
     def action_confirm(self):
         self.write({'is_confirmed': True})
@@ -97,14 +97,14 @@ class ExaminationSeating(models.Model):
         seat_counter = 1
 
         for student in students:
-            room_number = f"R{room_counter:03d}"
+            room_number_id = f"R{room_counter:03d}"
             seat_number = f"S{seat_counter:03d}"
 
             self.create({
                 'examination_id': examination_id,
                 'student_id': student.id,
                 'hall_ticket_id': hall_tickets.filtered(lambda h: h.student_id == student).id,
-                'room_number': room_number,
+                'room_number_id': room_number_id,
                 'seat_number': seat_number,
             })
 

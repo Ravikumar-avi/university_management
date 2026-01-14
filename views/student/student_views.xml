@@ -119,7 +119,7 @@
                         <group string="Personal Information">
                             <field name="date_of_birth" widget="date"/>
                             <field name="age" readonly="1"/>
-                            <field name="gender" widget="radio"/>
+                            <field name="gender" widget="radio" options="{'horizontal': true}"/>
                             <field name="blood_group"/>
                             <field name="nationality_id" options="{'no_create': True}"/>
                             <field name="is_international" widget="boolean_toggle"/>

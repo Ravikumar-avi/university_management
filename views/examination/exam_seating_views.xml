@@ -46,9 +46,9 @@
 
                     <group>
                         <group string="Room Details">
-                            <field name="room_number"/>
-                            <field name="building"/>
-                            <field name="floor"/>
+                            <field name="room_number_id"/>
+                            <field name="building_name_id"/>
+                            <field name="floor_id"/>
                             <field name="venue"/>
                         </group>
                         <group string="Seat Details">
@@ -79,7 +79,7 @@
         <field name="model">examination.seating</field>
         <field name="arch" type="xml">
             <list string="Exam Seating"
-                  default_order="examination_id, room_number, seat_number"
+                  default_order="examination_id, room_number_id, seat_number"
                   multi_edit="1"
                   sample="1"
                   decoration-success="is_confirmed == True"
@@ -92,9 +92,9 @@
                 <field name="student_id"/>
                 <field name="registration_number" optional="show"/>
                 <field name="hall_ticket_id" optional="hide"/>
-                <field name="room_number"/>
-                <field name="building" optional="show"/>
-                <field name="floor" optional="hide"/>
+                <field name="room_number_id"/>
+                <field name="building_name_id" optional="show"/>
+                <field name="floor_id" optional="hide"/>
                 <field name="seat_number"/>
                 <field name="row_number" optional="show"/>
                 <field name="column_number" optional="show"/>
@@ -115,9 +115,9 @@
                 <field name="examination_id"/>
                 <field name="student_id"/>
                 <field name="registration_number"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="seat_number"/>
-                <field name="building"/>
+                <field name="building_name_id"/>
                 <field name="venue"/>
 
                 <separator/>
@@ -140,9 +140,9 @@
                     <filter name="group_by_subject" string="Subject"
                             context="{'group_by': 'subject_id'}"/>
                     <filter name="group_by_room" string="Room Number"
-                            context="{'group_by': 'room_number'}"/>
+                            context="{'group_by': 'room_number_id'}"/>
                     <filter name="group_by_building" string="Building"
-                            context="{'group_by': 'building'}"/>
+                            context="{'group_by': 'building_name_id'}"/>
                     <filter name="group_by_venue" string="Venue"
                             context="{'group_by': 'venue'}"/>
                     <filter name="group_by_exam_date" string="Exam Date"
@@ -169,7 +169,7 @@
         <field name="model">examination.seating</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile"
-                    default_group_by="room_number"
+                    default_group_by="room_number_id"
                     quick_create="false"
                     sample="1">
                 <field name="id"/>
@@ -180,9 +180,9 @@
                 <field name="student_id"/>
                 <field name="registration_number"/>
                 <field name="hall_ticket_id"/>
-                <field name="room_number"/>
-                <field name="building"/>
-                <field name="floor"/>
+                <field name="room_number_id"/>
+                <field name="building_name_id"/>
+                <field name="floor_id"/>
                 <field name="seat_number"/>
                 <field name="row_number"/>
                 <field name="column_number"/>
@@ -240,7 +240,7 @@
                                                         <strong> Room:</strong>
                                                     </span>
                                                     <strong class="text-primary">
-                                                        <field name="room_number"/>
+                                                        <field name="room_number_id"/>
                                                     </strong>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-1">
@@ -248,7 +248,7 @@
                                                         <i class="fa fa-building text-success"/>
                                                         <strong> Building:</strong>
                                                     </span>
-                                                    <strong><field name="building"/></strong>
+                                                    <strong><field name="building_name_id"/></strong>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-1">
                                                     <span>
@@ -305,10 +305,10 @@
             <calendar string="Exam Seating Calendar"
                       date_start="exam_date"
                       mode="month"
-                      color="room_number"
+                      color="room_number_id"
                       quick_create="false">
                 <field name="student_id"/>
-                <field name="room_number"/>
+                <field name="room_number_id"/>
                 <field name="seat_number"/>
                 <field name="subject_id"/>
             </calendar>
@@ -321,7 +321,7 @@
         <field name="model">examination.seating</field>
         <field name="arch" type="xml">
             <pivot string="Seating Analysis">
-                <field name="room_number" type="row"/>
+                <field name="room_number_id" type="row"/>
                 <field name="examination_id" type="col"/>
             </pivot>
         </field>
@@ -333,7 +333,7 @@
         <field name="model">examination.seating</field>
         <field name="arch" type="xml">
             <graph string="Seating Statistics" type="bar">
-                <field name="room_number"/>
+                <field name="room_number_id"/>
             </graph>
         </field>
     </record>

@@ -15,6 +15,9 @@ access_university_course_coordinator,university.course.coordinator,model_univers
 access_university_course_faculty,university.course.faculty,model_university_course,group_faculty,1,0,0,0
 access_university_course_student,university.course.student,model_university_course,group_student_portal,1,0,0,0
 
+access_university_classroom_admin,university.classroom.admin,model_university_classroom,group_university_admin,1,1,1,1
+access_university_classroom_faculty,university.classroom.faculty,model_university_classroom,group_faculty,1,0,0,0
+
 access_university_department_admin,university.department.admin,model_university_department,group_university_admin,1,1,1,1
 access_university_department_coordinator,university.department.coordinator,model_university_department,group_academic_coordinator,1,1,1,0
 access_university_department_faculty,university.department.faculty,model_university_department,group_faculty,1,0,0,0

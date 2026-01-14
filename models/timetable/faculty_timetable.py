@@ -22,9 +22,22 @@ class FacultyTimetable(models.Model):
     end_time = fields.Float(string='End Time', readonly=True)
     duration = fields.Float(string='Duration', readonly=True)
 
+    # fields used by calendar
+    start_datetime = fields.Datetime(string='Start Datetime', required=True)
+    end_datetime = fields.Datetime(string='End Datetime', required=True)
+
     subject_id = fields.Many2one('university.subject', string='Subject', readonly=True)
     batch_id = fields.Many2one('university.batch', string='Batch', readonly=True)
-    room_number = fields.Char(string='Room', readonly=True)
+    room_number_id = fields.Many2one('university.classroom', string='Room Number', readonly=True)
+
+    @api.onchange('start_datetime', 'end_datetime')
+    def _onchange_datetimes(self):
+        """Keep float times in sync when user changes calendar event."""
+        for rec in self:
+            if rec.start_datetime:
+                rec.start_time = rec.start_datetime.hour + rec.start_datetime.minute / 60.0
+            if rec.end_datetime:
+                rec.end_time = rec.end_datetime.hour + rec.end_datetime.minute / 60.0
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
@@ -39,7 +52,9 @@ class FacultyTimetable(models.Model):
                     (end_time - start_time) as duration,
                     subject_id,
                     batch_id,
-                    room_number
+                    room_number_id,
+                    start_datetime,
+                    end_datetime
                 FROM class_timetable
                 WHERE active = true
             )

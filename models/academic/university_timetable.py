@@ -46,7 +46,7 @@ class UniversityTimetable(models.Model):
 
     # Classroom
     classroom_id = fields.Many2one('university.classroom', string='Classroom', tracking=True)
-    room_number = fields.Char(string='Room Number')
+    room_number_id = fields.Many2one('university.classroom', string='Room Number')
 
     # Class Type
     class_type = fields.Selection([
@@ -142,7 +142,7 @@ class UniversityTimetable(models.Model):
             'rrule_type': 'weekly',
             'byday': days_map.get(self.day_of_week),
             'until': self.end_date if self.end_date else False,
-            'description': f"Faculty: {self.faculty_id.name}\nRoom: {self.room_number or 'N/A'}",
+            'description': f"Faculty: {self.faculty_id.name}\nRoom: {self.room_number_id or 'N/A'}",
         }
 
         event = CalendarEvent.create(event_vals)

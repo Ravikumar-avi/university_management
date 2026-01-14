@@ -1,5 +1,6 @@
 from . import university_program
 from . import university_course
+from . import university_classroom
 from . import university_department
 from . import university_semester
 from . import university_subject

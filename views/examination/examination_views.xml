@@ -178,7 +178,7 @@
                                    context="{'default_examination_id': id}">
                                 <list string="Seating">
                                     <field name="student_id"/>
-                                    <field name="room_number"/>
+                                    <field name="room_number_id"/>
                                     <field name="seat_number"/>
                                     <field name="is_confirmed"/>
                                 </list>

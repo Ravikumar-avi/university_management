@@ -26,11 +26,7 @@ class Student(models.Model):
     student_photo = fields.Binary(string='Photo', attachment=True)
     date_of_birth = fields.Date(string='Date of Birth', required=True, tracking=True)
     age = fields.Integer(string='Age', compute='_compute_age')
-    gender = fields.Selection([
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
-    ], string='Gender', required=True, tracking=True)
+    gender = fields.Selection([('male', 'Male'),('female', 'Female'),('other', 'Other'),], string='Gender', required=True, tracking=True)
     blood_group = fields.Selection([
         ('a+', 'A+'), ('a-', 'A-'),
         ('b+', 'B+'), ('b-', 'B-'),
