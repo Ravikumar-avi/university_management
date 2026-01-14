@@ -110,7 +110,7 @@
                         <h2>
                             <field name="registration_number" readonly="1"/>
                             <span class="text-muted ms-2" invisible="not student_code or student_code == '/'">
-                                (<field name="student_code" readonly="1"/>)
+                                <field name="student_code" readonly="1"/>
                             </span>
                         </h2>
                     </div>
