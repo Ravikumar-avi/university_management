@@ -296,8 +296,8 @@
         <field name="model">university.batch</field>
         <field name="arch" type="xml">
             <calendar string="Batch Timeline"
-                      date_start="start_year"
-                      date_stop="end_year"
+                      date_start="calendar_start_date"
+                      date_stop="calendar_end_date"
                       color="program_id"
                       mode="year"
                       event_open_popup="true"

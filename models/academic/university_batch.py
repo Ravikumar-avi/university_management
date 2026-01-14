@@ -24,6 +24,10 @@ class UniversityBatch(models.Model):
     start_year = fields.Integer(string='Start Year', required=True)
     end_year = fields.Integer(string='Expected End Year', required=True)
 
+    # ADD THESE COMPUTED DATE FIELDS FOR CALENDAR VIEW
+    calendar_start_date = fields.Date(string='Calendar Start Date', compute='_compute_calendar_dates', store=True)
+    calendar_end_date = fields.Date(string='Calendar End Date', compute='_compute_calendar_dates', store=True)
+
     # Students
     student_ids = fields.One2many('student.student', 'batch_id', string='Students')
     total_students = fields.Integer(string='Total Students', compute='_compute_counts', store=True)
@@ -48,6 +52,20 @@ class UniversityBatch(models.Model):
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'Batch Code must be unique!'),
     ]
+
+    @api.depends('start_year', 'end_year')
+    def _compute_calendar_dates(self):
+        for record in self:
+            # Convert integer year to date (e.g., 2021 -> 2021-01-01)
+            if record.start_year:
+                record.calendar_start_date = fields.Date.to_date(f"{record.start_year}-01-01")
+            else:
+                record.calendar_start_date = False
+
+            if record.end_year:
+                record.calendar_end_date = fields.Date.to_date(f"{record.end_year}-12-31")
+            else:
+                record.calendar_end_date = False
 
     @api.depends('student_ids')
     def _compute_counts(self):
