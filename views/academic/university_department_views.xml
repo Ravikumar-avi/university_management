@@ -149,7 +149,7 @@
                                                                 <i class="fa fa-envelope text-primary"/>
                                                                 <field name="email"/>
                                                             </div>
-                                                            <div t-if="record.specialization.value">
+                                                            <div t-if="record.specialization">
                                                                 <i class="fa fa-lightbulb-o text-warning"/>
                                                                 <field name="specialization"/>
                                                             </div>
@@ -374,7 +374,7 @@
                             </div>
 
                             <div class="o_kanban_card_content">
-                                <div class="row" t-if="record.hod_id.value">
+                                <div class="row" t-if="record.hod_id">
                                     <div class="col-12 mb-2">
                                         <i class="fa fa-user-circle text-primary"/>
                                         HOD: <field name="hod_id"/>
@@ -414,7 +414,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row mt-2" t-if="record._id.value">
+                                <div class="row mt-2" t-if="record._id">
                                     <div class="col-12">
                                         <i class="fa fa-building text-muted"/>
                                         <field name="building_name_id"/>
@@ -422,11 +422,11 @@
                                 </div>
 
                                 <div class="row mt-2">
-                                    <div class="col-12" t-if="record.email.value">
+                                    <div class="col-12" t-if="record.email">
                                         <i class="fa fa-envelope"/>
                                         <field name="email"/>
                                     </div>
-                                    <div class="col-12" t-if="record.phone.value">
+                                    <div class="col-12" t-if="record.phone">
                                         <i class="fa fa-phone"/>
                                         <field name="phone"/>
                                     </div>
@@ -435,8 +435,8 @@
 
                             <div class="o_kanban_card_footer">
                                 <div class="o_kanban_footer_left">
-                                    <span t-if="record.website.value">
-                                        <a t-att-href="record.website.value"
+                                    <span t-if="record.website">
+                                        <a t-att-href="record.website"
                                            target="_blank"
                                            class="btn btn-sm btn-link">
                                             <i class="fa fa-globe"/> Website
