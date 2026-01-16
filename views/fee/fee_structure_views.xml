@@ -427,6 +427,18 @@
         </field>
     </record>
 
+    <!-- Action -->
+    <record id="action_fee_structure_line" model="ir.actions.act_window">
+        <field name="name">Fee Structure Line</field>
+        <field name="res_model">fee.structure.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Fee Structure Line
+            </p>
+        </field>
+    </record>
+
     <!-- ========================================= -->
     <!-- FEE INSTALLMENT CONFIG VIEWS -->
     <!-- ========================================= -->
@@ -475,6 +487,18 @@
                 <field name="due_date" widget="date"/>
                 <field name="currency_id" column_invisible="1"/>
             </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_fee_installment_config" model="ir.actions.act_window">
+        <field name="name">Fee Installment Config</field>
+        <field name="res_model">fee.installment.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Fee Installment Config
+            </p>
         </field>
     </record>
 
