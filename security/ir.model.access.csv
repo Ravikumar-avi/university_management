@@ -97,9 +97,18 @@ access_fee_discount_accounts,fee.discount.accounts,model_fee_discount,group_acco
 access_fee_discount_faculty,fee.discount.faculty,model_fee_discount,group_faculty,1,0,0,0
 access_fee_discount_student,fee.discount.student,model_fee_discount,group_student_portal,1,0,0,0
 
+access_fee_discount_application_admin,fee.discount.application.admin,model_fee_discount_application,group_university_admin,1,1,1,1
+access_fee_discount_application_accounts,fee.discount.application.accounts,model_fee_discount_application,group_accounts_manager,1,1,1,0
+access_fee_discount_application_faculty,fee.discount.application.faculty,model_fee_discount_application,group_faculty,1,0,0,0
+access_fee_discount_application_student,fee.discount.application.student,model_fee_discount_application,group_student_portal,1,0,0,0
+
 access_fee_installment_admin,fee.installment.admin,model_fee_installment,group_university_admin,1,1,1,1
 access_fee_installment_accounts,fee.installment.accounts,model_fee_installment,group_accounts_manager,1,1,1,0
 access_fee_installment_student,fee.installment.student,model_fee_installment,group_student_portal,1,0,0,0
+
+access_fee_installment_config_admin,fee.installment.config.admin,model_fee_installment_config,group_university_admin,1,1,1,1
+access_fee_installment_config_accounts,fee.installment.config.accounts,model_fee_installment_config,group_accounts_manager,1,1,1,0
+access_fee_installment_config_student,fee.installment.config.student,model_fee_installment_config,group_student_portal,1,0,0,0
 
 access_fee_payment_admin,fee.payment.admin,model_fee_payment,group_university_admin,1,1,1,1
 access_fee_payment_accounts,fee.payment.accounts,model_fee_payment,group_accounts_manager,1,1,1,0
@@ -114,10 +123,25 @@ access_fee_structure_accounts,fee.structure.accounts,model_fee_structure,group_a
 access_fee_structure_faculty,fee.structure.faculty,model_fee_structure,group_faculty,1,0,0,0
 access_fee_structure_student,fee.structure.student,model_fee_structure,group_student_portal,1,0,0,0
 
+access_fee_structure_line_admin,fee.structure.line.admin,model_fee_structure_line,group_university_admin,1,1,1,1
+access_fee_structure_line_accounts,fee.structure.line.accounts,model_fee_structure_line,group_accounts_manager,1,1,1,0
+access_fee_structure_line_faculty,fee.structure.line.faculty,model_fee_structure_line,group_faculty,1,0,0,0
+access_fee_structure_line_student,fee.structure.line.student,model_fee_structure_line,group_student_portal,1,0,0,0
+
 access_scholarship_scholarship_admin,scholarship.scholarship.admin,model_scholarship_scholarship,group_university_admin,1,1,1,1
 access_scholarship_scholarship_accounts,scholarship.scholarship.accounts,model_scholarship_scholarship,group_accounts_manager,1,1,0,0
 access_scholarship_scholarship_faculty,scholarship.scholarship.faculty,model_scholarship_scholarship,group_faculty,1,0,0,0
 access_scholarship_scholarship_student,scholarship.scholarship.student,model_scholarship_scholarship,group_student_portal,1,0,0,0
+
+access_scholarship_application_admin,scholarship.application.admin,model_scholarship_application,group_university_admin,1,1,1,1
+access_scholarship_application_accounts,scholarship.application.accounts,model_scholarship_application,group_accounts_manager,1,1,0,0
+access_scholarship_application_faculty,scholarship.application.faculty,model_scholarship_application,group_faculty,1,0,0,0
+access_scholarship_application_student,scholarship.application.student,model_scholarship_application,group_student_portal,1,0,0,0
+
+access_scholarship_document_type_admin,scholarship.document.type.admin,model_scholarship_document_type,group_university_admin,1,1,1,1
+access_scholarship_document_type_accounts,scholarship.document.type.accounts,model_scholarship_document_type,group_accounts_manager,1,1,0,0
+access_scholarship_document_type_faculty,scholarship.document.type.faculty,model_scholarship_document_type,group_faculty,1,0,0,0
+access_scholarship_document_type_student,scholarship.document.type.student,model_scholarship_document_type,group_student_portal,1,0,0,0
 
 access_examination_evaluation_admin,examination.evaluation.admin,model_examination_evaluation,group_university_admin,1,1,1,1
 access_examination_evaluation_controller,examination.evaluation.controller,model_examination_evaluation,group_exam_controller,1,1,1,0
