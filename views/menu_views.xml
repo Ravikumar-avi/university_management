@@ -155,6 +155,18 @@
               action="action_fee_structure"
               sequence="10"/>
 
+    <menuitem id="menu_fee_structure_line"
+              name="Fee Structure Line"
+              parent="menu_fee"
+              action="action_fee_structure_line"
+              sequence="10"/>
+
+    <menuitem id="menu_fee_installment_config"
+              name="Fee Installment Config"
+              parent="menu_fee"
+              action="action_fee_installment_config"
+              sequence="10"/>
+
     <menuitem id="menu_fee_payment"
               name="Fee Payments"
               parent="menu_fee"
@@ -173,6 +185,12 @@
               action="action_fee_discount"
               sequence="40"/>
 
+    <menuitem id="menu_fee_discount_application"
+              name="Discount Applications"
+              parent="menu_fee"
+              action="action_fee_discount_application"
+              sequence="20"/>
+
     <menuitem id="menu_fee_reminder"
               name="Fee Reminders"
               parent="menu_fee"
@@ -184,6 +202,18 @@
               parent="menu_fee"
               action="action_scholarship"
               sequence="60"/>
+
+    <menuitem id="menu_scholarship_application"
+              name="Scholarship Applications"
+              parent="menu_fee"
+              action="action_scholarship_application"
+              sequence="20"/>
+
+        <menuitem id="menu_scholarship_document_type"
+              name="Scholarship Document Types"
+              parent="menu_fee"
+              action="action_scholarship_document_type"
+              sequence="30"/>
 
     <!-- ========================================== -->
     <!-- FACULTY MODULE -->
