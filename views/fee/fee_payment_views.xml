@@ -286,12 +286,21 @@
         </field>
     </record>
 
-    <!-- Search View -->
+    <!-- ================================================================ -->
+    <!--  SEARCH VIEW                                                       -->
+    <!--  Changes vs original:                                             -->
+    <!--   1. Added payment_date as a searchable field                     -->
+    <!--   2. Added quick date-range filters (This Week / Last 30 Days /   -->
+    <!--      Last 3 Months / This Year)                                   -->
+    <!--   3. Added Payment Month group-by                                 -->
+    <!-- ================================================================ -->
     <record id="fee_payment_view_search" model="ir.ui.view">
         <field name="name">fee.payment.view.search</field>
         <field name="model">fee.payment</field>
         <field name="arch" type="xml">
             <search string="Search Fee Payments">
+
+                <!-- Text / relational search fields -->
                 <field name="name"/>
                 <field name="student_id"/>
                 <field name="registration_number"/>
@@ -299,8 +308,20 @@
                 <field name="fee_structure_id"/>
                 <field name="payment_term"/>
 
+                <!--
+                    DATE RANGE SEARCH
+                    Exposes payment_date in the search bar so the user can
+                    type a date and choose operators (is, is before, is after,
+                    is between) directly from the search dropdown — the
+                    simplest way to filter any custom date range without a
+                    wizard.  The wizard (fee.date.range.wizard) provides a
+                    richer popup alternative with a live summary preview.
+                -->
+                <field name="payment_date" string="Payment Date"/>
+
                 <separator/>
 
+                <!-- ── Status filters ───────────────────────────────── -->
                 <filter name="filter_draft" string="Draft"
                         domain="[('state', '=', 'draft')]"/>
                 <filter name="filter_pending" string="Pending Verification"
@@ -320,6 +341,7 @@
 
                 <separator/>
 
+                <!-- ── Smart filters ────────────────────────────────── -->
                 <filter name="filter_awaiting_payment" string="Awaiting Payment"
                         domain="[('state', 'in', ['invoiced', 'partial'])]"/>
                 <filter name="filter_has_outstanding" string="Has Outstanding Balance"
@@ -331,12 +353,47 @@
 
                 <separator/>
 
-                <filter name="filter_today" string="Paid Today"
+                <!-- ── Date range quick filters ─────────────────────── -->
+                <filter name="filter_today"
+                        string="Today"
                         domain="[('payment_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter name="filter_this_month" string="This Month"
-                        domain="[('payment_date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
-                                 ('payment_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
 
+                <filter name="filter_this_week"
+                        string="This Week"
+                        domain="[
+                            ('payment_date', '&gt;=', (context_today() - relativedelta(weekday=0, weeks=1)).strftime('%Y-%m-%d')),
+                            ('payment_date', '&lt;=', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+
+                <filter name="filter_this_month"
+                        string="This Month"
+                        domain="[
+                            ('payment_date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                            ('payment_date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))
+                        ]"/>
+
+                <filter name="filter_last_30_days"
+                        string="Last 30 Days"
+                        domain="[
+                            ('payment_date', '&gt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d')),
+                            ('payment_date', '&lt;=', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+
+                <filter name="filter_last_3_months"
+                        string="Last 3 Months"
+                        domain="[
+                            ('payment_date', '&gt;=', (context_today() - relativedelta(months=3)).strftime('%Y-%m-%d')),
+                            ('payment_date', '&lt;=', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+
+                <filter name="filter_this_year"
+                        string="This Year"
+                        domain="[
+                            ('payment_date', '&gt;=', context_today().strftime('%Y-01-01')),
+                            ('payment_date', '&lt;=', context_today().strftime('%Y-12-31'))
+                        ]"/>
+
+                <!-- ── Group By ──────────────────────────────────────── -->
                 <group expand="0" string="Group By">
                     <filter name="group_by_student" string="Student"
                             context="{'group_by': 'student_id'}"/>
@@ -352,6 +409,8 @@
                             context="{'group_by': 'state'}"/>
                     <filter name="group_by_payment_date" string="Payment Date"
                             context="{'group_by': 'payment_date'}"/>
+                    <filter name="group_by_payment_date_month" string="Payment Month"
+                            context="{'group_by': 'payment_date:month'}"/>
                 </group>
 
                 <searchpanel>
@@ -515,7 +574,7 @@
         </field>
     </record>
 
-    <!-- Action -->
+    <!-- Main Fee Payments Action -->
     <record id="action_fee_payment" model="ir.actions.act_window">
         <field name="name">Fee Payments</field>
         <field name="res_model">fee.payment</field>
@@ -531,6 +590,20 @@
                 receipt printing, and email notifications.
             </p>
         </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  DATE RANGE FILTER WIZARD ACTION                                  -->
+    <!--  Accessible from:                                                 -->
+    <!--    - Fee menu (add as menu item pointing to this action)          -->
+    <!--    - University dashboard Fee section button                      -->
+    <!--  Opens fee.date.range.wizard as a popup dialog.                  -->
+    <!-- ================================================================ -->
+    <record id="action_fee_date_range_wizard" model="ir.actions.act_window">
+        <field name="name">Filter by Date Range</field>
+        <field name="res_model">fee.date.range.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 
 </odoo>

@@ -253,6 +253,7 @@
         'wizard/iic/iic_report_wizard_views.xml',
         'wizard/naac/naac_aqar_wizard_views.xml',
         'wizard/naac/naac_evidence_bulk_wizard_views.xml',
+        'wizard/date_range/fee_date_range_wizard_views.xml',
 
         # Reports
         'report/student_id_card.xml',

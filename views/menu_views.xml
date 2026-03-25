@@ -200,6 +200,13 @@
               action="action_fee_payment"
               sequence="10"/>
 
+    <menuitem id="menu_fee_date_range_wizard"
+              name="Filter by Date Range"
+              parent="menu_fee_payment_root"
+              action="action_fee_date_range_wizard"
+              sequence="20"
+              groups="group_university_admin,group_accounts_manager,group_faculty"/>
+
 
     <!-- Discount -->
     <menuitem id="menu_fee_discount_root"

@@ -100,8 +100,24 @@ class Student(models.Model):
 
     # Fee
     fee_payment_ids = fields.One2many('fee.payment', 'student_id', string='Fee Payments')
-    total_fee_due = fields.Monetary(string='Total Fee Due', compute='_compute_fees', store=True)
-    total_fee_paid = fields.Monetary(string='Total Fee Paid', compute='_compute_fees')
+
+    # ── Fixed: computes from actual invoice amounts, not hardcoded ────
+    total_fee_due = fields.Monetary(
+        string='Total Fee Due',
+        compute='_compute_fees',
+        store=False,  # always live — no stale data
+        search='_search_total_fee_due',
+    )
+    total_fee_paid = fields.Monetary(
+        string='Total Fee Paid',
+        compute='_compute_fees',
+        store=False,
+    )
+    fee_transaction_count = fields.Integer(
+        string='Transactions',
+        compute='_compute_fees',
+        store=False,
+    )
 
     currency_id = fields.Many2one('res.currency', string='Currency',
                                   default=lambda self: self.env.company.currency_id)
@@ -213,13 +229,20 @@ class Student(models.Model):
             else:
                 record.documents_verified = False
 
-    @api.depends('fee_payment_ids')
     def _compute_fees(self):
         for record in self:
-            # This should be linked to fee.structure
-            record.total_fee_paid = sum(record.fee_payment_ids.filtered(
-                lambda p: p.state == 'paid').mapped('amount'))
-            record.total_fee_due = 0.0  # Calculate from fee structure
+            payments = self.env['fee.payment'].search([
+                ('student_id', '=', record.id),
+                ('state', 'not in', ['draft', 'cancelled']),
+            ])
+            record.total_fee_paid = sum(payments.mapped('amount_paid'))
+            record.total_fee_due = sum(payments.mapped('outstanding_amount'))
+            try:
+                record.fee_transaction_count = self.env[
+                    'fee.payment.line'
+                ].search_count([('fee_payment_id.student_id', '=', record.id)])
+            except Exception:
+                record.fee_transaction_count = 0
 
     @api.depends('exam_result_ids')
     def _compute_academic_performance(self):
@@ -291,15 +314,45 @@ class Student(models.Model):
         }
 
     def action_fee_payment(self):
-        """Open fee payment records"""
+        """Open all fee payment records — used by Fee Paid smart button"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Fee Payments',
+            'name': 'Fee Payments — %s' % self.name,
             'res_model': 'fee.payment',
             'view_mode': 'list,form',
             'domain': [('student_id', '=', self.id)],
             'context': {'default_student_id': self.id},
+        }
+
+    def action_view_fee_due(self):
+        """Open outstanding fee payments — used by Fee Due smart button"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Outstanding Fees — %s' % self.name,
+            'res_model': 'fee.payment',
+            'view_mode': 'list,form',
+            'domain': [
+                ('student_id', '=', self.id),
+                ('outstanding_amount', '>', 0),
+                ('state', 'not in', ['draft', 'cancelled', 'paid']),
+            ],
+            'context': {'default_student_id': self.id},
+            'target': 'new',
+        }
+
+    def action_view_fee_transaction_history(self):
+        """Open component-wise transaction history — used by Transactions smart button"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Payment Transaction History — %s' % self.name,
+            'res_model': 'fee.payment.line',
+            'view_mode': 'list',
+            'domain': [('fee_payment_id.student_id', '=', self.id)],
+            'context': {'default_student_id': self.id},
+            'target': 'new',
         }
 
     def action_exam_result(self):
@@ -325,3 +378,31 @@ class Student(models.Model):
             'domain': [('student_id', '=', self.id)],
             'context': {'default_student_id': self.id},
         }
+
+    def _search_total_fee_due(self, operator, value):
+        """Enable searching/filtering on computed non-stored field total_fee_due"""
+        allowed_operators = ['=', '!=', '>', '<', '>=', '<=']
+        if operator not in allowed_operators:
+            raise ValidationError(_('Unsupported operator for Total Fee Due search: %s') % operator)
+
+        # Get all students first
+        students = self.search([])
+        matched_student_ids = []
+
+        for student in students:
+            due = student.total_fee_due or 0.0
+
+            if operator == '=' and due == value:
+                matched_student_ids.append(student.id)
+            elif operator == '!=' and due != value:
+                matched_student_ids.append(student.id)
+            elif operator == '>' and due > value:
+                matched_student_ids.append(student.id)
+            elif operator == '<' and due < value:
+                matched_student_ids.append(student.id)
+            elif operator == '>=' and due >= value:
+                matched_student_ids.append(student.id)
+            elif operator == '<=' and due <= value:
+                matched_student_ids.append(student.id)
+
+        return [('id', 'in', matched_student_ids)]

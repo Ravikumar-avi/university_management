@@ -561,3 +561,7 @@ access_naac_evidence_bulk_wizard_admin,naac.evidence.bulk.wizard.admin,model_naa
 access_naac_evidence_bulk_wizard_faculty,naac.evidence.bulk.wizard.faculty,model_naac_evidence_bulk_wizard,group_faculty,1,1,1,0
 access_naac_evidence_bulk_wizard_line_admin,naac.evidence.bulk.wizard.line.admin,model_naac_evidence_bulk_wizard_line,group_university_admin,1,1,1,1
 access_naac_evidence_bulk_wizard_line_faculty,naac.evidence.bulk.wizard.line.faculty,model_naac_evidence_bulk_wizard_line,group_faculty,1,1,1,0
+
+access_fee_date_range_wizard_admin,fee.date.range.wizard.admin,model_fee_date_range_wizard,group_university_admin,1,1,1,1
+access_fee_date_range_wizard_accounts,fee.date.range.wizard.accounts,model_fee_date_range_wizard,group_accounts_manager,1,1,1,1
+access_fee_date_range_wizard_faculty,fee.date.range.wizard.faculty,model_fee_date_range_wizard,group_faculty,1,1,1,1

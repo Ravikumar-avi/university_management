@@ -62,15 +62,29 @@
                             </div>
                         </button>
 
-                        <button name="action_fee_payment"
+                        <button name="action_view_fee_due"
                                 type="object"
                                 class="oe_stat_button"
-                                icon="fa-warning">
+                                icon="fa-exclamation-circle"
+                                help="Outstanding fee amount — click to see breakdown">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value text-danger">
                                     <field name="total_fee_due" widget="monetary"/>
                                 </span>
                                 <span class="o_stat_text">Fee Due</span>
+                            </div>
+                        </button>
+
+                        <button name="action_view_fee_transaction_history"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-history"
+                                help="Component-wise payment transaction history">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="fee_transaction_count" nolabel="1"/>
+                                </span>
+                                <span class="o_stat_text">Transactions</span>
                             </div>
                         </button>
 
