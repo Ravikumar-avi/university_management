@@ -83,7 +83,7 @@ class FacultyAttendance(models.Model):
                 raise ValidationError(_('Cannot mark attendance for future dates!'))
 
     def _sync_hr_attendance(self):
-        HrAttendance = self.env['hr.attendance']
+        HrAttendance = self.env['hr.attendance'].sudo()
         for rec in self:
             if not rec.employee_id:
                 continue
@@ -94,7 +94,7 @@ class FacultyAttendance(models.Model):
                     'check_out':   rec.check_out or False,
                 }
                 if rec.hr_attendance_id:
-                    rec.hr_attendance_id.write(vals)
+                    rec.hr_attendance_id.sudo().write(vals)
                 else:
                     rec.hr_attendance_id = HrAttendance.create(vals).id
             else:

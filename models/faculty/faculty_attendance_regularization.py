@@ -219,8 +219,11 @@ class FacultyAttendanceRegularization(models.Model):
                     summary=_('Attendance Regularization Approval Required'),
                     note=_(
                         'Faculty %s has submitted a regularization request for %s. '
-                        'Please review and approve.'
-                    ) % (rec.faculty_id.name, rec.date),
+                        'Reason: %s. '
+                        'Please open the record and click the HOD APPROVE button to approve, '
+                        'or the REJECT button to reject. '
+                        'Do NOT use Mark Done on this activity — use the buttons on the form.'
+                    ) % (rec.faculty_id.name, rec.date, dict(rec._fields['reason'].selection).get(rec.reason, rec.reason)),
                     user_id=hod_user.id,
                 )
 
@@ -303,34 +306,43 @@ class FacultyAttendanceRegularization(models.Model):
         All changes are logged for audit trail via mail.thread tracking.
         """
         self.ensure_one()
-        FacultyAttendance = self.env['faculty.attendance']
+        # Use sudo() for all attendance writes so this works regardless of
+        # the calling user's access level (HR approving regularization,
+        # server record rules on hr.attendance, etc.)
+        FacultyAttendance = self.env['faculty.attendance'].sudo()
+        HrAttendance = self.env['hr.attendance'].sudo()
 
         if self.attendance_id:
-            # Update existing record
-            attendance = self.attendance_id
+            attendance = self.attendance_id.sudo()
         else:
-            # Find by faculty + date
             attendance = FacultyAttendance.search([
                 ('faculty_id', '=', self.faculty_id.id),
                 ('date', '=', self.date),
             ], limit=1)
 
+        hr_att_id = attendance.hr_attendance_id.id if attendance and attendance.hr_attendance_id else False
+
         if attendance:
-            # Directly write corrected times first
+            # Write corrected times — _sync_hr_attendance will also run sudo internally
             attendance.write({
                 'check_in': self.corrected_check_in,
                 'check_out': self.corrected_check_out or False,
             })
-            # Re-run the classification engine
+            # Also directly update the linked hr.attendance to be safe
+            if hr_att_id:
+                HrAttendance.browse(hr_att_id).write({
+                    'check_in': self.corrected_check_in,
+                    'check_out': self.corrected_check_out or False,
+                })
+            # Re-run the classification engine via sudo
             FacultyAttendance.process_punch(
                 faculty_id=self.faculty_id.id,
                 check_in=self.corrected_check_in,
                 check_out=self.corrected_check_out or False,
-                hr_attendance_id=attendance.hr_attendance_id.id
-                if attendance.hr_attendance_id else False,
+                hr_attendance_id=hr_att_id,
             )
         else:
-            # No existing attendance record — create one via engine
+            # No existing record — create via engine (sudo inside process_punch)
             FacultyAttendance.process_punch(
                 faculty_id=self.faculty_id.id,
                 check_in=self.corrected_check_in,
