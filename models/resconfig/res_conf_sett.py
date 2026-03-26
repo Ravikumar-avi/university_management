@@ -2,6 +2,21 @@
 
 from odoo import models, fields
 
+MONTH_SELECTION = [
+    ('1', 'January'),
+    ('2', 'February'),
+    ('3', 'March'),
+    ('4', 'April'),
+    ('5', 'May'),
+    ('6', 'June'),
+    ('7', 'July'),
+    ('8', 'August'),
+    ('9', 'September'),
+    ('10', 'October'),
+    ('11', 'November'),
+    ('12', 'December'),
+]
+
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
@@ -27,4 +42,29 @@ class ResConfigSettings(models.TransientModel):
         string='Jitsi Server Domain',
         help="Jitsi server domain (e.g., meet.jit.si)",
         config_parameter='jitsi.server_domain',
+    )
+
+    # HR settings compatibility fields
+    notice_period = fields.Boolean(
+        string='Enable Notice Period',
+        config_parameter='university_management.notice_period',
+    )
+    no_of_days = fields.Integer(
+        string='Notice Period Days',
+        default=0,
+        config_parameter='university_management.notice_period_days',
+    )
+
+    # Accounting settings compatibility fields
+    # In many Odoo builds these are related fields on res.company.
+    fiscalyear_last_month = fields.Selection(
+        MONTH_SELECTION,
+        string='Fiscal Year Last Month',
+        related='company_id.fiscalyear_last_month',
+        readonly=False,
+    )
+    fiscalyear_last_day = fields.Integer(
+        string='Fiscal Year Last Day',
+        related='company_id.fiscalyear_last_day',
+        readonly=False,
     )

@@ -99,7 +99,7 @@ class FacultyAttendanceRegularization(models.Model):
     )
 
     # ── Approval ──────────────────────────────────────────────────────
-    hod_id = fields.Many2one('res.users', string='HOD')
+    hod_id = fields.Many2one('res.users', string='HOD', readonly=True)
     hod_approval_date = fields.Date(string='HOD Approval Date', readonly=True)
     hod_remarks = fields.Text(string='HOD Remarks')
 
