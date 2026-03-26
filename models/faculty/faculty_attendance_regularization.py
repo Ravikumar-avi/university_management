@@ -99,7 +99,7 @@ class FacultyAttendanceRegularization(models.Model):
     )
 
     # ── Approval ──────────────────────────────────────────────────────
-    hod_id = fields.Many2one('res.users', string='HOD', readonly=True)
+    hod_id = fields.Many2one('res.users', string='HOD')
     hod_approval_date = fields.Date(string='HOD Approval Date', readonly=True)
     hod_remarks = fields.Text(string='HOD Remarks')
 
@@ -202,10 +202,27 @@ class FacultyAttendanceRegularization(models.Model):
                 'applied_by': self.env.user.id,
                 'applied_date': date.today(),
             })
+
+            # Resolve HOD user via department -> hod_id -> user_id
+            hod_user = rec.faculty_id.department_id.hod_id.user_id
+
             rec.message_post(
-                body=_('Regularization request submitted by %s.')
-                % self.env.user.name
+                body=_('Regularization request submitted by %s. Pending HOD approval.')
+                % self.env.user.name,
+                partner_ids=hod_user.partner_id.ids if hod_user else [],
             )
+
+            # Create a To-Do activity assigned to the HOD
+            if hod_user:
+                rec.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=_('Attendance Regularization Approval Required'),
+                    note=_(
+                        'Faculty %s has submitted a regularization request for %s. '
+                        'Please review and approve.'
+                    ) % (rec.faculty_id.name, rec.date),
+                    user_id=hod_user.id,
+                )
 
     def action_hod_approve(self):
         """HOD approves the request and forwards to HR."""
@@ -214,9 +231,35 @@ class FacultyAttendanceRegularization(models.Model):
             'hod_id': self.env.user.id,
             'hod_approval_date': date.today(),
         })
-        self.message_post(
-            body=_('HOD approved by %s.') % self.env.user.name
+
+        # Mark HOD activity as done and notify HR group
+        self.activity_feedback(
+            ['mail.mail_activity_data_todo'],
+            feedback=_('Approved by HOD %s.') % self.env.user.name,
         )
+
+        # Notify all users in HR Manager group
+        hr_group = self.env.ref('hr.group_hr_manager', raise_if_not_found=False)
+        hr_partners = hr_group.users.mapped('partner_id') if hr_group else []
+
+        self.message_post(
+            body=_('HOD approved by %s. Forwarded to HR for final approval.') % self.env.user.name,
+            partner_ids=[p.id for p in hr_partners],
+        )
+
+        # Create activity for HR
+        for rec in self:
+            if hr_group and hr_group.users:
+                hr_user = hr_group.users[0]
+                rec.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=_('Attendance Regularization - HR Approval Required'),
+                    note=_(
+                        'HOD has approved the regularization request for %s on %s. '
+                        'Please do the final HR approval.'
+                    ) % (rec.faculty_id.name, rec.date),
+                    user_id=hr_user.id,
+                )
 
     def action_hr_approve(self):
         """
