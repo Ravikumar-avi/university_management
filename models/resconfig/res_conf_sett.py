@@ -57,6 +57,10 @@ class ResConfigSettings(models.TransientModel):
 
     # Accounting settings compatibility fields
     # In many Odoo builds these are related fields on res.company.
+    group_fiscal_year = fields.Boolean(
+        string='Fiscal Years',
+        help='Compatibility field for accounting settings view.',
+    )
     fiscalyear_last_month = fields.Selection(
         MONTH_SELECTION,
         string='Fiscal Year Last Month',
