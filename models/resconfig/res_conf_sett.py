@@ -61,6 +61,11 @@ class ResConfigSettings(models.TransientModel):
         string='Fiscal Years',
         help='Compatibility field for accounting settings view.',
     )
+    fiscalyear_lock_date = fields.Date(
+        string='Fiscal Year Lock Date',
+        related='company_id.fiscalyear_lock_date',
+        readonly=False,
+    )
     fiscalyear_last_month = fields.Selection(
         MONTH_SELECTION,
         string='Fiscal Year Last Month',
