@@ -67,6 +67,9 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
     )
     sale_lock_date = fields.Date(string='Sales Lock Date')
+    purchase_lock_date = fields.Date(string='Purchase Lock Date')
+    tax_lock_date = fields.Date(string='Tax Lock Date')
+    hard_lock_date = fields.Date(string='Hard Lock Date')
     fiscalyear_last_month = fields.Selection(
         MONTH_SELECTION,
         string='Fiscal Year Last Month',
