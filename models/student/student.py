@@ -23,7 +23,7 @@ class Student(models.Model):
     admission_number = fields.Char(string='Admission Number', tracking=True)
 
     # Personal Information
-    student_photo = fields.Binary(string='Photo', attachment=True)
+    student_photo = fields.Binary(related='partner_id.image_1920', string='Photo', readonly=False, store=True)
     date_of_birth = fields.Date(string='Date of Birth', required=True, tracking=True)
     age = fields.Integer(string='Age', compute='_compute_age')
     gender = fields.Selection([('male', 'Male'),('female', 'Female'),('other', 'Other'),], string='Gender', required=True, tracking=True)
