@@ -59,7 +59,7 @@ class ResConfigSettings(models.TransientModel):
     # In many Odoo builds these are related fields on res.company.
     group_fiscal_year = fields.Boolean(
         string='Fiscal Years',
-        help='Compatibility field for accounting settings view.',
+        implied_group='account.group_fiscal_year',
     )
     fiscalyear_lock_date = fields.Date(
         string='Fiscal Year Lock Date',
