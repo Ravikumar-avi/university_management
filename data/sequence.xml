@@ -39,6 +39,30 @@
             <field name="number_increment">1</field>
         </record>
 
+        <!-- Student Temporary ID — Format: TEMP{YEAR}-{5-digit} -->
+        <record id="seq_student_temp_id" model="ir.sequence">
+            <field name="name">Student Temporary ID</field>
+            <field name="code">student.temp.id</field>
+            <field name="prefix">%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Seat Blocking Reference — Format: SB/{YEAR}/{5-digit} -->
+        <record id="seq_student_seat_blocking" model="ir.sequence">
+            <field name="name">Student Seat Blocking</field>
+            <field name="code">student.seat.blocking</field>
+            <field name="prefix">SB/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
         <record id="seq_id_card_request" model="ir.sequence">
             <field name="name">ID Card Request Sequence</field>
             <field name="code">id.card.request</field>
@@ -382,6 +406,15 @@
             <field name="code">faculty.attendance.regularization</field>
             <field name="prefix">FAR</field>
             <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_faculty_form16" model="ir.sequence">
+            <field name="name">Faculty Form 16</field>
+            <field name="code">faculty.form16</field>
+            <field name="prefix">FORM16/%(year)s/</field>
+            <field name="padding">4</field>
             <field name="number_next">1</field>
             <field name="number_increment">1</field>
         </record>

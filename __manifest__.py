@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     'name': 'University Management System',
     'version': '18.0.1.0.1',
@@ -74,6 +73,8 @@
         'payment',
         'account_payment',
         'website_payment',
+        'crm',
+        'odoo_website_helpdesk'
     ],
 
     'data': [
@@ -91,6 +92,10 @@
         'data/iic_naac_sequences.xml',
         'data/naac_cron.xml',
         'data/faculty_hr_data.xml',
+        'data/student_seat_blocking_data.xml',
+        'data/crm_lead_education_data.xml',
+        'data/student_counselling_session_data.xml',
+        'data/asset_data.xml',
 
         # Views - Academic
         'views/academic/university_batch_views.xml',
@@ -133,6 +138,16 @@
         'views/student/student_discipline_views.xml',
         'views/student/student_views.xml',
         'views/student/student_ledger_views.xml',
+        'views/student/student_seat_blocking_views.xml',
+        'views/student/crm_lead_education_views.xml',
+        'views/student/student_counselling_session_views.xml',
+
+        # Views - Asset Management
+        'views/asset/asset_views.xml',
+        'views/asset/asset_maintenance_transfer_views.xml',
+        'views/asset/asset_request_views.xml',
+        'views/asset/asset_qr_scan_log_views.xml',
+        'views/asset/helpdesk_purchase_views.xml',
 
         # Views - Faculty
         'views/faculty/faculty_views.xml',
@@ -143,6 +158,7 @@
         'views/faculty/faculty_attendance_regularization_views.xml',
         'views/faculty/faculty_workload_views.xml',
         'views/faculty/faculty_evaluation_views.xml',
+        'views/faculty/faculty_form16_views.xml',
 
         # Views - Library
         'views/library/library_book_views.xml',
@@ -238,6 +254,14 @@
         'views/naac/naac_ssr_views.xml',
         'views/naac/naac_dashboard_views.xml',
 
+        # ── Views: NBA ──────────────────────────
+        'views/nba/nba_sar_views.xml',
+        'views/nba/nba_co_views.xml',
+        'views/nba/nba_research_views.xml',
+        'views/nba/nba_evidence_views.xml',
+        'views/nba/nba_criteria_views.xml',
+        'views/nba/nba_dashboard_views.xml',
+
         # Wizards (BEFORE reports)
         'wizard/admission/bulk_admission_wizard_views.xml',
         'wizard/id_card/bulk_id_card_wizard_views.xml',
@@ -254,6 +278,9 @@
         'wizard/naac/naac_aqar_wizard_views.xml',
         'wizard/naac/naac_evidence_bulk_wizard_views.xml',
         'wizard/date_range/fee_date_range_wizard_views.xml',
+        'wizard/nba/nba_compute_wizard_views.xml',
+        'wizard/nba/nba_evidence_bulk_wizard_views.xml',
+        'wizard/nba/nba_generate_sar_wizard_views.xml',
 
         # Reports
         'report/student_id_card.xml',
@@ -261,6 +288,7 @@
         'report/fee_receipt.xml',
         'report/marksheet_report.xml',
         'report/salary_slip_report.xml',
+        'report/faculty_form16_report.xml',
         'report/student_report.xml',
         'report/attendance_report.xml',
         'report/placement_report.xml',
@@ -270,6 +298,7 @@
         'report/naac_activity_report.xml',
         'report/naac_aqar_report.xml',
         'report/naac_reports.xml',
+        'report/nba_sar_report.xml',
 
         'templates/mains/admission_templates.xml',
         'templates/mains/library_templates.xml',
@@ -310,6 +339,8 @@
             'university_management/static/src/xml/naac_dashboard_templates.xml',
             'university_management/static/src/js/iic_dashboard.js',
             'university_management/static/src/js/naac_dashboard.js',
+            'university_management/static/src/xml/nba_dashboard_templates.xml',
+            'university_management/static/src/js/nba_dashboard.js',
         ],
     },
 
@@ -322,4 +353,4 @@
     'application': True,
     'auto_install': False,
 }
-
+# -*- coding: utf-8 -*-

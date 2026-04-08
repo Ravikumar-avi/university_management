@@ -7,3 +7,4 @@ from . import faculty_leave
 from . import faculty_salary
 from . import faculty_workload
 from . import zk_faculty_bridge
+from . import faculty_form16

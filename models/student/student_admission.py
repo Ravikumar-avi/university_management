@@ -113,6 +113,22 @@ class StudentAdmission(models.Model):
     # Student Record
     student_id = fields.Many2one('student.student', string='Student Record', readonly=True)
 
+    # ── Temporary ID & University Verification ────────────────────────
+    temp_student_id = fields.Char(
+        string='Temporary Student ID', readonly=True, copy=False,
+        help='Mirrored from student record on admission.',
+    )
+    university_submitted_date = fields.Date(
+        string='Sent to University On', readonly=True,
+    )
+    university_verified_date = fields.Date(
+        string='University Verified On', tracking=True,
+    )
+    university_usn = fields.Char(
+        string='University USN', tracking=True,
+        help='Official USN received from the university. Enter and click Map USN.',
+    )
+
     # Rejection
     rejection_reason = fields.Text(string='Rejection Reason')
     rejected_by = fields.Many2one('res.users', string='Rejected By', readonly=True)
@@ -125,6 +141,8 @@ class StudentAdmission(models.Model):
         ('under_review', 'Under Review'),
         ('approved', 'Approved'),
         ('admitted', 'Admitted'),
+        ('university_verification', 'University Verification'),
+        ('usn_mapped', 'USN Mapped'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
     ], string='Status', default='draft', tracking=True, index=True)
@@ -220,6 +238,9 @@ class StudentAdmission(models.Model):
 
         student = self.env['student.student'].create(student_vals)
 
+        # Mirror auto-generated temp_student_id back to the admission record
+        self.temp_student_id = student.temp_student_id
+
         # Create Parent Records
         self._create_parent_records(student)
 
@@ -242,6 +263,45 @@ class StudentAdmission(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
+    def action_send_to_university(self):
+        """Move to University Verification stage after internal admission."""
+        self.ensure_one()
+        if self.state != 'admitted':
+            raise ValidationError(_(
+                'Only fully admitted students can be sent for university verification.'
+            ))
+        self.write({
+            'state': 'university_verification',
+            'university_submitted_date': fields.Date.today(),
+        })
+        self.message_post(
+            body=_('Admission data submitted to university. '
+                   'Temporary Student ID: <b>%s</b>. Awaiting USN.') % self.temp_student_id
+        )
+
+    def action_map_usn_from_admission(self):
+        """Map university USN and complete the student lifecycle."""
+        self.ensure_one()
+        if self.state != 'university_verification':
+            raise ValidationError(_(
+                'USN can only be mapped after submission to the university.'
+            ))
+        if not self.university_usn:
+            raise ValidationError(_('Please enter the University USN received from the university.'))
+        if not self.student_id:
+            raise ValidationError(_('No linked student record found. Please admit the student first.'))
+        self.student_id.university_usn = self.university_usn
+        self.student_id.action_map_usn()
+        self.write({
+            'state': 'usn_mapped',
+            'university_verified_date': fields.Date.today(),
+        })
+        self.message_post(
+            body=_('University USN <b>%s</b> mapped. '
+                   'Temporary ID <b>%s</b> retired. Student lifecycle is now active.')
+            % (self.university_usn, self.temp_student_id)
+        )
 
     def _create_parent_records(self, student):
         """Create parent/guardian records for student"""

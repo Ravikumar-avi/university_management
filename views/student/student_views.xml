@@ -33,6 +33,13 @@
                             type="object"
                             invisible="state == 'draft'"
                             confirm="Are you sure you want to reset this student to draft?"/>
+                    <button name="action_map_usn"
+                            string="Map USN"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="usn_mapped or not university_usn"
+                            confirm="Permanently map the USN to this student and mark them active?"
+                            groups="base.group_user"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,admitted,enrolled,active,graduated"/>
                 </header>
@@ -131,6 +138,14 @@
                                 <field name="student_code" readonly="1"/>
                             </span>
                         </h2>
+                        <h3 invisible="usn_mapped">
+                            <span class="text-muted" invisible="not temp_student_id">Temp ID: </span>
+                            <field name="temp_student_id" readonly="1" invisible="not temp_student_id"/>
+                        </h3>
+                        <h3 invisible="not usn_mapped">
+                            <span class="fw-bold" style="color: green;">USN: </span>
+                            <field name="university_usn" readonly="1"/>
+                        </h3>
                     </div>
 
                     <group>
@@ -196,6 +211,23 @@
                             <field name="aadhar_number" placeholder="12 digit Aadhar"/>
                             <field name="pan_number" placeholder="PAN Number"/>
                         </group>
+                        <group string="University ID">
+                            <field name="temp_student_id" readonly="1"
+                                   invisible="usn_mapped"/>
+                            <field name="university_usn"
+                                   readonly="usn_mapped"
+                                   placeholder="e.g. 1MV24AR001"
+                                   invisible="usn_mapped"/>
+                            <field name="university_usn" readonly="1"
+                                   invisible="not usn_mapped"/>
+                            <field name="usn_mapped" widget="boolean_toggle" readonly="1"/>
+                            <field name="usn_mapped_date" widget="date" readonly="1"
+                                   invisible="not usn_mapped"/>
+                            <field name="usn_mapped_by" readonly="1"
+                                   invisible="not usn_mapped"/>
+                        </group>
+                    </group>
+                    <group>
                         <group string="Bank Details">
                             <field name="bank_account_number"/>
                             <field name="bank_name"/>

@@ -58,5 +58,22 @@
             <field name="company_id" eval="False"/>
         </record>
 
+        <!-- ── NBA SAR Sequences ── -->
+        <record id="sequence_nba_sar" model="ir.sequence">
+            <field name="name">NBA SAR Sequence</field>
+            <field name="code">nba.sar</field>
+            <field name="prefix">NBA/SAR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="sequence_nba_research" model="ir.sequence">
+            <field name="name">NBA Research Sequence</field>
+            <field name="code">nba.research</field>
+            <field name="prefix">NBAR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
     </data>
 </odoo>

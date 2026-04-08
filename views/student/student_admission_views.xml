@@ -29,19 +29,31 @@
                             invisible="state != 'approved'"
                             confirm="This will create a student record. Are you sure?"
                             groups="base.group_user"/>
+                    <button name="action_send_to_university"
+                            string="Send to University"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'admitted'"
+                            confirm="Mark this student as submitted to the university for USN generation?"
+                            groups="base.group_user"/>
+                    <button name="action_map_usn_from_admission"
+                            string="Map USN"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'university_verification'"
+                            confirm="Map the university USN and complete the student lifecycle?"
+                            groups="base.group_user"/>
                     <button name="action_view_student" string="View Student Record"
                             type="object"
                             invisible="not student_id"
                             class="oe_highlight"/>
                     <button name="action_cancel" string="Cancel"
                             type="object"
-                            invisible="state in ['admitted', 'cancelled', 'rejected']"/>
+                            invisible="state in ['admitted', 'university_verification', 'usn_mapped', 'cancelled', 'rejected']"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object"
                             invisible="state == 'draft'"
                             confirm="Are you sure you want to reset this student to draft?"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,submitted,under_review,approved,admitted"/>
+                           statusbar_visible="draft,submitted,under_review,approved,admitted,university_verification,usn_mapped"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -60,6 +72,12 @@
                     <widget name="web_ribbon" title="Admitted"
                             bg_color="text-bg-success"
                             invisible="state != 'admitted'"/>
+                    <widget name="web_ribbon" title="At University"
+                            bg_color="text-bg-info"
+                            invisible="state != 'university_verification'"/>
+                    <widget name="web_ribbon" title="USN Mapped"
+                            bg_color="text-bg-success"
+                            invisible="state != 'usn_mapped'"/>
                     <widget name="web_ribbon" title="Rejected"
                             bg_color="text-bg-danger"
                             invisible="state != 'rejected'"/>
@@ -279,6 +297,23 @@
                                 <group>
                                     <field name="admission_letter_date" widget="date"
                                            invisible="not admission_letter_sent"/>
+                                </group>
+                            </group>
+
+                            <group string="University Verification"
+                                   invisible="state not in ['admitted', 'university_verification', 'usn_mapped']">
+                                <group>
+                                    <field name="temp_student_id" readonly="1"/>
+                                    <field name="university_submitted_date" widget="date" readonly="1"
+                                           invisible="not university_submitted_date"/>
+                                </group>
+                                <group>
+                                    <field name="university_usn"
+                                           invisible="state == 'admitted'"
+                                           readonly="state == 'usn_mapped'"
+                                           placeholder="e.g. 1MV24AR001"/>
+                                    <field name="university_verified_date" widget="date" readonly="1"
+                                           invisible="not university_verified_date"/>
                                 </group>
                             </group>
 

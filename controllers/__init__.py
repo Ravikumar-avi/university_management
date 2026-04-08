@@ -11,3 +11,4 @@ from . import iic_poster_controller
 from . import naac_dashboard_api
 from . import naac_evidence_controller
 from . import portal_fee
+from . import asset_qr_controller

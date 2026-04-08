@@ -52,7 +52,14 @@
                                     <td style="width: 25%; background: #f5f5f5; font-weight: bold;">Student Name</td>
                                     <td style="width: 25%;"><t t-esc="o.student_id.name"/></td>
                                     <td style="width: 25%; background: #f5f5f5; font-weight: bold;">Registration No.</td>
-                                    <td style="width: 25%;"><t t-esc="o.student_id.registration_number"/></td>
+                                    <td style="width: 25%;">
+                                        <t t-if="o.student_id.usn_mapped">
+                                            <t t-esc="o.student_id.university_usn"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="o.student_id.registration_number"/>
+                                        </t>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td style="background: #f5f5f5; font-weight: bold;">Program</td>

@@ -22,6 +22,21 @@ class FeePayment(models.Model):
                                  string='Program', store=True)
     department_id = fields.Many2one('university.department', related='student_id.department_id',
                                     string='Department', store=True)
+    student_temp_id = fields.Char(
+        related='student_id.temp_student_id',
+        string='Temp Student ID',
+        store=False,
+    )
+    student_usn = fields.Char(
+        related='student_id.university_usn',
+        string='University USN',
+        store=False,
+    )
+    student_usn_mapped = fields.Boolean(
+        related='student_id.usn_mapped',
+        string='USN Mapped',
+        store=False,
+    )
 
     # ── Fee Structure ─────────────────────────────────────────────────
     fee_structure_id = fields.Many2one('fee.structure', string='Fee Structure',
@@ -38,8 +53,7 @@ class FeePayment(models.Model):
     )
 
     # ── Payment Details ───────────────────────────────────────────────
-    payment_date = fields.Date(string='Payment Date', default=fields.Date.today(),
-                               required=True, tracking=True, index=True)
+    payment_date = fields.Date(string='Payment Date', tracking=True, index=True)
     due_date = fields.Date(string='Due Date', tracking=True)
 
     # ── Amount ────────────────────────────────────────────────────────
@@ -450,7 +464,13 @@ class FeePayment(models.Model):
                 # Invoice fully paid — mark fee.payment as paid too
                 # Component states will be finalized in portal_fee_return
                 # via apply_component_selection + _sync_component_states
-                record.write({'state': 'paid'})
+
+                # Capture actual payment date from reconciled invoice payment
+                actual_payment_date = record._get_actual_payment_date(invoice)
+                write_vals = {'state': 'paid'}
+                if actual_payment_date:
+                    write_vals['payment_date'] = actual_payment_date
+                record.write(write_vals)
                 record._send_receipt()
                 record.message_post(
                     body=_('Invoice %s fully paid.') % invoice.name
@@ -460,13 +480,45 @@ class FeePayment(models.Model):
                 # Partial payment received — just move to partial state
                 # Component allocation handled by portal_fee_return
                 paid = invoice.amount_total - invoice.amount_residual
-                record.write({'state': 'partial'})
+
+                # Capture most recent partial payment date
+                actual_payment_date = record._get_actual_payment_date(invoice)
+                write_vals = {'state': 'partial'}
+                if actual_payment_date:
+                    write_vals['payment_date'] = actual_payment_date
+                record.write(write_vals)
                 record.message_post(
                     body=_('Partial payment received. ₹%s paid, ₹%s remaining on Invoice %s.')
                     % (paid, invoice.amount_residual, invoice.name)
                 )
 
     # ── Private Helpers ───────────────────────────────────────────────
+
+    def _get_actual_payment_date(self, invoice):
+        """
+        Return the date of the most recent payment reconciled against the invoice.
+
+        Looks at account.payment records linked to this invoice and returns
+        the latest payment date. Falls back to payment.transaction date,
+        then today as a last resort.
+
+        This ensures payment_date reflects when the student actually paid
+        via the portal, not when the admin created the fee.payment record.
+        """
+        payments = (
+            invoice.line_ids.mapped('matched_credit_ids.credit_move_id.payment_id')
+            | invoice.line_ids.mapped('matched_debit_ids.debit_move_id.payment_id')
+        )
+        if payments:
+            return max(payments.mapped('date'))
+        # Fallback: check payment.transaction date
+        tx = self.env['payment.transaction'].sudo().search([
+            ('invoice_ids', 'in', [invoice.id]),
+            ('state', 'in', ['done', 'authorized']),
+        ], order='last_state_change desc', limit=1)
+        if tx:
+            return tx.last_state_change.date()
+        return fields.Date.today()
 
     def _create_invoice(self):
         """Create and post one invoice with all fee components as lines."""

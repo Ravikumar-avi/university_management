@@ -171,21 +171,6 @@
                             </field>
                         </page>
 
-                        <page string="Qualifications" name="qualifications">
-                            <field name="qualification_ids" nolabel="1">
-                                <list editable="bottom"
-                                      decoration-success="is_verified == True">
-                                    <field name="degree"/>
-                                    <field name="specialization" optional="show"/>
-                                    <field name="institution"/>
-                                    <field name="year_of_passing"/>
-                                    <field name="percentage" optional="show"/>
-                                    <field name="is_verified" widget="boolean_toggle"/>
-                                    <field name="hr_resume_line_id" readonly="1" optional="hide"/>
-                                </list>
-                            </field>
-                        </page>
-
                         <page string="Timetable" name="timetable">
                             <field name="timetable_ids" readonly="1">
                                 <list>

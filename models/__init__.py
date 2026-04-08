@@ -17,3 +17,5 @@ from . import resusers
 from . import resconfig
 from . import iic
 from . import naac
+from . import asset
+from . import nba

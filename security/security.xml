@@ -168,7 +168,4 @@
         <field name="comment">HOD access: approve attendance regularization and departmental workflows</field>
     </record>
 
-    <!-- HR Manager -->
-    <!-- Uses hr.group_hr_manager from the HR module (already installed) -->
-
 </odoo>

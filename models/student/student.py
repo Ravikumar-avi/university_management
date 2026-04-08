@@ -174,11 +174,32 @@ class Student(models.Model):
     aadhar_number = fields.Char(string='Aadhar Number')
     pan_number = fields.Char(string='PAN Number')
 
+    # ── University ID & USN Mapping ───────────────────────────────────
+    temp_student_id = fields.Char(
+        string='Temporary Student ID', readonly=True, copy=False, index=True,
+        help='Auto-generated on student creation. Format: TEMP{YEAR}-{SEQ}. '
+             'Used until the university assigns an official USN.',
+    )
+    university_usn = fields.Char(
+        string='University USN', tracking=True, copy=False, index=True,
+        help='Official University Seat Number assigned by the affiliating university '
+             'e.g. 1MV24AR001.',
+    )
+    usn_mapped = fields.Boolean(
+        string='USN Mapped', default=False, tracking=True,
+    )
+    usn_mapped_date = fields.Date(string='USN Mapping Date', readonly=True)
+    usn_mapped_by = fields.Many2one('res.users', string='USN Mapped By', readonly=True)
+
     _sql_constraints = [
         ('registration_number_unique', 'unique(registration_number)',
          'Registration Number must be unique!'),
         ('aadhar_unique', 'unique(aadhar_number)',
          'Aadhar Number must be unique!'),
+        ('temp_student_id_unique', 'unique(temp_student_id)',
+         'Temporary Student ID must be unique!'),
+        ('university_usn_unique', 'unique(university_usn)',
+         'University USN must be unique!'),
     ]
 
     @api.model
@@ -187,6 +208,12 @@ class Student(models.Model):
             vals['student_code'] = self.env['ir.sequence'].next_by_code('student.student') or '/'
         if vals.get('registration_number', '/') == '/':
             vals['registration_number'] = self.env['ir.sequence'].next_by_code('student.registration') or '/'
+
+        # Auto-generate Temporary Student ID (TEMP{YEAR}-{SEQ})
+        if not vals.get('temp_student_id') and not vals.get('usn_mapped'):
+            year = fields.Date.today().year
+            seq = self.env['ir.sequence'].next_by_code('student.temp.id') or '00001'
+            vals['temp_student_id'] = f'TEMP{year}-{seq}'
 
         # Create partner if not exists
         if not vals.get('partner_id'):
@@ -406,3 +433,47 @@ class Student(models.Model):
                 matched_student_ids.append(student.id)
 
         return [('id', 'in', matched_student_ids)]
+
+    # ── USN Mapping ───────────────────────────────────────────────────
+
+    def action_map_usn(self):
+        """
+        Map the university-issued USN to this student record.
+        Called by admin once the affiliating university generates the USN.
+        """
+        self.ensure_one()
+        if self.usn_mapped:
+            raise ValidationError(_(
+                'USN has already been mapped for this student (%s → %s).'
+            ) % (self.temp_student_id, self.university_usn))
+        if not self.university_usn:
+            raise ValidationError(_('Please enter the University USN before mapping.'))
+        existing = self.search([
+            ('university_usn', '=', self.university_usn),
+            ('id', '!=', self.id),
+        ], limit=1)
+        if existing:
+            raise ValidationError(_(
+                'USN %s is already assigned to student %s.'
+            ) % (self.university_usn, existing.name))
+        self.write({
+            'usn_mapped': True,
+            'usn_mapped_date': fields.Date.today(),
+            'usn_mapped_by': self.env.user.id,
+            'state': 'active',
+        })
+        self.message_post(
+            body=_('University USN mapped: <b>%s</b> → <b>%s</b>. '
+                   'Student record is now permanently active.')
+            % (self.temp_student_id, self.university_usn)
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('USN Mapped Successfully'),
+                'message': _('%s mapped to %s.') % (self.university_usn, self.name),
+                'type': 'success',
+                'sticky': False,
+            },
+        }

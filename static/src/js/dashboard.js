@@ -90,6 +90,24 @@ class UniversityDashboard extends Component {
                 overdue: 0,
                 fines_collected: 0,
             },
+            assets: {
+                total_assets: 0,
+                active_assets: 0,
+                under_maintenance: 0,
+                total_purchase_value: 0,
+                total_book_value: 0,
+                pending_requests: 0,
+                transfers_this_month: 0,
+                disposed_assets: 0,
+                assets_under_warranty: 0,
+                unverified_assets: 0,
+                by_category: [],
+                by_condition: [],
+                by_department: [],
+                recent_maintenance: [],
+                recent_requests: [],
+                recent_transfers: [],
+            },
             recentAdmissions: [],
             recentPayments: [],
             departmentStats: [],
@@ -178,7 +196,166 @@ class UniversityDashboard extends Component {
                 UniversityCharts.renderAll(this.state);
             }, 100);
         }
+        this.loadAssetData();
     }
+
+    async loadAssetData() {
+        try {
+            const today = new Date();
+            const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+                .toISOString().slice(0, 10);
+
+            const [
+                totalAssets, activeAssets, underMaintenance, disposedCondemned,
+                pendingRequests, transfersMonth, underWarranty, unverified,
+                categoryGroups, conditionGroups, departmentGroups,
+                recentMaint, recentReq, recentTransfer, valueData,
+            ] = await Promise.all([
+                this.orm.searchCount('asset.asset', []),
+                this.orm.searchCount('asset.asset', [['state', '=', 'active']]),
+                this.orm.searchCount('asset.asset', [['state', '=', 'under_maintenance']]),
+                this.orm.searchCount('asset.asset', [['state', 'in', ['disposed', 'condemned', 'lost']]]),
+                this.orm.searchCount('asset.request', [['state', 'in', ['draft', 'approved', 'pending_purchase']]]),
+                this.orm.searchCount('asset.transfer', [
+                    ['transfer_date', '>=', firstOfMonth], ['transfer_type', '=', 'transfer'],
+                ]),
+                this.orm.searchCount('asset.asset', [['is_under_warranty', '=', true]]),
+                this.orm.searchCount('asset.asset', [
+                    ['is_verified_this_year', '=', false],
+                    ['state', 'not in', ['disposed', 'condemned', 'lost']],
+                ]),
+                this.orm.readGroup('asset.asset', [], ['category_id'],
+                    { groupby: ['category_id'], limit: 8 }),
+                this.orm.readGroup('asset.asset',
+                    [['state', 'not in', ['disposed', 'condemned', 'lost']]],
+                    ['condition'], { groupby: ['condition'] }),
+                this.orm.readGroup('asset.asset', [], ['department_id'],
+                    { groupby: ['department_id'], limit: 8 }),
+                this.orm.searchRead('asset.maintenance',
+                    [['maintenance_type', '!=', false]],
+                    ['name', 'asset_id', 'request_date', 'priority', 'state', 'maintenance_type'],
+                    { limit: 5, order: 'request_date desc' }),
+                this.orm.searchRead('asset.request', [],
+                    ['name', 'requester_id', 'category_id', 'request_date', 'state'],
+                    { limit: 5, order: 'request_date desc' }),
+                this.orm.searchRead('asset.transfer',
+                    [['transfer_type', '=', 'transfer']],
+                    ['name', 'asset_id', 'transfer_date', 'from_department_id', 'to_department_id', 'state'],
+                    { limit: 5, order: 'transfer_date desc' }),
+                this.orm.searchRead('asset.asset', [],
+                    ['purchase_cost', 'current_book_value'], { limit: 9999 }),
+            ]);
+
+            let totalPurchase = 0, totalBook = 0;
+            for (const r of valueData) {
+                totalPurchase += r.purchase_cost || 0;
+                totalBook += r.current_book_value || 0;
+            }
+
+            const conditionLabels = {
+                new: 'New', good: 'Good', fair: 'Fair',
+                poor: 'Poor', non_functional: 'Non-Functional', condemned: 'Condemned',
+            };
+
+            this.state.assets = {
+                total_assets: totalAssets,
+                active_assets: activeAssets,
+                under_maintenance: underMaintenance,
+                total_purchase_value: totalPurchase,
+                total_book_value: totalBook,
+                pending_requests: pendingRequests,
+                transfers_this_month: transfersMonth,
+                disposed_assets: disposedCondemned,
+                assets_under_warranty: underWarranty,
+                unverified_assets: unverified,
+                by_category: categoryGroups.map(g => ({
+                    name: g.category_id ? g.category_id[1] : 'Uncategorized',
+                    count: g.category_id_count,
+                })),
+                by_condition: conditionGroups.map(g => ({
+                    name: conditionLabels[g.condition] || g.condition || 'Unknown',
+                    count: g.condition_count,
+                })),
+                by_department: departmentGroups.map(g => ({
+                    name: g.department_id ? g.department_id[1] : 'Unassigned',
+                    count: g.department_id_count,
+                })),
+                recent_maintenance: recentMaint,
+                recent_requests: recentReq,
+                recent_transfers: recentTransfer,
+            };
+
+            if (this.state.activeModule === 'assets') {
+                setTimeout(() => this._renderAssetCharts(), 150);
+            }
+        } catch (e) {
+            console.error('Asset data load error:', e);
+        }
+    }
+
+    _renderAssetCharts() {
+        if (typeof Chart === 'undefined') return;
+
+        const catCanvas = document.getElementById('uni-asset-category-chart');
+        if (catCanvas && !catCanvas._chartInstance) {
+            const data = this.state.assets.by_category;
+            const COLORS = ['#4A90D9','#27AE60','#E67E22','#8E44AD','#E74C3C','#16A085','#2980B9','#F39C12'];
+            catCanvas._chartInstance = new Chart(catCanvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{ data: data.map(d => d.count), backgroundColor: COLORS.slice(0, data.length), borderWidth: 2, borderColor: '#fff' }],
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } } },
+            });
+        }
+
+        const condCanvas = document.getElementById('uni-asset-condition-chart');
+        if (condCanvas && !condCanvas._chartInstance) {
+            const data = this.state.assets.by_condition;
+            const COLOR_MAP = { 'New':'#27AE60','Good':'#2ECC71','Fair':'#F39C12',
+                'Poor':'#E67E22','Non-Functional':'#E74C3C','Condemned':'#8E44AD' };
+            condCanvas._chartInstance = new Chart(condCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{ label: 'Assets', data: data.map(d => d.count),
+                        backgroundColor: data.map(d => COLOR_MAP[d.name] || '#4A90D9'), borderRadius: 6 }],
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } } },
+            });
+        }
+    }
+
+    formatAssetCurrency(val) {
+        if (!val) return '₹ 0';
+        if (val >= 10000000) return '₹ ' + (val / 10000000).toFixed(2) + ' Cr';
+        if (val >= 100000) return '₹ ' + (val / 100000).toFixed(2) + ' L';
+        if (val >= 1000) return '₹ ' + (val / 1000).toFixed(1) + ' K';
+        return '₹ ' + val.toFixed(0);
+    }
+
+    assetStateClass(state) {
+        const map = {
+            draft:'warning', active:'success', audited:'info', under_maintenance:'warning',
+            transferred:'primary', condemned:'danger', disposed:'danger', lost:'danger',
+            completed:'success', in_progress:'warning', assigned:'info',
+            approved:'info', pending_purchase:'warning', rejected:'danger', fulfilled:'success',
+        };
+        return map[state] || 'secondary';
+    }
+
+    assetStateLabel(state) {
+        return (state || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    openAssets() { this.navigateTo('university_management.action_asset_asset'); }
+    openAssetRequests() { this.navigateTo('university_management.action_asset_request'); }
+    openAssetMaintenance() { this.navigateTo('university_management.action_asset_maintenance'); }
+    openAssetTransfers() { this.navigateTo('university_management.action_asset_transfer'); }
 
     updateState(data) {
         this.state.overview = { ...this.state.overview, ...data.overview };
@@ -209,7 +386,14 @@ class UniversityDashboard extends Component {
 
         setTimeout(() => {
             UniversityCharts.renderForModule(module, this.state);
-        }, 100);
+            if (module === 'assets') {
+                const c1 = document.getElementById('uni-asset-category-chart');
+                const c2 = document.getElementById('uni-asset-condition-chart');
+                if (c1) delete c1._chartInstance;
+                if (c2) delete c2._chartInstance;
+                this._renderAssetCharts();
+            }
+        }, 150);
     }
 
     // Navigation methods
@@ -270,6 +454,7 @@ class UniversityDashboard extends Component {
             { key: "library", label: "Library", icon: "fa-book", badge: this.state.library?.overdue || 0 },
             { key: "placement", label: "Placement", icon: "fa-briefcase", badge: this.state.overview?.active_placement_drives || 0 },
             { key: "transport", label: "Transport", icon: "fa-bus", badge: null },
+            { key: "assets", label: "Assets", icon: "fa-cubes", badge: this.state.assets?.pending_requests || 0 },
         ];
     }
 }

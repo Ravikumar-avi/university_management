@@ -89,6 +89,13 @@
                     <group>
                         <group string="Student Information">
                             <field name="registration_number" readonly="1"/>
+                            <field name="student_temp_id" readonly="1"
+                                   string="Temp Student ID"
+                                   invisible="student_usn_mapped"/>
+                            <field name="student_usn" readonly="1"
+                                   string="University USN"
+                                   invisible="not student_usn_mapped"/>
+                            <field name="student_usn_mapped" invisible="1"/>
                             <field name="program_id" readonly="1"/>
                             <field name="department_id" readonly="1"/>
                         </group>
@@ -103,7 +110,7 @@
 
                     <group>
                         <group string="Payment Details">
-                            <field name="payment_date" widget="date"/>
+                            <field name="payment_date" readonly="1"/>
                             <field name="due_date" widget="date"/>
                             <field name="payment_method" readonly="1"/>
                         </group>
