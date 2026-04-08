@@ -16,7 +16,7 @@
     <template id="report_iic_poster_template">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <div style="width:210mm; min-height:297mm; margin:0 auto; padding:0; font-family:Arial,sans-serif; background:#ffffff; position:relative; box-sizing:border-box; page-break-after:always;">
+                <div style="width:210mm; margin:0 auto; padding:0; font-family:Arial,sans-serif; background:#ffffff; box-sizing:border-box;">
 
                     <!-- HEADER BAND -->
                     <div style="background:#1a237e; padding:18px 24px 14px 24px; border-bottom:5px solid #ffd600;">
@@ -189,56 +189,8 @@
                         </span>
                     </div>
 
-                    <!-- PHOTO GALLERY -->
-                    <t t-if="doc.media_image_ids">
-                        <div style="margin:0 24px 80px 24px;">
-                            <div style="font-size:11px; font-weight:700; color:#1a237e; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; border-bottom:2px solid #ffd600; padding-bottom:4px;">
-                                Event Photo Gallery
-                            </div>
-                            <table style="width:100%; border-collapse:separate; border-spacing:6px;">
-                                <!-- Row 1: images 1-3 (pre-computed in Python) -->
-                                <t t-if="doc.gallery_row1">
-                                <tr>
-                                    <t t-foreach="doc.gallery_row1" t-as="img">
-                                        <td style="width:33%; text-align:center; vertical-align:top; padding:4px;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
-                                                 style="width:100%; height:130px; object-fit:cover; border-radius:6px; border:1.5px solid #c5cae9;"
-                                                 t-att-alt="img.name or 'Event Photo'"/>
-                                            <t t-if="img.name">
-                                                <div style="font-size:8px; color:#546e7a; margin-top:3px;">
-                                                    <t t-esc="img.name"/>
-                                                </div>
-                                            </t>
-                                        </td>
-                                    </t>
-                                </tr>
-                                </t>
-                                <!-- Row 2: images 4-6 (pre-computed in Python) -->
-                                <t t-if="doc.gallery_row2">
-                                <tr>
-                                    <t t-foreach="doc.gallery_row2" t-as="img">
-                                        <td style="width:33%; text-align:center; vertical-align:top; padding:4px;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
-                                                 style="width:100%; height:130px; object-fit:cover; border-radius:6px; border:1.5px solid #c5cae9;"
-                                                 t-att-alt="img.name or 'Event Photo'"/>
-                                            <t t-if="img.name">
-                                                <div style="font-size:8px; color:#546e7a; margin-top:3px;">
-                                                    <t t-esc="img.name"/>
-                                                </div>
-                                            </t>
-                                        </td>
-                                    </t>
-                                </tr>
-                                </t>
-                            </table>
-                        </div>
-                    </t>
-                    <t t-else="">
-                        <div style="margin-bottom:80px;"/>
-                    </t>
-
                     <!-- FOOTER BAND -->
-                    <div style="background:#1a237e; color:#fff; padding:10px 24px; border-top:4px solid #ffd600; position:absolute; bottom:0; left:0; right:0;">
+                    <div style="background:#1a237e; color:#fff; padding:10px 24px; border-top:4px solid #ffd600; margin-top:20px;">
                         <table style="width:100%; border-collapse:collapse;">
                             <tr>
                                 <td style="font-size:10px; color:#90caf9;">Ministry of Education, Govt. of India | MSME</td>
