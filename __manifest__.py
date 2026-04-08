@@ -299,6 +299,7 @@
         'report/naac_aqar_report.xml',
         'report/naac_reports.xml',
         'report/nba_sar_report.xml',
+        'report/asset_reports.xml',
 
         'templates/mains/admission_templates.xml',
         'templates/mains/library_templates.xml',
@@ -322,6 +323,7 @@
         'templates/iic/iic_portal_templates.xml',
         'templates/naac/naac_evidence_templates.xml',
         'templates/portalfee/portal_fee_templates.xml',
+        'templates/asset/asset_qr_templates.xml',
 
         # Menu
         'views/menu_views.xml',
