@@ -18,6 +18,10 @@
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
                     <div class="page">
+
+                        <!-- base_url for absolute image URLs (needed by wkhtmltopdf on server) -->
+                        <t t-set="base_url" t-value="request.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
+
                         <!-- Header -->
                         <div class="text-center mb-4 border-bottom pb-3">
                             <h2 class="text-primary">INSTITUTE INNOVATION COUNCIL</h2>
@@ -113,8 +117,8 @@
                                 <!-- Row 1: images 0-2 -->
                                 <tr>
                                     <t t-foreach="all_gallery_images[:3]" t-as="img">
-                                        <td style="vertical-align:top; text-align:center; overflow:hidden;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                        <td style="vertical-align:top; text-align:center;">
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -122,16 +126,15 @@
                                             </t>
                                         </td>
                                     </t>
-                                    <!-- pad to 3 cols if fewer than 3 images total -->
                                     <t t-if="len(all_gallery_images) == 1"><td/><td/></t>
                                     <t t-elif="len(all_gallery_images) == 2"><td/></t>
                                 </tr>
-                                <!-- Row 2: images 3-5 (only if we have more than 3) -->
+                                <!-- Row 2: images 3-5 -->
                                 <t t-if="len(all_gallery_images) &gt; 3">
                                 <tr>
                                     <t t-foreach="all_gallery_images[3:6]" t-as="img">
-                                        <td style="vertical-align:top; text-align:center; overflow:hidden;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                        <td style="vertical-align:top; text-align:center;">
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -139,17 +142,16 @@
                                             </t>
                                         </td>
                                     </t>
-                                    <!-- pad row 2 -->
                                     <t t-if="len(all_gallery_images) == 4"><td/><td/></t>
                                     <t t-elif="len(all_gallery_images) == 5"><td/></t>
                                 </tr>
                                 </t>
-                                <!-- Row 3: images 6-8 (only if we have more than 6) -->
+                                <!-- Row 3: images 6-8 -->
                                 <t t-if="len(all_gallery_images) &gt; 6">
                                 <tr>
                                     <t t-foreach="all_gallery_images[6:9]" t-as="img">
-                                        <td style="vertical-align:top; text-align:center; overflow:hidden;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                        <td style="vertical-align:top; text-align:center;">
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
