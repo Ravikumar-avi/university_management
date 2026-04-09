@@ -1,20 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Low-DPI paper format to prevent wkhtmltopdf memory crash on server -->
-    <record id="paperformat_iic_poster" model="report.paperformat">
-        <field name="name">IIC Poster Format</field>
-        <field name="format">A4</field>
-        <field name="orientation">Portrait</field>
-        <field name="margin_top">5</field>
-        <field name="margin_bottom">5</field>
-        <field name="margin_left">5</field>
-        <field name="margin_right">5</field>
-        <field name="header_line" eval="False"/>
-        <field name="header_spacing">0</field>
-        <field name="dpi">96</field>
-    </record>
-
     <!-- IIC Poster Print Report Action -->
     <record id="action_report_iic_poster" model="ir.actions.report">
         <field name="name">IIC Event Poster</field>
@@ -24,14 +10,15 @@
         <field name="report_file">university_management.report_iic_poster_template</field>
         <field name="binding_model_id" ref="model_iic_poster"/>
         <field name="binding_type">report</field>
-        <field name="paperformat_id" ref="paperformat_iic_poster"/>
     </record>
 
     <!-- QWeb Poster Template -->
     <template id="report_iic_poster_template">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <div style="width:200mm; margin:0 auto; padding:0; font-family:Arial,sans-serif; background:#ffffff; box-sizing:border-box;">
+                <!-- base_url for absolute image URLs (needed by wkhtmltopdf on server) -->
+                <t t-set="base_url" t-value="request.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
+                <div style="width:210mm; margin:0 auto; padding:0; font-family:Arial,sans-serif; background:#ffffff; box-sizing:border-box;">
 
                     <!-- HEADER BAND -->
                     <div style="background:#1a237e; padding:18px 24px 14px 24px; border-bottom:5px solid #ffd600;">
@@ -39,7 +26,7 @@
                             <tr>
                                 <td style="width:80px; text-align:center; vertical-align:middle;">
                                     <t t-if="doc.institute_logo">
-                                        <img t-att-src="image_data_uri(doc.institute_logo)"
+                                        <img t-att-src="base_url + '/web/image/iic.poster/' + str(doc.id) + '/institute_logo'"
                                              style="max-width:70px; max-height:70px;" alt="Institute Logo"/>
                                     </t>
                                     <t t-else="">
@@ -61,7 +48,7 @@
                                 </td>
                                 <td style="width:80px; text-align:center; vertical-align:middle;">
                                     <t t-if="doc.iic_logo">
-                                        <img t-att-src="image_data_uri(doc.iic_logo)"
+                                        <img t-att-src="base_url + '/web/image/iic.poster/' + str(doc.id) + '/iic_logo'"
                                              style="max-width:70px; max-height:70px;" alt="IIC Logo"/>
                                     </t>
                                     <t t-else="">
@@ -120,7 +107,7 @@
                                         </div>
                                         <t t-if="doc.speaker_photo">
                                             <div style="margin:0 auto 12px auto; width:90px; height:90px; border-radius:50%; overflow:hidden; border:3px solid #ffd600; background:#fff;">
-                                                <img t-att-src="image_data_uri(doc.speaker_photo)"
+                                                <img t-att-src="base_url + '/web/image/iic.poster/' + str(doc.id) + '/speaker_photo'"
                                                      style="width:90px; height:90px; object-fit:cover;" alt="Speaker"/>
                                             </div>
                                         </t>

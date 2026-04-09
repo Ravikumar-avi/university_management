@@ -1,20 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Low-DPI paper format to prevent wkhtmltopdf memory crash on server -->
-    <record id="paperformat_iic_event_report" model="report.paperformat">
-        <field name="name">IIC Event Report Format</field>
-        <field name="format">A4</field>
-        <field name="orientation">Portrait</field>
-        <field name="margin_top">10</field>
-        <field name="margin_bottom">10</field>
-        <field name="margin_left">10</field>
-        <field name="margin_right">10</field>
-        <field name="header_line" eval="False"/>
-        <field name="header_spacing">0</field>
-        <field name="dpi">96</field>
-    </record>
-
     <!-- IIC Event Report Action -->
     <record id="action_report_iic_event_report" model="ir.actions.report">
         <field name="name">IIC Event Report (MSME Format)</field>
@@ -24,7 +10,6 @@
         <field name="report_file">university_management.report_iic_event_template</field>
         <field name="binding_model_id" ref="model_iic_event_report"/>
         <field name="binding_type">report</field>
-        <field name="paperformat_id" ref="paperformat_iic_event_report"/>
     </record>
 
     <!-- QWeb Template -->
@@ -33,6 +18,10 @@
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
                     <div class="page">
+
+                        <!-- base_url for absolute image URLs (needed by wkhtmltopdf on server) -->
+                        <t t-set="base_url" t-value="request.env['ir.config_parameter'].sudo().get_param('web.base.url')"/>
+
                         <!-- Header -->
                         <div class="text-center mb-4 border-bottom pb-3">
                             <h2 class="text-primary">INSTITUTE INNOVATION COUNCIL</h2>
@@ -129,7 +118,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[:3]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="image_data_uri(img.image)"
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -145,7 +134,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[3:6]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="image_data_uri(img.image)"
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -162,7 +151,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[6:9]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="image_data_uri(img.image)"
+                                            <img t-att-src="base_url + '/web/image/iic.media.image/' + str(img.id) + '/image'"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">

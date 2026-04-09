@@ -12,14 +12,6 @@ class IICMediaImage(models.Model):
     sequence = fields.Integer(string='Sequence', default=10)
     name = fields.Char(string='Caption')
     image = fields.Binary(string='Image', attachment=True, required=True)
-    image_medium = fields.Image(
-        string='Image (Medium)',
-        related='image',
-        max_width=800,
-        max_height=600,
-        store=True,
-        attachment=True,
-    )
     filename = fields.Char(string='Filename')
     is_cover = fields.Boolean(string='Use as Cover', default=False)
 
