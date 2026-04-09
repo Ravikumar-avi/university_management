@@ -1008,18 +1008,22 @@
     </t>
 
     <!--  ============================================================  -->
-    <!--  Asset DASHBOARD                                           -->
+    <!--  ASSET MANAGEMENT DASHBOARD                                    -->
     <!--  ============================================================  -->
-
     <t t-name="university_management.DashboardAssets">
         <div class="uni-page">
             <div class="uni-page-header">
                 <h2>Asset Management</h2>
+                <!--
+                    FIX 3: Buttons kept for visual layout but t-on-click removed
+                    because openAssets / openAssetRequests are no-op stubs —
+                    removing the handler prevents the OwlError entirely.
+                -->
                 <div class="uni-header-actions">
-                    <button class="uni-action-btn secondary" t-on-click="openAssetRequests">
+                    <button class="uni-action-btn secondary">
                         <i class="fa fa-inbox"/> Requests
                     </button>
-                    <button class="uni-action-btn" t-on-click="openAssets">
+                    <button class="uni-action-btn">
                         <i class="fa fa-cubes"/> All Assets
                     </button>
                 </div>
@@ -1027,7 +1031,8 @@
 
             <!-- KPI ROW 1 -->
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openAssets">
+                <!-- FIX 3: t-on-click removed from asset KPI cards — no valid action exists -->
+                <div class="uni-kpi-card uni-kpi-blue">
                     <div class="uni-kpi-icon"><i class="fa fa-cubes"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Total Assets</div>
@@ -1043,7 +1048,7 @@
                         <div class="uni-kpi-change positive">Currently in use</div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openAssetMaintenance">
+                <div class="uni-kpi-card uni-kpi-orange">
                     <div class="uni-kpi-icon"><i class="fa fa-wrench"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Under Maintenance</div>
@@ -1055,7 +1060,7 @@
                     <div class="uni-kpi-icon"><i class="fa fa-inr"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Purchase Value</div>
-                        <div class="uni-kpi-value" t-esc="formatAssetCurrency(state.assets.total_purchase_value)"/>
+                        <div class="uni-kpi-value" t-esc="formatCurrency(state.assets.total_purchase_value)"/>
                         <div class="uni-kpi-change">Total cost</div>
                     </div>
                 </div>
@@ -1063,7 +1068,7 @@
 
             <!-- KPI ROW 2 -->
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openAssetRequests">
+                <div class="uni-kpi-card uni-kpi-teal">
                     <div class="uni-kpi-icon"><i class="fa fa-inbox"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Pending Requests</div>
@@ -1071,7 +1076,7 @@
                         <div class="uni-kpi-change negative">Awaiting approval</div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-navy" t-on-click="openAssetTransfers">
+                <div class="uni-kpi-card uni-kpi-navy">
                     <div class="uni-kpi-icon"><i class="fa fa-exchange"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Transfers This Month</div>
@@ -1118,7 +1123,11 @@
                 <div class="uni-chart-card">
                     <div class="uni-chart-header">
                         <h3>Recent Maintenance</h3>
-                        <button class="uni-link-btn" t-on-click="openAssetMaintenance">View All</button>
+                        <!--
+                            FIX 3: "View All" button kept but t-on-click removed
+                            — no valid Odoo action registered for asset maintenance.
+                        -->
+                        <button class="uni-link-btn">View All</button>
                     </div>
                     <table class="uni-table">
                         <thead>
@@ -1131,7 +1140,9 @@
                             <t t-foreach="(state.assets.recent_maintenance || [])" t-as="m" t-key="m.id">
                                 <tr>
                                     <td><strong t-esc="m.name"/></td>
+                                    <!-- FIX 2a: dummy data now uses asset_id tuple so [1] returns the name -->
                                     <td t-esc="m.asset_id ? m.asset_id[1] : '-'"/>
+                                    <!-- FIX 2a: dummy data now uses request_date -->
                                     <td t-esc="m.request_date ? m.request_date.slice(0,10) : '-'"/>
                                     <td><span t-attf-class="uni-badge #{assetStateClass(m.state)}" t-esc="assetStateLabel(m.state)"/></td>
                                 </tr>
@@ -1142,7 +1153,8 @@
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
                         <h3>Recent Asset Requests</h3>
-                        <button class="uni-link-btn" t-on-click="openAssetRequests">View All</button>
+                        <!-- FIX 3: t-on-click removed -->
+                        <button class="uni-link-btn">View All</button>
                     </div>
                     <table class="uni-table">
                         <thead>
@@ -1155,8 +1167,11 @@
                             <t t-foreach="(state.assets.recent_requests || [])" t-as="r" t-key="r.id">
                                 <tr>
                                     <td><strong t-esc="r.name"/></td>
+                                    <!-- FIX 2b: dummy data now uses requester_id tuple -->
                                     <td t-esc="r.requester_id ? r.requester_id[1] : '-'"/>
+                                    <!-- FIX 2b: dummy data now uses category_id tuple -->
                                     <td t-esc="r.category_id ? r.category_id[1] : '-'"/>
+                                    <!-- FIX 2b: dummy data now uses request_date -->
                                     <td t-esc="r.request_date ? r.request_date.slice(0,10) : '-'"/>
                                     <td><span t-attf-class="uni-badge #{assetStateClass(r.state)}" t-esc="assetStateLabel(r.state)"/></td>
                                 </tr>
@@ -1170,7 +1185,8 @@
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
                         <h3>Recent Asset Transfers</h3>
-                        <button class="uni-link-btn" t-on-click="openAssetTransfers">View All</button>
+                        <!-- FIX 3: t-on-click removed -->
+                        <button class="uni-link-btn">View All</button>
                     </div>
                     <table class="uni-table">
                         <thead>
@@ -1180,14 +1196,17 @@
                             <t t-if="(state.assets.recent_transfers || []).length === 0">
                                 <tr><td colspan="6" style="text-align:center;color:var(--uni-text-muted);padding:16px;">No transfers</td></tr>
                             </t>
-                            <t t-foreach="(state.assets.recent_transfers || [])" t-as="t" t-key="t.id">
+                            <t t-foreach="(state.assets.recent_transfers || [])" t-as="tf" t-key="tf.id">
                                 <tr>
-                                    <td><strong t-esc="t.name"/></td>
-                                    <td t-esc="t.asset_id ? t.asset_id[1] : '-'"/>
-                                    <td t-esc="t.from_department_id ? t.from_department_id[1] : '-'"/>
-                                    <td t-esc="t.to_department_id ? t.to_department_id[1] : '-'"/>
-                                    <td t-esc="t.transfer_date ? t.transfer_date.slice(0,10) : '-'"/>
-                                    <td><span t-attf-class="uni-badge #{assetStateClass(t.state)}" t-esc="assetStateLabel(t.state)"/></td>
+                                    <td><strong t-esc="tf.name"/></td>
+                                    <!-- FIX 2c: dummy data now uses asset_id tuple -->
+                                    <td t-esc="tf.asset_id ? tf.asset_id[1] : '-'"/>
+                                    <!-- FIX 2c: dummy data now uses from_department_id / to_department_id tuples -->
+                                    <td t-esc="tf.from_department_id ? tf.from_department_id[1] : '-'"/>
+                                    <td t-esc="tf.to_department_id ? tf.to_department_id[1] : '-'"/>
+                                    <!-- FIX 2c: dummy data now uses transfer_date -->
+                                    <td t-esc="tf.transfer_date ? tf.transfer_date.slice(0,10) : '-'"/>
+                                    <td><span t-attf-class="uni-badge #{assetStateClass(tf.state)}" t-esc="assetStateLabel(tf.state)"/></td>
                                 </tr>
                             </t>
                         </tbody>

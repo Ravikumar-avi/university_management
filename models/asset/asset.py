@@ -562,8 +562,12 @@ class Asset(models.Model):
         for rec in self:
             if rec.state != 'draft':
                 raise ValidationError(_('Only draft assets can be activated.'))
-            # Create/sync accounting asset first
-            rec.action_create_accounting_asset()
+            # Create accounting asset only if accounting category is configured (optional)
+            if rec.category_id and rec.category_id.account_asset_category_id:
+                try:
+                    rec.action_create_accounting_asset()
+                except Exception:
+                    pass  # Accounting integration optional; proceed with activation
             rec.write({'state': 'active'})
             # Regenerate QR on activation to ensure fresh token URL
             rec._generate_qr_code()

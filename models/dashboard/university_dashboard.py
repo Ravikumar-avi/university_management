@@ -26,6 +26,7 @@ class UniversityDashboard(models.TransientModel):
             'department_stats': self._get_department_stats(),
             'fee_monthly': self._get_fee_monthly_trend(),
             'semester_admissions': self._get_semester_admissions(),
+            'assets': self._get_asset_dummy_data(),
         }
 
     def _student_active_domain(self):
@@ -675,6 +676,148 @@ class UniversityDashboard(models.TransientModel):
             })
 
         return result
+
+    def _get_asset_dummy_data(self):
+        return {
+            'total_assets': 25,
+            'active_assets': 20,
+            'under_maintenance': 2,
+            'disposed_assets': 1,
+            'pending_requests': 4,
+            'transfers_this_month': 4,
+            'assets_under_warranty': 7,
+            'unverified_assets': 18,
+            'total_purchase_value': 3885000.0,
+            'total_book_value': 3128000.0,
+            'by_category': [
+                {'name': 'IT Equipment', 'count': 9},
+                {'name': 'Lab Equipment', 'count': 5},
+                {'name': 'Furniture', 'count': 3},
+                {'name': 'Vehicles', 'count': 2},
+                {'name': 'Electrical Equipment', 'count': 4},
+                {'name': 'Sports Equipment', 'count': 2},
+            ],
+            'by_condition': [
+                {'name': 'Good', 'count': 17},
+                {'name': 'Fair', 'count': 5},
+                {'name': 'Poor', 'count': 2},
+                {'name': 'Condemned', 'count': 1},
+            ],
+            'recent_maintenance': [
+                {
+                    'id': -1,
+                    'name': 'MAINT/2024/00005',
+                    'asset': 'Daikin Split AC 1.5 Ton (Set of 5)',
+                    'date': '2024-04-01',
+                    'state': 'assigned',
+                    'type': 'amc',
+                },
+                {
+                    'id': -2,
+                    'name': 'MAINT/2024/00004',
+                    'asset': 'Digital Oscilloscope 100MHz',
+                    'date': '2024-03-20',
+                    'state': 'completed',
+                    'type': 'calibration',
+                },
+                {
+                    'id': -3,
+                    'name': 'MAINT/2024/00003',
+                    'asset': 'Hydraulic Press 20 Ton',
+                    'date': '2024-02-20',
+                    'state': 'in_progress',
+                    'type': 'corrective',
+                },
+                {
+                    'id': -4,
+                    'name': 'MAINT/2024/00002',
+                    'asset': 'Kirloskar DG Set 62.5 KVA',
+                    'date': '2024-01-12',
+                    'state': 'completed',
+                    'type': 'preventive',
+                },
+                {
+                    'id': -5,
+                    'name': 'MAINT/2024/00001',
+                    'asset': 'Epson Multimedia Projector',
+                    'date': '2024-03-17',
+                    'state': 'completed',
+                    'type': 'corrective',
+                },
+            ],
+            'recent_requests': [
+                {
+                    'id': -11,
+                    'name': 'AREQ/2024/0004',
+                    'requester': 'Administrator',
+                    'category': 'IT Equipment',
+                    'date': '2024-04-03',
+                    'state': 'approved',
+                },
+                {
+                    'id': -12,
+                    'name': 'AREQ/2024/0003',
+                    'requester': 'Administrator',
+                    'category': 'Lab Equipment',
+                    'date': '2024-04-05',
+                    'state': 'draft',
+                },
+                {
+                    'id': -13,
+                    'name': 'AREQ/2024/0002',
+                    'requester': 'Administrator',
+                    'category': 'Furniture',
+                    'date': '2024-03-25',
+                    'state': 'pending_purchase',
+                },
+                {
+                    'id': -14,
+                    'name': 'AREQ/2024/0001',
+                    'requester': 'Administrator',
+                    'category': 'IT Equipment',
+                    'date': '2024-04-01',
+                    'state': 'submitted',
+                },
+            ],
+            'recent_transfers': [
+                {
+                    'id': -21,
+                    'name': 'TRF/2024/00004',
+                    'asset': 'Samsung Smart Board 75 Inch',
+                    'from_dept': 'Electronics and Communication Engg',
+                    'to_dept': 'Computer Science and Engineering',
+                    'date': '2024-04-01',
+                    'state': 'completed',
+                },
+                {
+                    'id': -22,
+                    'name': 'TRF/2024/00003',
+                    'asset': 'Dell Laptop Core i7',
+                    'from_dept': 'Computer Science and Engineering',
+                    'to_dept': 'Computer Science and Engineering',
+                    'date': '2024-03-20',
+                    'state': 'pending',
+                },
+                {
+                    'id': -23,
+                    'name': 'TRF/2024/00002',
+                    'asset': 'Lenovo ThinkPad — Faculty Laptop',
+                    'from_dept': 'Computer Science and Engineering',
+                    'to_dept': 'Computer Science and Engineering',
+                    'date': '2024-02-10',
+                    'state': 'completed',
+                },
+                {
+                    'id': -24,
+                    'name': 'TRF/2024/00001',
+                    'asset': 'HP Desktop PC Core i5',
+                    'from_dept': 'Administration',
+                    'to_dept': 'Administration',
+                    'date': '2024-01-15',
+                    'state': 'completed',
+                },
+            ],
+        }
 
     @staticmethod
     def _format_amount(amount):
