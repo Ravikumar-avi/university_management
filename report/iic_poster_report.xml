@@ -39,7 +39,7 @@
                             <tr>
                                 <td style="width:80px; text-align:center; vertical-align:middle;">
                                     <t t-if="doc.institute_logo">
-                                        <img t-att-src="'data:image/png;base64,' + doc.institute_logo.decode('utf-8')"
+                                        <img t-att-src="image_data_uri(doc.institute_logo)"
                                              style="max-width:70px; max-height:70px;" alt="Institute Logo"/>
                                     </t>
                                     <t t-else="">
@@ -61,7 +61,7 @@
                                 </td>
                                 <td style="width:80px; text-align:center; vertical-align:middle;">
                                     <t t-if="doc.iic_logo">
-                                        <img t-att-src="'data:image/png;base64,' + doc.iic_logo.decode('utf-8')"
+                                        <img t-att-src="image_data_uri(doc.iic_logo)"
                                              style="max-width:70px; max-height:70px;" alt="IIC Logo"/>
                                     </t>
                                     <t t-else="">
@@ -120,7 +120,7 @@
                                         </div>
                                         <t t-if="doc.speaker_photo">
                                             <div style="margin:0 auto 12px auto; width:90px; height:90px; border-radius:50%; overflow:hidden; border:3px solid #ffd600; background:#fff;">
-                                                <img t-att-src="'data:image/png;base64,' + doc.speaker_photo.decode('utf-8')"
+                                                <img t-att-src="image_data_uri(doc.speaker_photo)"
                                                      style="width:90px; height:90px; object-fit:cover;" alt="Speaker"/>
                                             </div>
                                         </t>

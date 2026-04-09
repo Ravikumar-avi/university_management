@@ -129,7 +129,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[:3]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                            <img t-att-src="image_data_uri(img.image)"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -145,7 +145,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[3:6]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                            <img t-att-src="image_data_uri(img.image)"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
@@ -162,7 +162,7 @@
                                 <tr>
                                     <t t-foreach="all_gallery_images[6:9]" t-as="img">
                                         <td style="vertical-align:top; text-align:center;">
-                                            <img t-att-src="'data:image/png;base64,' + img.image.decode('utf-8')"
+                                            <img t-att-src="image_data_uri(img.image)"
                                                  style="width:100%; height:auto; display:block; border-radius:4px; border:1px solid #dee2e6;"
                                                  t-att-alt="img.name or 'Event Photo'"/>
                                             <t t-if="img.name">
