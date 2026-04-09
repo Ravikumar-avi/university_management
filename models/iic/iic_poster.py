@@ -28,6 +28,7 @@ class IICPoster(models.Model):
     speaker_designation = fields.Char(related='event_id.speaker_id.designation', string='Speaker Designation')
     speaker_profile = fields.Text(related='event_id.speaker_id.profile', string='Speaker Profile')
     speaker_photo = fields.Binary(related='event_id.speaker_id.photo', string='Speaker Photo')
+    speaker_photo_medium = fields.Image(string='Speaker Photo (Medium)', related='event_id.speaker_id.photo', max_width=300, max_height=300, store=True, attachment=True)
 
     iic_president_id = fields.Many2one('hr.employee', related='event_id.iic_president_id', string='IIC President')
     iic_president_name = fields.Char(related='event_id.iic_president_id.name', string='IIC President Name', store=True)
@@ -36,7 +37,9 @@ class IICPoster(models.Model):
     iic_convenor_name = fields.Char(related='event_id.iic_convenor_id.name', string='IIC Convenor Name', store=True)
     iic_convenor_designation = fields.Char(string='IIC Convenor Designation')
     iic_logo = fields.Binary(string='IIC Logo', attachment=True)
+    iic_logo_medium = fields.Image(string='IIC Logo (Medium)', related='iic_logo', max_width=200, max_height=200, store=True, attachment=True)
     institute_logo = fields.Binary(string='Institute Logo', attachment=True)
+    institute_logo_medium = fields.Image(string='Institute Logo (Medium)', related='institute_logo', max_width=200, max_height=200, store=True, attachment=True)
     highlight_text = fields.Char(string='Highlight Text')
     tagline = fields.Char(string='Tagline')
     publish_date = fields.Date(string='Publish Date')
