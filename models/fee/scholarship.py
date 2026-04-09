@@ -82,7 +82,7 @@ class Scholarship(models.Model):
     available_count = fields.Integer(string='Available', compute='_compute_counts')
 
     # Eligibility
-    eligibility_criteria = fields.Html(string='Eligibility Criteria', required=True)
+    eligibility_criteria = fields.Html(string='Eligibility Criteria')
     min_percentage = fields.Float(string='Minimum Percentage/CGPA Required')
     max_family_income = fields.Monetary(string='Maximum Family Income',
                                         currency_field='currency_id')
