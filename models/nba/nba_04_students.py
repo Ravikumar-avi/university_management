@@ -244,7 +244,7 @@ class NBAC4Students(models.Model):
             # N2: lateral entry
             lateral = self.env['student.student'].search([
                 ('program_id', '=', program.id),
-                ('batch_id.academic_year_id', '=', year.id),
+                ('academic_year_id', '=', year.id),
             ])
             rec.n2_lateral = 0  # Will be derived from admission entry_type when available
 
