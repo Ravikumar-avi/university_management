@@ -286,6 +286,8 @@ class ScholarshipApplication(models.Model):
         ('reversed', 'Reversed'),
     ], string='Payment Status', compute='_compute_payment_state', store=True)
 
+    payment_date = fields.Date(string='Payment Date', tracking=True, index=True)
+
     # Documents
     document_ids = fields.One2many('scholarship.application.document', 'application_id',
                                    string='Documents')

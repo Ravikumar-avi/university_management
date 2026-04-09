@@ -94,6 +94,7 @@
                         </group>
                         <group string="Payment Information">
                             <field name="payment_state"/>
+                            <field name="payment_date"/>
                         </group>
                     </group>
 
