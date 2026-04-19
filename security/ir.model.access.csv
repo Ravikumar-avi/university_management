@@ -276,6 +276,22 @@ access_library_rack_admin,library.rack.admin,model_library_rack,group_university
 access_library_rack_librarian,library.rack.librarian,model_library_rack,group_librarian,1,1,1,0
 access_library_rack_student,library.rack.student,model_library_rack,group_student_portal,1,0,0,0
 
+access_library_digital_collection_admin,library.digital.collection.admin,model_library_digital_collection,group_university_admin,1,1,1,1
+access_library_digital_collection_librarian,library.digital.collection.librarian,model_library_digital_collection,group_librarian,1,1,1,0
+access_library_digital_collection_all,library.digital.collection.all,model_library_digital_collection,base.group_user,1,0,0,0
+
+access_library_digital_resource_admin,library.digital.resource.admin,model_library_digital_resource,group_university_admin,1,1,1,1
+access_library_digital_resource_librarian,library.digital.resource.librarian,model_library_digital_resource,group_librarian,1,1,1,0
+access_library_digital_resource_all,library.digital.resource.all,model_library_digital_resource,base.group_user,1,0,0,0
+access_library_digital_resource_student,library.digital.resource.student,model_library_digital_resource,group_student_portal,1,0,0,0
+
+access_library_digital_access_admin,library.digital.access.admin,model_library_digital_access,group_university_admin,1,1,1,1
+access_library_digital_access_librarian,library.digital.access.librarian,model_library_digital_access,group_librarian,1,1,0,0
+access_library_digital_access_student,library.digital.access.student,model_library_digital_access,group_student_portal,1,1,1,0
+
+access_library_opac_search_log_admin,library.opac.search.log.admin,model_library_opac_search_log,group_university_admin,1,1,1,1
+access_library_opac_search_log_librarian,library.opac.search.log.librarian,model_library_opac_search_log,group_librarian,1,1,1,0
+
 access_hostel_hostel_admin,hostel.hostel.admin,model_hostel_hostel,group_university_admin,1,1,1,1
 access_hostel_hostel_warden,hostel.hostel.warden,model_hostel_hostel,group_hostel_warden,1,1,0,0
 access_hostel_hostel_student,hostel.hostel.student,model_hostel_hostel,group_student_portal,1,0,0,0

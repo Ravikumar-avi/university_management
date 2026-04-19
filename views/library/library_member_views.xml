@@ -41,6 +41,25 @@
                     <widget name="web_ribbon" title="Blocked" bg_color="text-bg-dark"
                             invisible="state != 'blocked'"/>
 
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_digital_access"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-laptop">
+                            <field name="digital_access_count"
+                                   widget="statinfo"
+                                   string="Digital Accesses"/>
+                        </button>
+                        <button name="action_view_digital_access"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-download">
+                            <field name="digital_download_count"
+                                   widget="statinfo"
+                                   string="Downloads"/>
+                        </button>
+                    </div>
+
                     <div class="oe_title">
                         <label for="name" string="Membership Number"/>
                         <h1>
@@ -82,6 +101,9 @@
                         <group string="Issue Limits">
                             <field name="max_books_allowed"/>
                             <field name="max_issue_days"/>
+                            <field name="digital_access_enabled"/>
+                            <field name="max_digital_downloads_per_day"
+                                   invisible="not digital_access_enabled"/>
                         </group>
                     </group>
 
@@ -170,6 +192,24 @@
                             <field name="notes" nolabel="1"
                                    placeholder="Enter any notes or remarks about this member..."/>
                         </page>
+
+                        <page string="Digital Access History" name="digital_access">
+                            <field name="digital_access_ids">
+                                <list create="false" edit="false"
+                                      decoration-primary="access_type == 'download'">
+                                    <field name="access_date"/>
+                                    <field name="resource_id"/>
+                                    <field name="resource_type" widget="badge"/>
+                                    <field name="collection_id" optional="show"/>
+                                    <field name="access_type" widget="badge"
+                                           decoration-primary="access_type == 'download'"
+                                           decoration-info="access_type == 'view'"
+                                           decoration-warning="access_type == 'stream'"/>
+                                    <field name="duration_minutes" optional="show"/>
+                                    <field name="device_type" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
                 <chatter/>
@@ -205,6 +245,9 @@
                 <field name="total_issues" readonly="1" optional="hide"/>
                 <field name="pending_fine" widget="monetary" readonly="1" optional="show"
                        decoration-danger="pending_fine &gt; 0"/>
+                <field name="digital_access_count" readonly="1" optional="show"/>
+                <field name="digital_download_count" readonly="1" optional="show"/>
+                <field name="digital_access_enabled" widget="boolean" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'active'"
                        decoration-warning="state == 'expired'"

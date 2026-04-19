@@ -12,3 +12,4 @@ from . import naac_dashboard_api
 from . import naac_evidence_controller
 from . import portal_fee
 from . import asset_qr_controller
+from . import library_opac_controller

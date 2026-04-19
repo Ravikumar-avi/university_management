@@ -28,6 +28,18 @@
                            statusbar_visible="draft,available,issued,reserved,maintenance,lost,damaged"/>
                 </header>
                 <sheet>
+                    <!-- Stat buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_digital_versions"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-laptop"
+                                invisible="not has_digital">
+                            <field name="digital_count"
+                                   widget="statinfo"
+                                   string="Digital Versions"/>
+                        </button>
+                    </div>
                     <widget name="web_ribbon" title="Draft" bg_color="text-bg-secondary"
                             invisible="state != 'draft'"/>
                     <widget name="web_ribbon" title="Out of Stock" bg_color="text-bg-danger"
@@ -90,6 +102,7 @@
                                    options="{'no_create': True, 'no_create_edit': True}"/>
                             <field name="subject" placeholder="e.g., Computer Science"/>
                             <field name="language"/>
+                            <field name="subject_ids" widget="many2many_tags"/>
                         </group>
                         <group string="Physical Details">
                             <field name="pages" placeholder="Number of pages"/>
@@ -115,6 +128,19 @@
                             <field name="vendor_id"
                                    options="{'no_create': True, 'no_create_edit': True}"
                                    domain="[('supplier_rank', '&gt;', 0)]"/>
+                        </group>
+                    </group>
+
+                    <!-- OPAC & Digital group -->
+                    <group string="OPAC &amp; Digital">
+                        <group>
+                            <field name="opac_visible"/>
+                            <field name="has_digital" readonly="1"/>
+                            <field name="tags" placeholder="comma-separated keywords..."/>
+                        </group>
+                        <group>
+                            <field name="opac_description"
+                                   placeholder="Short abstract shown in OPAC search results..."/>
                         </group>
                     </group>
 
@@ -158,6 +184,26 @@
                                            decoration-success="state == 'issued'"
                                            decoration-danger="state == 'expired'"
                                            decoration-muted="state == 'cancelled'"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- Digital Versions tab -->
+                        <page string="Digital Versions" name="digital_versions">
+                            <field name="digital_resource_ids">
+                                <list>
+                                    <field name="code" readonly="1"/>
+                                    <field name="title"/>
+                                    <field name="resource_type" widget="badge"/>
+                                    <field name="collection_id"/>
+                                    <field name="access_type" widget="badge"/>
+                                    <field name="content_type" widget="badge"/>
+                                    <field name="total_access_count"/>
+                                    <field name="is_available" widget="boolean"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'published'"
+                                           decoration-muted="state == 'draft'"
+                                           decoration-warning="state == 'archived'"/>
                                 </list>
                             </field>
                         </page>
@@ -262,6 +308,8 @@
                 <field name="reserved_copies" optional="hide"/>
                 <field name="rack_id" optional="show"/>
                 <field name="code_id" optional="show"/>
+                <field name="opac_visible" widget="boolean_toggle" optional="show"/>
+                <field name="has_digital" widget="boolean" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'available'"
                        decoration-info="state == 'reserved'"
@@ -285,6 +333,8 @@
                 <field name="category_id"/>
                 <field name="subject"/>
                 <field name="rack_id"/>
+                <field name="tags"/>
+                <field name="subject_ids"/>
 
                 <separator/>
 
@@ -323,6 +373,13 @@
 
                 <separator/>
 
+                <filter name="filter_opac_visible" string="Visible in OPAC"
+                        domain="[('opac_visible', '=', True)]"/>
+                <filter name="filter_has_digital" string="Has Digital Version"
+                        domain="[('has_digital', '=', True)]"/>
+
+                <separator/>
+
                 <filter name="filter_active" string="Active"
                         domain="[('active', '=', True)]"/>
                 <filter name="filter_archived" string="Archived"
@@ -345,6 +402,8 @@
                             context="{'group_by': 'state'}"/>
                     <filter name="group_by_publication_year" string="Publication Year"
                             context="{'group_by': 'publication_year'}"/>
+                    <filter name="group_by_has_digital" string="Has Digital"
+                            context="{'group_by': 'has_digital'}"/>
                 </group>
 
                 <searchpanel>
@@ -385,6 +444,7 @@
                 <field name="code_id"/>
                 <field name="state"/>
                 <field name="active"/>
+                <field name="has_digital"/>
 
                 <progressbar field="state"
                              colors='{"draft": "secondary", "available": "success", "reserved": "info", "issued": "warning", "maintenance": "secondary", "lost": "danger", "damaged": "danger"}'/>
@@ -429,6 +489,11 @@
                                         <div class="text-muted" t-if="record.isbn.raw_value">
                                             <i class="fa fa-barcode text-info"/>
                                             ISBN: <field name="isbn"/>
+                                        </div>
+                                        <div t-if="record.has_digital.raw_value" class="mt-1">
+                                            <span class="badge text-bg-info">
+                                                <i class="fa fa-laptop me-1"/>Digital Available
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

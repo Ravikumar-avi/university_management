@@ -171,6 +171,9 @@
         'views/library/library_fine_views.xml',
         'views/library/library_category_views.xml',
         'views/library/library_reservation_views.xml',
+        'views/library/library_digital_collection_views.xml',
+        'views/library/library_digital_resource_views.xml',
+        'views/library/library_digital_access_views.xml',
 
         # Views - Hostel
         'views/hostel/hostel_views.xml',
@@ -307,6 +310,7 @@
 
         'templates/mains/admission_templates.xml',
         'templates/mains/library_templates.xml',
+        'templates/library/opac_templates.xml',
         'templates/mains/program_templates.xml',
         'templates/mains/department_templates.xml',
         'templates/mains/faculty_templates.xml',

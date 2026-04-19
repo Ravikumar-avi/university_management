@@ -38,7 +38,7 @@ class LibraryMember(models.Model):
     card_number = fields.Char(string='Library Card Number')
     card_issued_date = fields.Date(string='Card Issue Date')
 
-    # Limits
+    # Physical book limits
     max_books_allowed = fields.Integer(string='Max Books Allowed', default=3)
     max_issue_days = fields.Integer(string='Max Issue Days', default=14)
 
@@ -57,7 +57,8 @@ class LibraryMember(models.Model):
     pending_fine = fields.Monetary(string='Pending Fine', compute='_compute_fines',
                                    currency_field='currency_id', store=True)
 
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one('res.currency',
+                                  default=lambda self: self.env.company.currency_id)
 
     # Status
     state = fields.Selection([
@@ -71,15 +72,50 @@ class LibraryMember(models.Model):
     # Notes
     notes = fields.Text(string='Notes')
 
+    # -------------------------------------------------------------------------
+    # Digital E-Library fields
+    # -------------------------------------------------------------------------
+
+    # Digital access history
+    digital_access_ids = fields.One2many(
+        'library.digital.access', 'member_id',
+        string='Digital Access History')
+    digital_access_count = fields.Integer(
+        string='Digital Accesses',
+        compute='_compute_digital_stats', store=True)
+    digital_download_count = fields.Integer(
+        string='Total Downloads',
+        compute='_compute_digital_stats', store=True)
+
+    # Per-member digital limits
+    digital_access_enabled = fields.Boolean(
+        string='Digital Access Enabled', default=True,
+        help='Uncheck to block this member from accessing all digital resources')
+    max_digital_downloads_per_day = fields.Integer(
+        string='Max Downloads / Day', default=5,
+        help='Maximum digital resource downloads allowed per day (0 = unlimited)')
+
+    # -------------------------------------------------------------------------
+    # SQL Constraints
+    # -------------------------------------------------------------------------
+
     _sql_constraints = [
         ('name_unique', 'unique(name)', 'Membership Number must be unique!'),
     ]
+
+    # -------------------------------------------------------------------------
+    # ORM Overrides
+    # -------------------------------------------------------------------------
 
     @api.model
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('library.member') or '/'
         return super(LibraryMember, self).create(vals)
+
+    # -------------------------------------------------------------------------
+    # Compute Methods
+    # -------------------------------------------------------------------------
 
     @api.depends('member_type', 'student_id', 'faculty_id', 'partner_id')
     def _compute_member_name(self):
@@ -129,23 +165,40 @@ class LibraryMember(models.Model):
             record.pending_fine = sum(record.fine_ids.filtered(
                 lambda f: f.state == 'pending').mapped('amount'))
 
-    # Workflow Actions
+    @api.depends('digital_access_ids', 'digital_access_ids.access_type')
+    def _compute_digital_stats(self):
+        for rec in self:
+            logs = rec.digital_access_ids
+            rec.digital_access_count = len(logs)
+            rec.digital_download_count = len(
+                logs.filtered(lambda a: a.access_type == 'download'))
+
+    # -------------------------------------------------------------------------
+    # Actions
+    # -------------------------------------------------------------------------
+
     def action_activate(self):
-        """Activate the membership (move from draft to active)"""
         self.write({'state': 'active'})
 
     def action_suspend(self):
-        """Suspend the membership"""
         self.write({'state': 'suspended'})
 
     def action_block(self):
-        """Block the membership"""
         self.write({'state': 'blocked'})
 
     def action_renew(self):
-        """Renew expired membership (move from expired to active)"""
         self.write({'state': 'active'})
 
     def action_reset_to_draft(self):
-        """Reset membership to draft state"""
         self.write({'state': 'draft'})
+
+    def action_view_digital_access(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Digital Access — %s') % self.member_name,
+            'res_model': 'library.digital.access',
+            'view_mode': 'list,form',
+            'domain': [('member_id', '=', self.id)],
+            'context': {'default_member_id': self.id},
+        }

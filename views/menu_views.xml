@@ -504,6 +504,35 @@
               action="action_library_fine"
               sequence="60"/>
 
+    <menuitem id="menu_library_elibrary_root"
+              name="E-Library"
+              parent="menu_library"
+              sequence="70"/>
+
+    <menuitem id="menu_library_digital_resource"
+              name="Digital Resources"
+              parent="menu_library_elibrary_root"
+              action="action_library_digital_resource"
+              sequence="10"/>
+
+    <menuitem id="menu_library_digital_collection"
+              name="Collections / Databases"
+              parent="menu_library_elibrary_root"
+              action="action_library_digital_collection"
+              sequence="20"/>
+
+    <menuitem id="menu_library_digital_access"
+              name="Access Logs"
+              parent="menu_library_elibrary_root"
+              action="action_library_digital_access"
+              sequence="30"/>
+
+    <menuitem id="menu_library_opac_search_log"
+              name="OPAC Search Analytics"
+              parent="menu_library_elibrary_root"
+              action="action_library_opac_search_log"
+              sequence="40"/>
+
     <!-- ========================================== -->
     <!-- HOSTEL MODULE -->
     <!-- ========================================== -->
