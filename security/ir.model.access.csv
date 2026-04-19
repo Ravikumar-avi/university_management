@@ -233,6 +233,9 @@ access_online_exam_response_student,online.exam.response.student,model_online_ex
 access_wizard_auto_evaluate_admin,wizard.auto.evaluate.admin,model_wizard_auto_evaluate_exam,group_university_admin,1,1,1,1
 access_wizard_auto_evaluate_controller,wizard.auto.evaluate.controller,model_wizard_auto_evaluate_exam,group_exam_controller,1,1,1,0
 
+access_wizard_generate_seating_admin,wizard.generate.seating.admin,model_generate_examination_seating_wizard,group_university_admin,1,1,1,1
+access_wizard_generate_seating_controller,wizard.generate.seating.controller,model_generate_examination_seating_wizard,group_exam_controller,1,1,1,0
+
 access_faculty_faculty_admin,faculty.faculty.admin,model_faculty_faculty,group_university_admin,1,1,1,1
 access_faculty_faculty_controller,faculty.faculty.controller,model_faculty_faculty,group_exam_controller,1,1,0,0
 access_faculty_faculty_faculty,faculty.faculty.faculty,model_faculty_faculty,group_faculty,1,1,0,0

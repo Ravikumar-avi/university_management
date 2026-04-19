@@ -142,7 +142,7 @@ class Examination(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Generate Hall Tickets'),
-            'res_model': 'wizard.generate.hall.ticket',
+            'res_model': 'generate.examination.hall.ticket.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_examination_id': self.id}
@@ -153,7 +153,7 @@ class Examination(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Generate Seating Arrangement'),
-            'res_model': 'wizard.generate.seating',
+            'res_model': 'generate.examination.seating.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_examination_id': self.id}

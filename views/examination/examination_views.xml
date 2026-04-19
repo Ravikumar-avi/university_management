@@ -27,12 +27,12 @@
                             class="oe_highlight"
                             invisible="state != 'completed'"/>
 
-<!--                    <button name="action_generate_hall_tickets" type="object" string="Generate Hall Tickets"-->
-<!--                            class="btn-secondary"-->
-<!--                            invisible="state in ['draft', 'results_published']"/>-->
-<!--                    <button name="action_generate_seating" type="object" string="Generate Seating"-->
-<!--                            class="btn-secondary"-->
-<!--                            invisible="state in ['draft', 'results_published']"/>-->
+                    <button name="action_generate_hall_tickets" type="object" string="Generate Hall Tickets"
+                            class="btn-secondary"
+                            invisible="state in ['draft', 'results_published']"/>
+                    <button name="action_generate_seating" type="object" string="Generate Seating"
+                            class="btn-secondary"
+                            invisible="state in ['draft', 'results_published']"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-default"
                             invisible="state == 'draft'"

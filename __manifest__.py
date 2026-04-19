@@ -284,6 +284,7 @@
         'wizard/promotion/promote_student_wizard_views.xml',
         'wizard/result/publish_result_wizard_views.xml',
         'wizard/examination/auto_evaluate_wizard_views.xml',
+        'wizard/examination/generate_seating_wizard_views.xml',
         'wizard/attendance/attendance_report_wizard_views.xml',
         'wizard/attendance/bulk_attendance_wizard_views.xml',
         'wizard/placements/placement_report_wizard_views.xml',
