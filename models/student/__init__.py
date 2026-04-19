@@ -8,5 +8,8 @@ from . import student_parent
 from . import student_discipline
 from . import student_ledger
 from . import student_seat_blocking
-from . import crm_lead_education
+from . import student_enquiry
 from . import student_counselling_session
+from . import student_assignment
+from . import student_assignment_submission
+from . import student_assignment_grading

@@ -70,7 +70,7 @@
 
                     <group>
                         <group string="Session Details">
-                            <field name="lead_id"
+                            <field name="enquiry_id"
                                    options="{'no_create': True}"
                                    required="1"/>
                             <field name="applicant_name" readonly="1"/>
@@ -170,7 +170,7 @@
                 <field name="session_date" widget="datetime"/>
                 <field name="session_number" string="#"/>
                 <field name="applicant_name"/>
-                <field name="lead_id"/>
+                <field name="enquiry_id"/>
                 <field name="counsellor_id"/>
                 <field name="session_mode"/>
                 <field name="program_discussed_id"/>
@@ -253,7 +253,7 @@
         <field name="arch" type="xml">
             <search string="Search Sessions">
                 <field name="applicant_name"/>
-                <field name="lead_id"/>
+                <field name="enquiry_id"/>
                 <field name="counsellor_id"/>
                 <field name="program_discussed_id"/>
 

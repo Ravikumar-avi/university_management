@@ -198,6 +198,14 @@ class StudentSeatBlocking(models.Model):
     )
 
     # ── SQL Constraints ───────────────────────────────────────────────
+    enquiry_id = fields.Many2one(
+        'student.enquiry',
+        string='Source Enquiry',
+        ondelete='set null',
+        index=True,
+        help='The admission pipeline enquiry this seat blocking was created from.',
+    )
+
     _sql_constraints = [
         ('name_unique', 'unique(name)', 'Blocking Reference must be unique!'),
         ('token_amount_positive', 'CHECK(token_amount > 0)',
@@ -262,7 +270,14 @@ class StudentSeatBlocking(models.Model):
             year = fields.Date.today().year
             seq = self.env['ir.sequence'].next_by_code('student.seat.blocking') or '0001'
             vals['name'] = f'SB/{year}/{seq}'
-        return super().create(vals)
+        record = super().create(vals)
+        # Link back to the source enquiry if created from one
+        if record.enquiry_id and not record.enquiry_id.seat_blocking_id:
+            record.enquiry_id.write({
+                'seat_blocking_id': record.id,
+                'state': 'seat_blocked',
+            })
+        return record
 
     # ── Business Actions ──────────────────────────────────────────────
 

@@ -417,6 +417,11 @@ access_student_leave_faculty,student.leave.faculty,model_student_leave,group_fac
 access_student_leave_student,student.leave.student,model_student_leave,group_student_portal,1,1,1,0
 access_student_leave_parent,student.leave.parent,model_student_leave,group_parent_portal,1,0,0,0
 
+access_student_enquiry_admin,student.enquiry.admin,model_student_enquiry,group_university_admin,1,1,1,1
+access_student_enquiry_officer,student.enquiry.officer,model_student_enquiry,group_admission_officer,1,1,1,0
+access_student_enquiry_faculty,student.enquiry.faculty,model_student_enquiry,group_faculty,1,0,0,0
+access_student_enquiry_user,student.enquiry.user,model_student_enquiry,base.group_user,1,1,1,0
+
 access_student_seat_blocking_admin,student.seat.blocking.admin,model_student_seat_blocking,group_university_admin,1,1,1,1
 access_student_seat_blocking_officer,student.seat.blocking.officer,model_student_seat_blocking,group_admission_officer,1,1,1,0
 access_student_seat_blocking_faculty,student.seat.blocking.faculty,model_student_seat_blocking,group_faculty,1,0,0,0
@@ -424,6 +429,26 @@ access_student_seat_blocking_faculty,student.seat.blocking.faculty,model_student
 access_student_counselling_session_admin,student.counselling.session.admin,model_student_counselling_session,group_university_admin,1,1,1,1
 access_student_counselling_session_officer,student.counselling.session.officer,model_student_counselling_session,group_admission_officer,1,1,1,0
 access_student_counselling_session_faculty,student.counselling.session.faculty,model_student_counselling_session,group_faculty,1,0,0,0
+
+access_student_assignment_admin,student.assignment.admin,model_student_assignment,group_university_admin,1,1,1,1
+access_student_assignment_coord,student.assignment.coord,model_student_assignment,group_academic_coordinator,1,1,1,0
+access_student_assignment_faculty,student.assignment.faculty,model_student_assignment,group_faculty,1,1,1,0
+access_student_assignment_student,student.assignment.student,model_student_assignment,group_student_portal,1,0,0,0
+
+access_student_assignment_submission_admin,student.assignment.submission.admin,model_student_assignment_submission,group_university_admin,1,1,1,1
+access_student_assignment_submission_coord,student.assignment.submission.coord,model_student_assignment_submission,group_academic_coordinator,1,1,0,0
+access_student_assignment_submission_faculty,student.assignment.submission.faculty,model_student_assignment_submission,group_faculty,1,1,1,0
+access_student_assignment_submission_student,student.assignment.submission.student,model_student_assignment_submission,group_student_portal,1,1,1,0
+
+access_student_assignment_criteria_admin,student.assignment.criteria.admin,model_student_assignment_criteria,group_university_admin,1,1,1,1
+access_student_assignment_criteria_coord,student.assignment.criteria.coord,model_student_assignment_criteria,group_academic_coordinator,1,1,0,0
+access_student_assignment_criteria_faculty,student.assignment.criteria.faculty,model_student_assignment_criteria,group_faculty,1,1,1,0
+access_student_assignment_criteria_student,student.assignment.criteria.student,model_student_assignment_criteria,group_student_portal,1,0,0,0
+
+access_student_assignment_submission_score_admin,student.assignment.submission.score.admin,model_student_assignment_submission_score,group_university_admin,1,1,1,1
+access_student_assignment_submission_score_coord,student.assignment.submission.score.coord,model_student_assignment_submission_score,group_academic_coordinator,1,1,0,0
+access_student_assignment_submission_score_faculty,student.assignment.submission.score.faculty,model_student_assignment_submission_score,group_faculty,1,1,1,0
+access_student_assignment_submission_score_student,student.assignment.submission.score.student,model_student_assignment_submission_score,group_student_portal,1,0,0,0
 
 access_id_card_request_admin,id.card.request.admin,model_id_card_request,group_university_admin,1,1,1,1
 access_id_card_request_coordinator,id.card.request.coordinator,model_id_card_request,group_academic_coordinator,1,1,1,0
@@ -723,4 +748,3 @@ access_nba_c4_dept_pub_coord,nba.c4.dept.pub.coord,model_nba_c4_dept_publication
 access_nba_c4_student_pub_admin,nba.c4.student.pub.admin,model_nba_c4_student_publication,group_university_admin,1,1,1,1
 access_nba_c4_student_pub_coord,nba.c4.student.pub.coord,model_nba_c4_student_publication,group_academic_coordinator,1,1,1,0
 access_nba_c4_student_pub_faculty,nba.c4.student.pub.faculty,model_nba_c4_student_publication,group_faculty,1,1,0,0
-

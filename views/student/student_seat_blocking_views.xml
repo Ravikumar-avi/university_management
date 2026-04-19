@@ -140,6 +140,9 @@
                         <group string="Counselling">
                             <field name="counsellor_id"
                                    options="{'no_create': True}"/>
+                        <field name="enquiry_id" readonly="1"
+                               invisible="not enquiry_id"
+                               options="{'no_create': True}"/>
                             <field name="entrance_exam_name"
                                    placeholder="e.g. JEE, KCET, COMEDK"/>
                             <field name="entrance_exam_score"

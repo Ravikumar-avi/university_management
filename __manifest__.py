@@ -92,10 +92,11 @@
         'data/iic_naac_sequences.xml',
         'data/naac_cron.xml',
         'data/faculty_hr_data.xml',
+        'data/student_enquiry_data.xml',
         'data/student_seat_blocking_data.xml',
-        'data/crm_lead_education_data.xml',
         'data/student_counselling_session_data.xml',
         'data/asset_data.xml',
+        'data/student_assignment_data.xml',
 
         # Views - Academic
         'views/academic/university_batch_views.xml',
@@ -139,8 +140,11 @@
         'views/student/student_views.xml',
         'views/student/student_ledger_views.xml',
         'views/student/student_seat_blocking_views.xml',
-        'views/student/crm_lead_education_views.xml',
+        'views/student/student_enquiry_views.xml',
         'views/student/student_counselling_session_views.xml',
+        'views/student/student_assignment_views.xml',
+        'views/student/student_assignment_submission_views.xml',
+        'views/student/student_assignment_grading_views.xml',
 
         # Views - Asset Management
         'views/asset/asset_views.xml',

@@ -162,23 +162,52 @@
               action="action_id_card_request"
               sequence="10"/>
 
-    <menuitem id="menu_edu_admission_pipeline"
-              name="Admission Pipeline"
+    <menuitem id="menu_student_enquiry"
+              name="Student Enquiry"
               parent="menu_student"
-              action="action_edu_crm_pipeline"
+              action="action_student_enquiry"
               sequence="2"/>
-
-    <menuitem id="menu_edu_raw_leads"
-              name="Enquiries"
-              parent="menu_student"
-              action="action_edu_crm_leads"
-              sequence="3"/>
 
     <menuitem id="menu_student_counselling_sessions"
               name="Counselling Sessions"
               parent="menu_student"
               action="action_student_counselling_session"
+              sequence="3"/>
+
+    <menuitem id="menu_student_seat_blocking"
+              name="Seat Blocking"
+              parent="menu_student"
+              action="action_student_seat_blocking"
               sequence="4"/>
+
+    <menuitem id="menu_student_assignment_root"
+              name="Assignments"
+              parent="menu_student"
+              sequence="90"/>
+
+    <menuitem id="menu_student_assignment"
+              name="Assignments &amp; Homework"
+              parent="menu_student_assignment_root"
+              action="action_student_assignment"
+              sequence="10"/>
+
+    <menuitem id="menu_student_assignment_submission"
+              name="Submissions"
+              parent="menu_student_assignment_root"
+              action="action_student_assignment_submission"
+              sequence="20"/>
+
+    <menuitem id="menu_student_assignment_criteria"
+              name="Grading Criteria"
+              parent="menu_student_assignment_root"
+              action="action_student_assignment_criteria"
+              sequence="30"/>
+
+    <menuitem id="menu_student_assignment_scores"
+              name="Score Breakdown"
+              parent="menu_student_assignment_root"
+              action="action_student_assignment_submission_score"
+              sequence="40"/>
 
     <!-- ========================================== -->
     <!-- FEE MODULE -->

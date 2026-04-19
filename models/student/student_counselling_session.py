@@ -8,8 +8,8 @@ class StudentCounsellingSession(models.Model):
     """
     Counselling Session — one record per session between counsellor and prospect.
 
-    Linked to crm.lead (Many2one) so one lead can have many sessions.
-    This solves the key gap: crm.lead only has ONE counselling date,
+    Linked to student.enquiry (Many2one) so one enquiry can have many sessions.
+    This solves the key gap: student.enquiry only has ONE counselling date,
     but in reality a student may visit 2-4 times before deciding.
 
     Each session captures:
@@ -19,7 +19,7 @@ class StudentCounsellingSession(models.Model):
       - Academic profile as discussed (may differ from lead's stored values)
       - Outcome + next action + follow-up date
 
-    The crm.lead keeps the big-picture pipeline view.
+    The student.enquiry keeps the big-picture pipeline view.
     The sessions give the complete audit trail per applicant.
 
     State machine:  scheduled  →  completed
@@ -40,9 +40,9 @@ class StudentCounsellingSession(models.Model):
     )
 
     # ── Parent Lead ───────────────────────────────────────────────────
-    lead_id = fields.Many2one(
-        'crm.lead',
-        string='Enquiry / Lead',
+    enquiry_id = fields.Many2one(
+        'student.enquiry',
+        string='Enquiry',
         required=True,
         ondelete='cascade',
         index=True,
@@ -51,18 +51,18 @@ class StudentCounsellingSession(models.Model):
 
     # Pulled from lead for convenience (read-only, for reporting)
     applicant_name = fields.Char(
-        related='lead_id.partner_name',
+        related='enquiry_id.applicant_name',
         string='Applicant',
         store=True,
     )
-    lead_program_id = fields.Many2one(
-        related='lead_id.edu_program_id',
-        string='Lead Program',
+    enquiry_program_id = fields.Many2one(
+        related='enquiry_id.program_id',
+        string='Enquiry Program',
         store=True,
     )
-    lead_stage_id = fields.Many2one(
-        related='lead_id.stage_id',
-        string='Lead Stage',
+    enquiry_state = fields.Selection(
+        related='enquiry_id.state',
+        string='Enquiry Status',
         store=True,
     )
 
@@ -215,24 +215,24 @@ class StudentCounsellingSession(models.Model):
 
     # ── Computed ──────────────────────────────────────────────────────
 
-    @api.depends('lead_id', 'lead_id.partner_name', 'session_number')
+    @api.depends('enquiry_id', 'enquiry_id.applicant_name', 'session_number')
     def _compute_display_name(self):
         for rec in self:
-            lead_name = rec.lead_id.partner_name or rec.lead_id.name or 'Lead'
-            rec.display_name = f'Session {rec.session_number} — {lead_name}'
+            enquiry_name = rec.enquiry_id.applicant_name or 'Enquiry'
+            rec.display_name = f'Session {rec.session_number} — {enquiry_name}'
 
-    @api.depends('lead_id', 'session_date')
+    @api.depends('enquiry_id', 'session_date')
     def _compute_session_number(self):
         """
         Sequential number within the same lead, ordered by session_date.
         Session 1 = earliest, Session N = latest.
         """
         for rec in self:
-            if not rec.lead_id:
+            if not rec.enquiry_id:
                 rec.session_number = 1
                 continue
             earlier = self.search([
-                ('lead_id', '=', rec.lead_id.id),
+                ('enquiry_id', '=', rec.enquiry_id.id),
                 ('session_date', '<=', rec.session_date or fields.Datetime.now()),
                 ('id', '!=', rec.id if rec.id else 0),
             ])
@@ -248,17 +248,17 @@ class StudentCounsellingSession(models.Model):
                 self.program_discussed_id.available_seats
             )
 
-    @api.onchange('lead_id')
-    def _onchange_lead_prefill(self):
+    @api.onchange('enquiry_id')
+    def _onchange_enquiry_prefill(self):
         """Pre-fill academic fields from the lead when lead is selected."""
-        if self.lead_id:
-            self.program_discussed_id = self.lead_id.edu_program_id
-            self.counsellor_id = self.lead_id.user_id or self.env.user
-            self.qualification_discussed = self.lead_id.edu_previous_qualification
-            self.percentage_discussed = self.lead_id.edu_previous_percentage
-            self.entrance_exam_name = self.lead_id.edu_entrance_exam_name
-            self.entrance_exam_score = self.lead_id.edu_entrance_exam_score
-            self.entrance_exam_rank = self.lead_id.edu_entrance_exam_rank
+        if self.enquiry_id:
+            self.program_discussed_id = self.enquiry_id.program_id
+            self.counsellor_id = self.enquiry_id.counsellor_id or self.env.user
+            self.qualification_discussed = self.enquiry_id.previous_qualification
+            self.percentage_discussed = self.enquiry_id.previous_percentage
+            self.entrance_exam_name = self.enquiry_id.entrance_exam_name
+            self.entrance_exam_score = self.enquiry_id.entrance_exam_score
+            self.entrance_exam_rank = self.enquiry_id.entrance_exam_rank
 
     @api.onchange('fee_discussed')
     def _onchange_fee_discussed(self):
@@ -267,7 +267,7 @@ class StudentCounsellingSession(models.Model):
 
     # ── Constraints ───────────────────────────────────────────────────
 
-    @api.constrains('session_date', 'lead_id')
+    @api.constrains('session_date', 'enquiry_id')
     def _check_session_date_not_future_for_completion(self):
         """Completed sessions cannot have a future date."""
         for rec in self:
@@ -291,20 +291,20 @@ class StudentCounsellingSession(models.Model):
         })
 
         # Update the parent lead's counselling done date
-        if self.lead_id:
+        if self.enquiry_id:
             update_vals = {
-                'edu_counselling_done_date': fields.Date.today(),
+                'counselling_done_date': fields.Date.today(),
             }
             # Update follow-up on lead if this session has a follow-up
             if self.follow_up_date:
-                update_vals['date_deadline'] = self.follow_up_date
+                update_vals['follow_up_date'] = self.follow_up_date
             # Sync program if discussed program differs
             if self.program_discussed_id:
-                update_vals['edu_program_id'] = self.program_discussed_id.id
-            self.lead_id.write(update_vals)
+                update_vals['program_id'] = self.program_discussed_id.id
+            self.enquiry_id.write(update_vals)
 
             # Move lead stage forward based on outcome
-            self._sync_lead_stage_from_outcome()
+            self._sync_enquiry_stage_from_outcome()
 
         self.message_post(
             body=_(
@@ -358,16 +358,16 @@ class StudentCounsellingSession(models.Model):
         duration_td = timedelta(hours=self.duration or 0.5)
 
         event_vals = {
-            'name': f'Counselling — {self.lead_id.partner_name or self.lead_id.name}',
+            'name': f'Counselling — {self.enquiry_id.applicant_name}',
             'start': self.session_date,
             'stop': fields.Datetime.to_string(
                 fields.Datetime.from_string(
                     fields.Datetime.to_string(self.session_date)
                 ) + duration_td
             ),
-            'description': f'Lead: {self.lead_id.name}\n'
+            'description': f'Enquiry: {self.enquiry_id.applicant_name}\n'
                            f'Program: {self.program_discussed_id.name if self.program_discussed_id else "-"}',
-            'user_id': self.counsellor_id.id,
+            'user_id': self.counsellor_id.id,  # calendar owner
         }
         event = self.env['calendar.event'].create(event_vals)
         self.write({'calendar_event_id': event.id})
@@ -383,40 +383,25 @@ class StudentCounsellingSession(models.Model):
 
     # ── Private Helpers ───────────────────────────────────────────────
 
-    def _sync_lead_stage_from_outcome(self):
-        """
-        Move the parent CRM lead to the appropriate stage based on session outcome.
-        Only moves forward — never moves back.
-        """
+    def _sync_enquiry_stage_from_outcome(self):
+        """Update the parent enquiry state based on session outcome."""
         self.ensure_one()
-        if not self.outcome or not self.lead_id:
+        if not self.outcome or not self.enquiry_id:
             return
-
-        stage_name_map = {
-            'interested': 'Interested',
-            'needs_follow_up': 'Counselled',
-            'considering': 'Counselled',
-            'seat_blocked': 'Seat Blocked',
-            'applied': 'Admitted',
-            'not_interested': None,   # CRM mark as lost
-            'chose_competitor': None,  # CRM mark as lost
+        state_map = {
+            'interested':     'interested',
+            'needs_follow_up': 'counselling_scheduled',
+            'considering':    'counselling_scheduled',
+            'seat_blocked':   'seat_blocked',
+            'applied':        'admitted',
+            'not_interested': 'lost',
+            'chose_competitor': 'lost',
         }
+        new_state = state_map.get(self.outcome)
+        if new_state:
+            self.enquiry_id.write({'state': new_state})
 
-        target_stage_name = stage_name_map.get(self.outcome)
-
-        if target_stage_name:
-            stage = self.env['crm.stage'].search([
-                ('name', 'ilike', target_stage_name),
-            ], limit=1)
-            if stage:
-                self.lead_id.write({'stage_id': stage.id})
-        elif self.outcome in ('not_interested', 'chose_competitor'):
-            # Mark lead as lost in CRM with reason
-            self.lead_id.action_set_lost(
-                lost_reason_id=False,
-            )
-
-    # ── Scheduled Action ──────────────────────────────────────────────
+        # ── Scheduled Action ──────────────────────────────────────────────
 
     @api.model
     def _cron_remind_follow_ups(self):
@@ -430,7 +415,7 @@ class StudentCounsellingSession(models.Model):
             ('state', '=', 'completed'),
         ])
         for session in due:
-            session.lead_id.message_post(
+            session.enquiry_id.message_post(
                 body=_(
                     'Follow-up due today for session %s with <b>%s</b>. '
                     'Next action: %s'
