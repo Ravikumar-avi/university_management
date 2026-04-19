@@ -448,6 +448,30 @@
               action="action_examination_revaluation"
               sequence="90"/>
 
+    <menuitem id="menu_mcq_question_bank"
+              name="Question Banks"
+              parent="menu_examination"
+              action="action_mcq_question_bank"
+              sequence="100"/>
+
+    <menuitem id="menu_mcq_question"
+              name="MCQ Questions"
+              parent="menu_examination"
+              action="action_mcq_question"
+              sequence="110"/>
+
+    <menuitem id="menu_online_exam"
+              name="Online Exams"
+              parent="menu_examination"
+              action="action_online_exam"
+              sequence="120"/>
+
+    <menuitem id="menu_online_exam_attempt"
+              name="Exam Attempts"
+              parent="menu_examination"
+              action="action_online_exam_attempt"
+              sequence="130"/>
+
     <!-- ========================================== -->
     <!-- LIBRARY MODULE -->
     <!-- ========================================== -->

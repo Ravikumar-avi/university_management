@@ -22,6 +22,7 @@ class Examination(models.Model):
         ('supplementary', 'Supplementary'),
         ('improvement', 'Improvement'),
         ('practical', 'Practical'),
+        ('online', 'Online / MCQ'),
     ], string='Examination Type', required=True, default='internal', tracking=True)
 
     # Academic Details
@@ -54,6 +55,11 @@ class Examination(models.Model):
     # Seating Arrangement
     seating_ids = fields.One2many('examination.seating', 'examination_id',
                                   string='Seating Arrangements')
+
+    # Online Exams (MCQ)
+    online_exam_ids = fields.One2many('online.exam', 'examination_id', string='Online Exams')
+    online_exam_count = fields.Integer(string='Online Exams',
+                                       compute='_compute_online_exam_count', store=True)
 
     # Registration
     registration_start_date = fields.Date(string='Registration Start Date')
@@ -98,6 +104,11 @@ class Examination(models.Model):
                                                for r in record.result_ids)
             else:
                 record.results_published = False
+
+    @api.depends('online_exam_ids')
+    def _compute_online_exam_count(self):
+        for record in self:
+            record.online_exam_count = len(record.online_exam_ids)
 
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
@@ -146,4 +157,64 @@ class Examination(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_examination_id': self.id}
+        }
+
+    def action_exam_timetable(self):
+        """Open exam timetable filtered to this examination."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Exam Timetable'),
+            'res_model': 'examination.timetable',
+            'view_mode': 'list,form',
+            'domain': [('examination_id', '=', self.id)],
+            'context': {'default_examination_id': self.id},
+        }
+
+    def action_examination_hall_ticket(self):
+        """Open hall tickets filtered to this examination."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Hall Tickets'),
+            'res_model': 'examination.hall.ticket',
+            'view_mode': 'list,form',
+            'domain': [('examination_id', '=', self.id)],
+            'context': {'default_examination_id': self.id},
+        }
+
+    def action_exam_result(self):
+        """Open exam results filtered to this examination."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Exam Results'),
+            'res_model': 'examination.result',
+            'view_mode': 'list,form',
+            'domain': [('examination_id', '=', self.id)],
+            'context': {'default_examination_id': self.id},
+        }
+
+    def action_exam_seating(self):
+        """Open seating arrangements filtered to this examination."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Seating Arrangement'),
+            'res_model': 'examination.seating',
+            'view_mode': 'list,form',
+            'domain': [('examination_id', '=', self.id)],
+            'context': {'default_examination_id': self.id},
+        }
+
+    def action_view_online_exams(self):
+        """Open online exams filtered to this examination."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Online Exams'),
+            'res_model': 'online.exam',
+            'view_mode': 'list,form',
+            'domain': [('examination_id', '=', self.id)],
+            'context': {'default_examination_id': self.id},
         }

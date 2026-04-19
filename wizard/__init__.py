@@ -10,4 +10,5 @@ from . import result
 from . import iic
 from . import naac
 from . import date_range
+from . import examination
 from . import nba

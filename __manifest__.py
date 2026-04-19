@@ -84,6 +84,7 @@
 
         # Data
         'data/sequence.xml',
+        'data/online_exam_sequences.xml',
         'data/email_templates.xml',
         'data/sms_templates.xml',
         'data/automated_actions.xml',
@@ -128,6 +129,10 @@
         'views/examination/marksheet_views.xml',
         'views/examination/revaluation_views.xml',
         'views/examination/exam_evaluation_views.xml',
+        'views/examination/mcq_question_views.xml',
+        'views/examination/mcq_question_bank_views.xml',
+        'views/examination/online_exam_views.xml',
+        'views/examination/online_exam_attempt_views.xml',
 
         # Views - Student
         'views/student/student_attendance_views.xml',
@@ -278,6 +283,7 @@
         'wizard/hall_ticket/generate_hall_ticket_wizard_line_views.xml',
         'wizard/promotion/promote_student_wizard_views.xml',
         'wizard/result/publish_result_wizard_views.xml',
+        'wizard/examination/auto_evaluate_wizard_views.xml',
         'wizard/attendance/attendance_report_wizard_views.xml',
         'wizard/attendance/bulk_attendance_wizard_views.xml',
         'wizard/placements/placement_report_wizard_views.xml',
@@ -326,6 +332,7 @@
         'templates/parentportal/parentdashboard_templates.xml',
         'templates/facultyportal/facultydashboard_templates.xml',
         'templates/hallticket/hallticket_templates.xml',
+        'templates/examination/online_exam_templates.xml',
         'templates/marksheet/marksheet_templates.xml',
         'templates/idcard/idcard_templates.xml',
         'templates/iic/iic_portal_templates.xml',

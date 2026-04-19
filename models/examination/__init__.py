@@ -7,3 +7,8 @@ from . import grade_system
 from . import hall_ticket
 from . import marksheet
 from . import revaluation
+from . import mcq_question_bank
+from . import mcq_question
+from . import online_exam
+from . import online_exam_attempt
+from . import online_exam_response
