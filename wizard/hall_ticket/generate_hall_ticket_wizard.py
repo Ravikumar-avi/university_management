@@ -62,6 +62,36 @@ class GenerateHallTicketWizard(models.TransientModel):
             wizard.ineligible_student_count = len(wizard.preview_lines) - eligible
             wizard.total_student_count = len(wizard.preview_lines)
 
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        exam_id = res.get('examination_id') or self.env.context.get('default_examination_id')
+        if exam_id:
+            exam = self.env['examination.examination'].browse(exam_id)
+            if exam.exists():
+                if exam.semester_id and exam.semester_id.semester_number:
+                    res['semester'] = str(exam.semester_id.semester_number)
+                if len(exam.program_ids) == 1:
+                    res['program_id'] = exam.program_ids[0].id
+                if len(exam.department_ids) == 1:
+                    res['department_id'] = exam.department_ids[0].id
+        return res
+
+    @api.onchange('examination_id')
+    def _onchange_examination_id(self):
+        """Auto-populate semester and applicable filters from the examination"""
+        if self.examination_id:
+            exam = self.examination_id
+            # Set semester from linked semester record
+            if exam.semester_id and exam.semester_id.semester_number:
+                self.semester = str(exam.semester_id.semester_number)
+            # Set program/department from applicable scope
+            if len(exam.program_ids) == 1:
+                self.program_id = exam.program_ids[0]
+            if len(exam.department_ids) == 1:
+                self.department_id = exam.department_ids[0]
+            self._update_preview_lines()
+
     @api.onchange('examination_id', 'program_id', 'department_id', 'batch_id', 'semester',
                   'check_eligibility', 'min_attendance', 'check_fee_payment', 'check_documents')
     def _onchange_filters(self):
@@ -73,7 +103,10 @@ class GenerateHallTicketWizard(models.TransientModel):
         self.ensure_one()
 
         # Clear existing lines
-        self.preview_lines.unlink()
+        self.preview_lines = [(5, 0, 0)]
+
+        if not self.examination_id or not self.semester:
+            return
 
         # Get students based on filters
         students = self._get_students()
@@ -93,8 +126,8 @@ class GenerateHallTicketWizard(models.TransientModel):
     def _get_students(self):
         """Get students based on filters"""
         domain = [
-            ('state', '=', 'enrolled'),
-            ('current_semester', '=', self.semester)
+            ('state', 'in', ['enrolled', 'active']),
+            ('current_semester', '=', int(self.semester) if self.semester else 1)
         ]
 
         if self.program_id:
@@ -104,7 +137,7 @@ class GenerateHallTicketWizard(models.TransientModel):
         if self.batch_id:
             domain.append(('batch_id', '=', self.batch_id.id))
 
-        return self.env['student.student'].search(domain, limit=100)  # Limit for performance
+        return self.env['student.student'].search(domain)
 
     def _check_student_eligibility(self, student):
         """Check if student is eligible for hall ticket"""
