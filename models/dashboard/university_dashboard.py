@@ -318,11 +318,39 @@ class UniversityDashboard(models.TransientModel):
         except Exception:
             pass
 
+        # Designation breakdown
+        designation_breakdown = []
+        try:
+            all_faculty = env['faculty.faculty'].search([('active', '=', True)])
+            desig_map = {}
+            for f in all_faculty:
+                label = f.designation or 'Other'
+                desig_map[label] = desig_map.get(label, 0) + 1
+            designation_breakdown = [{'label': k, 'value': v} for k, v in sorted(desig_map.items(), key=lambda x: -x[1])]
+        except Exception:
+            pass
+
+        # Department-wise faculty count
+        dept_distribution = []
+        try:
+            departments = env['university.department'].search([])
+            for dept in departments:
+                count = env['faculty.faculty'].search_count([
+                    ('department_id', '=', dept.id),
+                    ('active', '=', True),
+                ])
+                if count:
+                    dept_distribution.append({'label': dept.name, 'value': count})
+        except Exception:
+            pass
+
         return {
             'total': total,
             'present_today': present_today,
             'on_leave': on_leave,
             'avg_rating': round(avg_rating, 1),
+            'designation_breakdown': designation_breakdown,
+            'dept_distribution': dept_distribution,
         }
 
     def _get_fees_data(self):
@@ -575,6 +603,18 @@ class UniversityDashboard(models.TransientModel):
         except Exception:
             pass
 
+        # Complaints by status
+        complaints_breakdown = []
+        try:
+            all_complaints = env['hostel.complaint'].search([])
+            state_map = {}
+            for c in all_complaints:
+                label = (c.state or 'unknown').replace('_', ' ').title()
+                state_map[label] = state_map.get(label, 0) + 1
+            complaints_breakdown = [{'label': k, 'value': v} for k, v in sorted(state_map.items(), key=lambda x: -x[1])]
+        except Exception:
+            pass
+
         occupancy_rate = round(occupied_rooms / total_rooms * 100, 1) if total_rooms else 0
 
         return {
@@ -582,6 +622,7 @@ class UniversityDashboard(models.TransientModel):
             'occupied_rooms': occupied_rooms,
             'pending_complaints': pending_complaints,
             'occupancy_rate': occupancy_rate,
+            'complaints_breakdown': complaints_breakdown,
         }
 
     def _get_library_data(self):

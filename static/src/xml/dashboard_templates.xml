@@ -426,6 +426,24 @@
                         <canvas id="uni-faculty-status-chart"/>
                     </div>
                 </div>
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Department-wise Avg CGPA</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-faculty-cgpa-chart"/>
+                    </div>
+                </div>
+            </div>
+            <div class="uni-charts-row">
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Faculty Designation Breakdown</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-faculty-designation-chart"/>
+                    </div>
+                </div>
             </div>
         </div>
     </t>
@@ -778,6 +796,17 @@
                     </div>
                 </div>
             </div>
+            <!--  Examination Status Chart  -->
+            <div class="uni-charts-row">
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Examination Overview</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-exams-chart"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </t>
 
@@ -836,6 +865,24 @@
                     </div>
                     <div class="uni-canvas-wrap">
                         <canvas id="uni-hostel-chart"/>
+                    </div>
+                </div>
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Rooms Summary</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-hostel-rooms-chart"/>
+                    </div>
+                </div>
+            </div>
+            <div class="uni-charts-row">
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Complaints Status</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-hostel-complaints-chart"/>
                     </div>
                 </div>
             </div>
@@ -902,6 +949,14 @@
                         <canvas id="uni-library-chart"/>
                     </div>
                 </div>
+                <div class="uni-chart-card">
+                    <div class="uni-chart-header">
+                        <h3>Books Status</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-library-status-chart"/>
+                    </div>
+                </div>
             </div>
         </div>
     </t>
@@ -962,6 +1017,24 @@
                         <canvas id="uni-placement-chart"/>
                     </div>
                 </div>
+                <div class="uni-chart-card">
+                    <div class="uni-chart-header">
+                        <h3>Placement Summary</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-placement-summary-chart"/>
+                    </div>
+                </div>
+            </div>
+            <div class="uni-charts-row">
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Placed vs Total Students by Department</h3>
+                    </div>
+                    <div class="uni-canvas-wrap" style="height:260px">
+                        <canvas id="uni-placement-stacked-chart"/>
+                    </div>
+                </div>
             </div>
         </div>
     </t>
@@ -1000,6 +1073,17 @@
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Students Using Transport</div>
                         <div class="uni-kpi-value" t-esc="state.overview.transport_students || 0"/>
+                    </div>
+                </div>
+            </div>
+            <!--  Transport Overview Chart  -->
+            <div class="uni-charts-row">
+                <div class="uni-chart-card wide">
+                    <div class="uni-chart-header">
+                        <h3>Transport Overview</h3>
+                    </div>
+                    <div class="uni-canvas-wrap">
+                        <canvas id="uni-transport-chart"/>
                     </div>
                 </div>
             </div>

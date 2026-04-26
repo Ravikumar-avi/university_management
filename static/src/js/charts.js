@@ -589,6 +589,484 @@ const UniversityCharts = {
     },
 
     // ─────────────────────────────────────────────────────────────
+    // FA-2. DEPARTMENT-WISE AVG CGPA (Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderFacultyCgpaChart(deptStats) {
+        const id = 'uni-faculty-cgpa-chart';
+        const canvas = this._canvas(id);
+        if (!canvas || !deptStats || !deptStats.length) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: deptStats.map(d => d.name),
+                datasets: [{
+                    label: 'Avg CGPA',
+                    data: deptStats.map(d => d.avg_cgpa || 0),
+                    backgroundColor: (context) => {
+                        const chart = context.chart;
+                        const { ctx, chartArea } = chart;
+                        if (!chartArea) return this.palette.indigo;
+                        return this._gradient(ctx, this.palette.indigo, this.palette.purple);
+                    },
+                    borderRadius: 8,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => `Avg CGPA: ${c.parsed.y.toFixed(1)}` } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        grid: { color: '#e2e8f0' },
+                        ticks: { stepSize: 2 }
+                    },
+                    x: { grid: { display: false }, ticks: { font: { weight: '600' } } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // FA-3. FACULTY DESIGNATION BREAKDOWN (Doughnut)
+    // ─────────────────────────────────────────────────────────────
+    renderFacultyDesignationChart(faculty) {
+        const id = 'uni-faculty-designation-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const data = faculty.designation_breakdown || [];
+        // Fallback: use present/onleave/absent if no designation data
+        const labels = data.length ? data.map(d => d.label) : ['Present', 'On Leave', 'Absent'];
+        const values = data.length ? data.map(d => d.value) : [
+            faculty.present_today || 0,
+            faculty.on_leave || 0,
+            Math.max(0, (faculty.total || 0) - (faculty.present_today || 0) - (faculty.on_leave || 0))
+        ];
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: this.multiColors.slice(0, labels.length),
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                animation: { animateRotate: true, animateScale: true, duration: 2000 },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} faculty` } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HO-2. HOSTEL ROOMS SUMMARY (Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderHostelRoomsChart(hostel) {
+        const id = 'uni-hostel-rooms-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const total    = hostel.total_rooms    || 0;
+        const occupied = hostel.occupied_rooms || 0;
+        const vacant   = Math.max(0, total - occupied);
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Rooms', 'Occupied', 'Vacant'],
+                datasets: [{
+                    label: 'Rooms',
+                    data: [total, occupied, vacant],
+                    backgroundColor: [this.palette.blue, this.palette.teal, this.palette.amber],
+                    borderRadius: 8,
+                    barPercentage: 0.55,
+                    categoryPercentage: 0.7,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => `${c.label}: ${c.parsed.y} rooms` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HO-3. HOSTEL COMPLAINTS STATUS (Doughnut)
+    // ─────────────────────────────────────────────────────────────
+    renderHostelComplaintsChart(hostel) {
+        const id = 'uni-hostel-complaints-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const breakdown = hostel.complaints_breakdown || [];
+        // Fallback: show pending vs resolved
+        const labels = breakdown.length ? breakdown.map(d => d.label) : ['Pending', 'Resolved'];
+        const values = breakdown.length ? breakdown.map(d => d.value) : [
+            hostel.pending_complaints || 0,
+            Math.max(0, 0)
+        ];
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [this.palette.red, this.palette.amber, this.palette.green, this.palette.blue],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                animation: { animateRotate: true, animateScale: true, duration: 2000 },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} complaints` } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // LI-2. BOOKS STATUS DOUGHNUT (Available / Issued / Overdue)
+    // ─────────────────────────────────────────────────────────────
+    renderLibraryStatusChart(library) {
+        const id = 'uni-library-status-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const issued   = library.books_issued || 0;
+        const overdue  = library.overdue      || 0;
+        const total    = library.total_books  || 0;
+        const available = Math.max(0, total - issued - overdue);
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Available', 'Issued', 'Overdue'],
+                datasets: [{
+                    data: [available, issued, overdue],
+                    backgroundColor: [this.palette.green, this.palette.blue, this.palette.red],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 12,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                animation: { animateRotate: true, animateScale: true, duration: 2000 },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            generateLabels(chart) {
+                                const d = chart.data;
+                                const total = d.datasets[0].data.reduce((a, b) => a + b, 0);
+                                return d.labels.map((label, i) => ({
+                                    text: `${label} (${d.datasets[0].data[i]})`,
+                                    fillStyle: d.datasets[0].backgroundColor[i],
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    hidden: false,
+                                    index: i,
+                                    pointStyle: 'circle',
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => {
+                                const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total ? ((c.parsed / total) * 100).toFixed(1) : 0;
+                                return ` ${c.label}: ${c.parsed} books (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // PL-2. PLACEMENT SUMMARY DOUGHNUT (Placed vs Not Placed)
+    // ─────────────────────────────────────────────────────────────
+    renderPlacementSummaryChart(overview) {
+        const id = 'uni-placement-summary-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const placed    = overview.students_placed || 0;
+        const total     = overview.total_students  || 0;
+        const notPlaced = Math.max(0, total - placed);
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Placed', 'Not Yet Placed'],
+                datasets: [{
+                    data: [placed, notPlaced],
+                    backgroundColor: [this.palette.green, this.palette.navy + '30'],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 12,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                animation: { animateRotate: true, animateScale: true, duration: 2000 },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => {
+                                const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total ? ((c.parsed / total) * 100).toFixed(1) : 0;
+                                return ` ${c.label}: ${c.parsed} students (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // PL-3. PLACED VS TOTAL STUDENTS PER DEPT (Stacked Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderPlacementStackedChart(deptStats) {
+        const id = 'uni-placement-stacked-chart';
+        const canvas = this._canvas(id);
+        if (!canvas || !deptStats || !deptStats.length) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        const labels   = deptStats.map(d => d.name);
+        const placed   = deptStats.map(d => Math.round((d.placement_rate || 0) / 100 * (d.students || 0)));
+        const notPlaced = deptStats.map((d, i) => Math.max(0, (d.students || 0) - placed[i]));
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Placed',
+                        data: placed,
+                        backgroundColor: this.palette.green,
+                        borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 6, bottomRight: 6 },
+                        stack: 'students',
+                    },
+                    {
+                        label: 'Not Yet Placed',
+                        data: notPlaced,
+                        backgroundColor: this.palette.navy + '25',
+                        borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
+                        stack: 'students',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y} students` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, stacked: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
+                    x: { stacked: true, grid: { display: false }, ticks: { font: { weight: '600' } } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 9. EXAMINATION STATUS (Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderExamsChart(exams) {
+        const id = 'uni-exams-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Active Exams', 'Hall Tickets', 'Results Published', 'Revaluations'],
+                datasets: [{
+                    label: 'Count',
+                    data: [
+                        exams.active_exams      || 0,
+                        exams.hall_tickets      || 0,
+                        exams.results_published || 0,
+                        exams.revaluations      || 0,
+                    ],
+                    backgroundColor: [
+                        this.palette.blue,
+                        this.palette.green,
+                        this.palette.amber,
+                        this.palette.orange,
+                    ],
+                    borderRadius: 8,
+                    barPercentage: 0.55,
+                    categoryPercentage: 0.8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed.y}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#e2e8f0' },
+                        ticks: { stepSize: 1 }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // 10. TRANSPORT OVERVIEW (Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderTransportChart(overview) {
+        const id = 'uni-transport-chart';
+        const canvas = this._canvas(id);
+        if (!canvas) return;
+
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Vehicles', 'Active Routes', 'Students Using Transport'],
+                datasets: [{
+                    label: 'Count',
+                    data: [
+                        overview.total_vehicles      || 0,
+                        overview.active_routes       || 0,
+                        overview.transport_students  || 0,
+                    ],
+                    backgroundColor: [
+                        this.palette.blue,
+                        this.palette.green,
+                        this.palette.orange,
+                    ],
+                    borderRadius: 8,
+                    barPercentage: 0.55,
+                    categoryPercentage: 0.8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed.y}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#e2e8f0' },
+                        ticks: { stepSize: 1 }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
     // MASTER RENDER
     // ─────────────────────────────────────────────────────────────
 
@@ -683,10 +1161,9 @@ const UniversityCharts = {
             this.renderSemesterAdmissions(state.semesterAdmissions);
         }
 
-        // Department charts
+        // Department charts (overview)
         if (state.departmentStats && state.departmentStats.length) {
             this.renderDepartmentDistribution(state.departmentStats);
-            this.renderPlacementChart(state.departmentStats);
         }
 
         // Program pie
@@ -697,16 +1174,42 @@ const UniversityCharts = {
         // Faculty doughnut
         if (state.faculty && state.faculty.total) {
             this.renderFacultyStatus(state.faculty);
+            this.renderFacultyDesignationChart(state.faculty);
+        }
+        if (state.departmentStats && state.departmentStats.length) {
+            this.renderFacultyCgpaChart(state.departmentStats);
         }
 
         // Hostel doughnut
         if (state.hostel && state.hostel.total_rooms) {
             this.renderHostelOccupancy(state.hostel);
+            this.renderHostelRoomsChart(state.hostel);
+            this.renderHostelComplaintsChart(state.hostel);
         }
 
         // Library bar
         if (state.library) {
             this.renderLibraryChart(state.library);
+            this.renderLibraryStatusChart(state.library);
+        }
+
+        // Placement charts
+        if (state.departmentStats && state.departmentStats.length) {
+            this.renderPlacementChart(state.departmentStats);
+            this.renderPlacementStackedChart(state.departmentStats);
+        }
+        if (state.overview) {
+            this.renderPlacementSummaryChart(state.overview);
+        }
+
+        // Exams bar
+        if (state.exams) {
+            this.renderExamsChart(state.exams);
+        }
+
+        // Transport bar
+        if (state.overview) {
+            this.renderTransportChart(state.overview);
         }
 
         // Asset charts
@@ -739,8 +1242,12 @@ const UniversityCharts = {
                     break;
 
                 case 'faculty':
-                    if (state.faculty?.total)
+                    if (state.faculty?.total) {
                         this.renderFacultyStatus(state.faculty);
+                        this.renderFacultyDesignationChart(state.faculty);
+                    }
+                    if (state.departmentStats?.length)
+                        this.renderFacultyCgpaChart(state.departmentStats);
                     break;
 
                 case 'fees':
@@ -748,19 +1255,38 @@ const UniversityCharts = {
                         this.renderFeeTrend(state.feeCollectionMonthly);
                     break;
 
+                case 'exams':
+                    if (state.exams)
+                        this.renderExamsChart(state.exams);
+                    break;
+
                 case 'hostel':
-                    if (state.hostel?.total_rooms)
+                    if (state.hostel?.total_rooms) {
                         this.renderHostelOccupancy(state.hostel);
+                        this.renderHostelRoomsChart(state.hostel);
+                        this.renderHostelComplaintsChart(state.hostel);
+                    }
                     break;
 
                 case 'library':
-                    if (state.library)
+                    if (state.library) {
                         this.renderLibraryChart(state.library);
+                        this.renderLibraryStatusChart(state.library);
+                    }
                     break;
 
                 case 'placement':
-                    if (state.departmentStats?.length)
+                    if (state.departmentStats?.length) {
                         this.renderPlacementChart(state.departmentStats);
+                        this.renderPlacementStackedChart(state.departmentStats);
+                    }
+                    if (state.overview)
+                        this.renderPlacementSummaryChart(state.overview);
+                    break;
+
+                case 'transport':
+                    if (state.overview)
+                        this.renderTransportChart(state.overview);
                     break;
 
                 case 'assets':
