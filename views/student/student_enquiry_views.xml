@@ -96,16 +96,12 @@
                     <button name="action_schedule_counselling"
                             string="Schedule Counselling"
                             type="object"
+                            icon="fa-plus"
                             invisible="state not in ['new', 'contacted']"/>
                     <button name="action_mark_interested"
                             string="Mark Interested"
                             type="object"
                             invisible="state not in ['contacted', 'counselling_scheduled']"/>
-                    <button name="action_new_session"
-                            string="Add Session"
-                            type="object"
-                            icon="fa-plus"
-                            invisible="state in ['admitted', 'lost']"/>
                     <button name="action_convert_to_seat_blocking"
                             string="Block Seat"
                             type="object"

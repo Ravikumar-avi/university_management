@@ -3,6 +3,9 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import re
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class Student(models.Model):
@@ -204,30 +207,137 @@ class Student(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('student_code', '/') == '/':
-            vals['student_code'] = self.env['ir.sequence'].next_by_code('student.student') or '/'
-        if vals.get('registration_number', '/') == '/':
-            vals['registration_number'] = self.env['ir.sequence'].next_by_code('student.registration') or '/'
+        """
+        Auto-assigns sequences and auto-creates/finds res.partner.
 
-        # Auto-generate Temporary Student ID (TEMP{YEAR}-{SEQ})
+        Import path: wizard passes partner_id already set → skip auto-create.
+        Manual path: user fills name/email in form → auto-create partner.
+        """
+        # ── Sequences (skip if already supplied from import) ──────────────
+        if not vals.get('student_code') or vals.get('student_code') == '/':
+            vals['student_code'] = (
+                    self.env['ir.sequence'].next_by_code('student.student') or '/'
+            )
+
+        # registration_number: only auto-generate if not supplied or is placeholder
+        if not vals.get('registration_number') or vals.get('registration_number') == '/':
+            vals['registration_number'] = (
+                    self.env['ir.sequence'].next_by_code('student.registration') or '/'
+            )
+
+        # Temporary Student ID
         if not vals.get('temp_student_id') and not vals.get('usn_mapped'):
             year = fields.Date.today().year
             seq = self.env['ir.sequence'].next_by_code('student.temp.id') or '00001'
             vals['temp_student_id'] = f'TEMP{year}-{seq}'
 
-        # Create partner if not exists
+        # ── Partner: find or create ───────────────────────────────────────
         if not vals.get('partner_id'):
-            partner_vals = {
-                'name': vals.get('name'),
-                'email': vals.get('email'),
-                'phone': vals.get('mobile'),
-                'is_company': False,
-                'customer_rank': 0,
-            }
-            partner = self.env['res.partner'].create(partner_vals)
-            vals['partner_id'] = partner.id
+            name = vals.get('name', '').strip()
+            email = vals.get('email') or vals.get('personal_email') or ''
+            mobile = vals.get('mobile') or vals.get('personal_mobile') or ''
 
-        return super(Student, self).create(vals)
+            partner_id = self._find_or_create_partner(
+                name=name,
+                email=email.strip().lower() if email else False,
+                mobile=mobile.strip() if mobile else False,
+            )
+            vals['partner_id'] = partner_id
+
+        return super().create(vals)
+
+    @api.model
+    def _find_or_create_partner(self, name, email=False, mobile=False):
+        """
+        Find an existing res.partner by email (priority) or exact name,
+        or create a new one.
+
+        Args:
+            name  (str): Student full name — required.
+            email (str|False): Lowercase email or False.
+            mobile(str|False): Phone number or False.
+
+        Returns:
+            int: partner.id
+        """
+        Partner = self.env['res.partner']
+
+        if not name:
+            raise ValidationError(_('Student name is required to create a partner.'))
+
+        # 1. Dedup by email — most reliable
+        if email:
+            existing = Partner.search([('email', '=ilike', email)], limit=1)
+            if existing:
+                _logger.info(
+                    'student._find_or_create_partner: matched by email %s → partner %s',
+                    email, existing.id,
+                )
+                return existing.id
+
+        # 2. Dedup by exact name — fallback (risky for common names; email preferred)
+        existing = Partner.search([('name', '=', name)], limit=1)
+        if existing:
+            _logger.info(
+                'student._find_or_create_partner: matched by name "%s" → partner %s',
+                name, existing.id,
+            )
+            return existing.id
+
+        # 3. Create new partner
+        partner = Partner.create({
+            'name': name,
+            'email': email or False,
+            'phone': mobile or False,
+            'is_company': False,
+            'customer_rank': 0,
+            'supplier_rank': 0,
+        })
+        _logger.info(
+            'student._find_or_create_partner: created new partner "%s" id=%s',
+            name, partner.id,
+        )
+        return partner.id
+
+    @api.model
+    def load(self, fields_list, data):
+        """
+        Hook called by Odoo's native CSV/Excel importer.
+        Auto-creates res.partner for each row that lacks partner_id.
+        """
+        partner_col = 'partner_id' in fields_list
+        partner_name_col = 'partner_id/.id' in fields_list or 'partner_id/name' in fields_list
+
+        if not partner_col and not partner_name_col:
+            # Native importer didn't get a partner column — inject partner_id for each row
+            partner_idx = len(fields_list)
+            fields_list = list(fields_list) + ['partner_id/.id']
+
+            # Find name column index
+            try:
+                name_idx = fields_list.index('name')
+            except ValueError:
+                name_idx = None
+
+            try:
+                email_idx = fields_list.index('email')
+            except ValueError:
+                email_idx = None
+
+            new_data = []
+            for row in data:
+                row = list(row)
+                name = row[name_idx] if name_idx is not None and name_idx < len(row) else ''
+                email = row[email_idx] if email_idx is not None and email_idx < len(row) else ''
+                partner_id = self._find_or_create_partner(
+                    name=str(name).strip(),
+                    email=str(email).strip().lower() if email else False,
+                )
+                row.append(str(partner_id))
+                new_data.append(row)
+            data = new_data
+
+        return super().load(fields_list, data)
 
     @api.depends('date_of_birth')
     def _compute_age(self):

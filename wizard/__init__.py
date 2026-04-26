@@ -12,3 +12,4 @@ from . import naac
 from . import date_range
 from . import examination
 from . import nba
+from . import asset

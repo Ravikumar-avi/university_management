@@ -168,4 +168,154 @@
         <field name="comment">HOD access: approve attendance regularization and departmental workflows</field>
     </record>
 
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  IR.RULES — RECORD-LEVEL VISIBILITY FILTERS                    -->
+    <!--  Enforced at ORM level (not Python filtering)                  -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- Faculty: can only see assets they registered OR assigned to them -->
+    <record id="asset_faculty_visibility_rule" model="ir.rule">
+        <field name="name">Asset: Faculty — Own Assets Only</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="groups" eval="[(4, ref('group_faculty'))]"/>
+        <field name="domain_force">
+            ['|',
+                ('create_uid', '=', user.id),
+                ('faculty_id.resource_id.user_id', '=', user.id)
+            ]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- HOD: can only see assets in their department -->
+    <record id="asset_hod_visibility_rule" model="ir.rule">
+        <field name="name">Asset: HOD — Department Assets Only</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="groups" eval="[(4, ref('group_hod'))]"/>
+        <field name="domain_force">
+            [('department_id.hod_id.resource_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Principal, ACC, Secretary, Trust Manager: NO ir.rule — full access -->
+    <!-- (No domain restriction record = all records visible by default) -->
+
+    <!-- Purchase Request: Faculty sees only own requests -->
+    <record id="asset_purchase_req_faculty_rule" model="ir.rule">
+        <field name="name">Asset Purchase Request: Faculty — Own Requests Only</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="groups" eval="[(4, ref('group_faculty'))]"/>
+        <field name="domain_force">
+            [('requested_by', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Purchase Request: HOD read-only on dept requests -->
+    <record id="asset_purchase_req_hod_rule" model="ir.rule">
+        <field name="name">Asset Purchase Request: HOD — Department Requests Read</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="groups" eval="[(4, ref('group_hod'))]"/>
+        <field name="domain_force">
+            [('department_id.hod_id.resource_id.user_id', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Handover: Faculty sees only own handover requests -->
+    <record id="asset_handover_faculty_rule" model="ir.rule">
+        <field name="name">Asset Handover: Faculty — Own Requests Only</field>
+        <field name="model_id" ref="model_asset_handover"/>
+        <field name="groups" eval="[(4, ref('group_faculty'))]"/>
+        <field name="domain_force">
+            [('requested_by', '=', user.id)]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Audit: Assigned auditor can only see audits assigned to them -->
+    <record id="asset_audit_assigned_rule" model="ir.rule">
+        <field name="name">Asset Audit: Assigned User — Own Audits Only</field>
+        <field name="model_id" ref="model_asset_audit"/>
+        <field name="groups" eval="[(4, ref('group_faculty')), (4, ref('group_hod'))]"/>
+        <field name="domain_force">
+            ['|',
+                ('assigned_to', '=', user.id),
+                ('initiated_by', '=', user.id)
+            ]
+        </field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+
+    <!-- ================================================================ -->
+    <!-- ADMIN BYPASS RULES                                              -->
+    <!-- Separate ir.rule per model for group_university_admin.          -->
+    <!-- Odoo ORs rules for same user across different ir.rule records,  -->
+    <!-- so admin always gets full access regardless of other rules.     -->
+    <!-- ================================================================ -->
+
+    <record id="asset_admin_bypass_rule" model="ir.rule">
+        <field name="name">Asset Admin Bypass Rule</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="groups" eval="[(4, ref('group_university_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="asset_purchase_req_admin_bypass_rule" model="ir.rule">
+        <field name="name">Asset Purchase Req Admin Bypass Rule</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="groups" eval="[(4, ref('group_university_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="asset_handover_admin_bypass_rule" model="ir.rule">
+        <field name="name">Asset Handover Admin Bypass Rule</field>
+        <field name="model_id" ref="model_asset_handover"/>
+        <field name="groups" eval="[(4, ref('group_university_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <record id="asset_audit_admin_bypass_rule" model="ir.rule">
+        <field name="name">Asset Audit Admin Bypass Rule</field>
+        <field name="model_id" ref="model_asset_audit"/>
+        <field name="groups" eval="[(4, ref('group_university_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
 </odoo>

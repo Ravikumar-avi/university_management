@@ -174,9 +174,6 @@ class StudentEnquiry(models.Model):
     def action_contacted(self):
         self.write({'state': 'contacted'})
 
-    def action_schedule_counselling(self):
-        self.write({'state': 'counselling_scheduled'})
-
     def action_mark_interested(self):
         self.write({'state': 'interested'})
 
@@ -193,7 +190,7 @@ class StudentEnquiry(models.Model):
 
     # ── Session Actions ───────────────────────────────────────────────
 
-    def action_new_session(self):
+    def action_schedule_counselling(self):
         """Open a new counselling session form pre-linked to this enquiry."""
         self.ensure_one()
         return {
@@ -297,6 +294,12 @@ class StudentEnquiry(models.Model):
             'father_name': '',
             'mother_name': '',
             'admission_category': 'general',
+            'entrance_exam_taken': self.entrance_exam_taken,
+            'entrance_exam_name': self.entrance_exam_name or '',
+            'entrance_exam_score': self.entrance_exam_score or 0.0,
+            'entrance_exam_rank': self.entrance_exam_rank or 0,
+            'entrance_exam_percentile': self.entrance_exam_percentile or 0.0,
+            'state_id': self.state_id.id if self.state_id else False,
         })
         self.write({
             'admission_id': admission.id,

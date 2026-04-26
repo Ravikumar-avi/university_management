@@ -97,6 +97,7 @@
         'data/student_seat_blocking_data.xml',
         'data/student_counselling_session_data.xml',
         'data/asset_data.xml',
+        'data/asset_cron_sequences.xml',
         'data/student_assignment_data.xml',
 
         # Views - Academic
@@ -157,6 +158,9 @@
         'views/asset/asset_request_views.xml',
         'views/asset/asset_qr_scan_log_views.xml',
         'views/asset/helpdesk_purchase_views.xml',
+        'views/asset/asset_audit_views.xml',
+        'views/asset/asset_handover_views.xml',
+        'views/asset/asset_purchase_request_views.xml',
 
         # Views - Faculty
         'views/faculty/faculty_views.xml',
@@ -295,6 +299,7 @@
         'wizard/nba/nba_compute_wizard_views.xml',
         'wizard/nba/nba_evidence_bulk_wizard_views.xml',
         'wizard/nba/nba_generate_sar_wizard_views.xml',
+        'wizard/asset/asset_stock_issue_wizard_views.xml',
 
         # Reports
         'report/student_id_card.xml',
@@ -314,6 +319,7 @@
         'report/naac_reports.xml',
         'report/nba_sar_report.xml',
         'report/asset_reports.xml',
+        'report/asset_new_reports.xml',
 
         'templates/mains/admission_templates.xml',
         'templates/mains/library_templates.xml',

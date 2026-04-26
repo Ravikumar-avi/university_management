@@ -1083,19 +1083,33 @@
               parent="menu_university_root"
               sequence="95"/>
 
-    <!-- Main asset list -->
+    <!-- All Assets -->
     <menuitem id="menu_asset_all"
               name="All Assets"
               parent="menu_asset_root"
               action="action_asset_asset"
               sequence="10"/>
 
-    <!-- Asset Request -->
+    <!-- Asset Requests -->
     <menuitem id="menu_asset_request"
-          name="Asset Requests"
-          parent="menu_asset_root"
-          action="action_asset_request"
-          sequence="20"/>
+              name="Asset Requests"
+              parent="menu_asset_root"
+              action="action_asset_request"
+              sequence="20"/>
+
+    <!-- Purchase Requests - single menu for all roles -->
+    <menuitem id="menu_asset_purchase_request"
+              name="Purchase Requests"
+              parent="menu_asset_root"
+              action="action_asset_purchase_request"
+              sequence="25"/>
+
+    <!-- Handover Requests - single menu for all roles -->
+    <menuitem id="menu_asset_handover"
+              name="Handover Requests"
+              parent="menu_asset_root"
+              action="action_asset_handover"
+              sequence="35"/>
 
     <!-- Maintenance -->
     <menuitem id="menu_asset_maintenance"
@@ -1104,33 +1118,48 @@
               action="action_asset_maintenance"
               sequence="50"/>
 
-    <!-- Transfers -->
+    <!-- Consumable Issues -->
+    <menuitem id="menu_asset_stock_issue"
+              name="Consumable Issues"
+              parent="menu_asset_root"
+              action="action_asset_stock_issue_log"
+              sequence="55"/>
+
+    <!-- Asset Transfers -->
     <menuitem id="menu_asset_transfer"
               name="Asset Transfers"
               parent="menu_asset_root"
               action="action_asset_transfer"
               sequence="60"/>
 
-    <!-- Physical Audit -->
+    <!-- Physical Audit Sessions -->
     <menuitem id="menu_asset_audit"
               name="Physical Audit"
               parent="menu_asset_root"
               action="action_asset_audit_session"
               sequence="70"/>
 
-    <menuitem id="menu_asset_procurement_tickets"
-          name="Procurement Tickets"
-          parent="menu_asset_root"
-          action="action_asset_procurement_tickets"
-          sequence="80"
-          groups="group_university_admin"/>
+    <!-- Asset Audits -->
+    <menuitem id="menu_asset_audit_v2"
+              name="Asset Audits"
+              parent="menu_asset_root"
+              action="action_asset_audit"
+              sequence="70"/>
 
+    <!-- Procurement Tickets -->
+    <menuitem id="menu_asset_procurement_tickets"
+              name="Procurement Tickets"
+              parent="menu_asset_root"
+              action="action_asset_procurement_tickets"
+              sequence="80"
+              groups="group_university_admin"/>
+
+    <!-- QR Scan Logs -->
     <menuitem id="menu_asset_qr_scan_log"
-          name="QR Scan Logs"
-          parent="menu_asset_root"
-          action="action_asset_qr_scan_log"
-          sequence="90"
-          groups="group_university_admin"/>
+              name="QR Scan Logs"
+              parent="menu_asset_root"
+              action="action_asset_qr_scan_log"
+              sequence="90"/>
 
     <!-- Configuration -->
     <menuitem id="menu_asset_config"

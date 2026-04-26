@@ -43,7 +43,7 @@ class StudentDocument(models.Model):
     issuing_authority = fields.Char(string='Issuing Authority')
 
     # File Attachment
-    attachment_id = fields.Many2one('ir.attachment', string='Attachment', required=True)
+    attachment_id = fields.Many2one('ir.attachment', string='Attachment', required=False)
     attachment_name = fields.Char(related='attachment_id.name', string='File Name')
 
     # Verification

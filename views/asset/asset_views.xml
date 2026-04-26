@@ -157,6 +157,15 @@
                             invisible="state in ['disposed', 'condemned', 'lost', 'draft']"
                             confirm="Dispose this asset? This cannot be undone."
                             groups="university_management.group_university_admin"/>
+                    <button name="action_set_status_available" string="✓ Mark Available"
+                            type="object" class="btn-success"
+                            invisible="status == 'available'"/>
+                    <button name="action_set_status_not_available" string="Not Available"
+                            type="object" class="btn-warning"
+                            invisible="status == 'not_available'"/>
+                    <button name="action_set_status_needs_purchase" string="⚠ Needs Purchase"
+                            type="object" class="btn-danger"
+                            invisible="status != 'available'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,active,under_maintenance,audited,disposed"/>
                 </header>
@@ -260,6 +269,7 @@
                         </group>
                         <group string="Location &amp; Custodian">
                             <field name="department_id" options="{'no_create': True}"/>
+                            <field name="hod_id" options="{'no_create': True}" string="HOD In-Charge"/>
                             <field name="building"/>
                             <field name="floor"/>
                             <field name="room"/>
@@ -283,6 +293,27 @@
                     </group>
 
                     <notebook>
+                        <page string="Type, Status &amp; Stock" name="asset_type_stock">
+                            <group>
+                                <group string="Asset Type &amp; Status">
+                                    <field name="asset_type" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'available'"
+                                           decoration-danger="status == 'not_available'"
+                                           decoration-warning="status == 'needs_purchase'"
+                                           decoration-info="status == 'in_audit'"/>
+                                    <field name="license_expiry" invisible="asset_type != 'digital'"/>
+                                </group>
+                                <group string="Consumable Stock" invisible="asset_type != 'consumable'">
+                                    <field name="stock_qty"/>
+                                    <field name="min_stock_qty"/>
+                                    <field name="low_stock" readonly="1" widget="boolean_toggle"/>
+                                    <button name="action_open_issue_wizard" string="Issue Stock"
+                                            type="object" class="btn-primary"
+                                            invisible="asset_type != 'consumable'"/>
+                                </group>
+                            </group>
+                        </page>
                         <!-- Purchase Details -->
                         <page string="Purchase Details" name="purchase">
                             <group>
@@ -588,6 +619,12 @@
                        decoration-warning="state == 'under_maintenance'"
                        decoration-danger="state in ['disposed', 'condemned', 'lost']"
                        decoration-info="state == 'transferred'"/>
+                <field name="asset_type" optional="show"/>
+                <field name="status" widget="badge" optional="show"
+                       decoration-success="status == 'available'"
+                       decoration-danger="status == 'not_available'"
+                       decoration-warning="status == 'needs_purchase'"/>
+                <field name="hod_id" optional="show" string="HOD"/>
             </list>
         </field>
     </record>
@@ -668,10 +705,17 @@
                 <field name="asset_tag"/>
                 <field name="category_id"/>
                 <field name="department_id"/>
+                <field name="hod_id" string="HOD In-Charge"/>
                 <field name="make"/>
                 <field name="vendor_id"/>
                 <field name="account_asset_id"/>
 
+                <filter name="filter_available" string="Available" domain="[('status', '=', 'available')]"/>
+                <filter name="filter_not_available" string="Not Available" domain="[('status', '=', 'not_available')]"/>
+                <filter name="filter_needs_purchase" string="Needs Purchase" domain="[('status', '=', 'needs_purchase')]"/>
+                <filter name="filter_consumable" string="Consumables" domain="[('asset_type', '=', 'consumable')]"/>
+                <filter name="filter_low_stock" string="Low Stock" domain="[('low_stock', '=', True)]"/>
+                <separator/>
                 <filter string="Active" name="filter_active"
                         domain="[('state', '=', 'active')]"/>
                 <filter string="Under Maintenance" name="filter_maintenance"
@@ -722,6 +766,9 @@
                             context="{'group_by': 'purchase_date:year'}"/>
                     <filter string="Condition" name="group_condition"
                             context="{'group_by': 'condition'}"/>
+                    <filter string="HOD" name="group_hod" context="{'group_by': 'hod_id'}"/>
+                    <filter string="Asset Type" name="group_asset_type" context="{'group_by': 'asset_type'}"/>
+                    <filter string="Op. Status" name="group_status" context="{'group_by': 'status'}"/>
                 </group>
             </search>
         </field>

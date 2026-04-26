@@ -72,7 +72,6 @@
                     <t t-if="state.activeModule === 'transport'">
                         <t t-call="university_management.DashboardTransport"/>
                     </t>
-                    <!--  MODULE: ASSETS  -->
                     <t t-if="state.activeModule === 'assets'">
                         <t t-call="university_management.DashboardAssets"/>
                     </t>
@@ -119,7 +118,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-gold">
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="openStudents">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-star"/>
                     </div>
@@ -152,7 +151,7 @@
             </div>
             <!--  KPI ROW 2  -->
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-purple">
+                <div class="uni-kpi-card uni-kpi-purple" t-on-click="openExaminations">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-file-text"/>
                     </div>
@@ -161,7 +160,7 @@
                         <div class="uni-kpi-value" t-esc="state.exams.active_exams || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-teal">
+                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openHostel">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-building"/>
                     </div>
@@ -170,7 +169,7 @@
                         <div class="uni-kpi-value" t-esc="(state.hostel.occupancy_rate || 0) + '%'"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openLibrary">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-book"/>
                     </div>
@@ -179,7 +178,7 @@
                         <div class="uni-kpi-value" t-esc="state.library.books_issued || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-navy">
+                <div class="uni-kpi-card uni-kpi-navy" t-on-click="openPlacement">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-briefcase"/>
                     </div>
@@ -279,7 +278,7 @@
                 </button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openStudents">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-graduation-cap"/>
                     </div>
@@ -288,7 +287,7 @@
                         <div class="uni-kpi-value" t-esc="state.students.total_enrolled || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openAdmissions">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-user-plus"/>
                     </div>
@@ -297,7 +296,7 @@
                         <div class="uni-kpi-value" t-esc="state.students.new_this_year || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openAdmissions">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-clock-o"/>
                     </div>
@@ -306,7 +305,7 @@
                         <div class="uni-kpi-value" t-esc="state.students.pending_admissions || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-red">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openStudents">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-exclamation-triangle"/>
                     </div>
@@ -380,7 +379,7 @@
                 </button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openFaculty">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-users"/>
                     </div>
@@ -389,7 +388,7 @@
                         <div class="uni-kpi-value" t-esc="state.faculty.total || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openFaculty">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-check-circle"/>
                     </div>
@@ -398,7 +397,7 @@
                         <div class="uni-kpi-value" t-esc="state.faculty.present_today || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFaculty">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-calendar-times-o"/>
                     </div>
@@ -407,7 +406,7 @@
                         <div class="uni-kpi-value" t-esc="state.faculty.on_leave || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-gold">
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="openFaculty">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-star"/>
                     </div>
@@ -464,7 +463,7 @@
                     </div>
                 </div>
                 <!-- This Month -->
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openFeePayments">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-money"/>
                     </div>
@@ -480,7 +479,7 @@
                     </div>
                 </div>
                 <!-- Today's Collection  (PDF Finance Dashboard – "Today's Fee Collection") -->
-                <div class="uni-kpi-card uni-kpi-teal">
+                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openFeePayments">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-calendar-check-o"/>
                     </div>
@@ -495,7 +494,7 @@
                     </div>
                 </div>
                 <!-- Pending / Overdue -->
-                <div class="uni-kpi-card uni-kpi-red">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openFeePayments">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-exclamation-circle"/>
                     </div>
@@ -507,7 +506,7 @@
                     </div>
                 </div>
                 <!-- Late Payments -->
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFeePayments">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-clock-o"/>
                     </div>
@@ -742,7 +741,7 @@
                 </button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openExaminations">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-file-text"/>
                     </div>
@@ -751,7 +750,7 @@
                         <div class="uni-kpi-value" t-esc="state.exams.active_exams || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openHallTickets">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-id-card"/>
                     </div>
@@ -760,7 +759,7 @@
                         <div class="uni-kpi-value" t-esc="state.exams.hall_tickets || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-gold">
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="openExamResults">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-star"/>
                     </div>
@@ -769,7 +768,7 @@
                         <div class="uni-kpi-value" t-esc="state.exams.results_published || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openExamResults">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-redo"/>
                     </div>
@@ -792,7 +791,7 @@
                 <button class="uni-action-btn" t-on-click="openHostel">Manage Hostels</button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openHostel">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-building"/>
                     </div>
@@ -801,7 +800,7 @@
                         <div class="uni-kpi-value" t-esc="state.hostel.total_rooms || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openHostel">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-bed"/>
                     </div>
@@ -810,7 +809,7 @@
                         <div class="uni-kpi-value" t-esc="state.hostel.occupied_rooms || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openHostelComplaints">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-exclamation"/>
                     </div>
@@ -819,7 +818,7 @@
                         <div class="uni-kpi-value" t-esc="state.hostel.pending_complaints || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-teal">
+                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openHostel">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-percent"/>
                     </div>
@@ -853,7 +852,7 @@
                 <button class="uni-action-btn" t-on-click="openLibrary">Manage Books</button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openLibrary">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-book"/>
                     </div>
@@ -862,7 +861,7 @@
                         <div class="uni-kpi-value" t-esc="state.library.total_books || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openLibraryIssues">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-hand-o-right"/>
                     </div>
@@ -871,7 +870,7 @@
                         <div class="uni-kpi-value" t-esc="state.library.books_issued || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-red">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openLibraryIssues">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-clock-o"/>
                     </div>
@@ -880,7 +879,7 @@
                         <div class="uni-kpi-value" t-esc="state.library.overdue || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-gold">
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="openLibrary">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-money"/>
                     </div>
@@ -916,7 +915,7 @@
                 <h2>Placement</h2>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openPlacement">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-briefcase"/>
                     </div>
@@ -925,7 +924,7 @@
                         <div class="uni-kpi-value" t-esc="state.overview.active_placement_drives || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openPlacement">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-check"/>
                     </div>
@@ -934,7 +933,7 @@
                         <div class="uni-kpi-value" t-esc="state.overview.students_placed || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-gold">
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="openPlacement">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-trophy"/>
                     </div>
@@ -943,7 +942,7 @@
                         <div class="uni-kpi-value" t-esc="state.overview.highest_package || 'N/A'"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-purple">
+                <div class="uni-kpi-card uni-kpi-purple" t-on-click="openPlacement">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-building"/>
                     </div>
@@ -976,7 +975,7 @@
                 <h2>Transport</h2>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openTransport">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-bus"/>
                     </div>
@@ -985,7 +984,7 @@
                         <div class="uni-kpi-value" t-esc="state.overview.total_vehicles || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openTransport">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-route"/>
                     </div>
@@ -994,7 +993,7 @@
                         <div class="uni-kpi-value" t-esc="state.overview.active_routes || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openTransport">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-users"/>
                     </div>
@@ -1007,213 +1006,175 @@
         </div>
     </t>
 
-    <!--  ============================================================  -->
-    <!--  ASSET MANAGEMENT DASHBOARD                                    -->
-    <!--  ============================================================  -->
+    <!-- ═══════════════════════════════════ ASSETS MODULE ═══════════════════════════════════ -->
     <t t-name="university_management.DashboardAssets">
         <div class="uni-page">
             <div class="uni-page-header">
                 <h2>Asset Management</h2>
-                <!--
-                    FIX 3: Buttons kept for visual layout but t-on-click removed
-                    because openAssets / openAssetRequests are no-op stubs —
-                    removing the handler prevents the OwlError entirely.
-                -->
-                <div class="uni-header-actions">
-                    <button class="uni-action-btn secondary">
-                        <i class="fa fa-inbox"/> Requests
+                <div style="display:flex;gap:8px;">
+                    <button class="uni-action-btn" t-on-click="() => this.openPurchaseRequests()">
+                        <i class="fa fa-shopping-cart"/> Purchase Requests
                     </button>
-                    <button class="uni-action-btn">
+                    <button class="uni-action-btn" t-on-click="() => this.openAssets()">
                         <i class="fa fa-cubes"/> All Assets
                     </button>
                 </div>
             </div>
 
-            <!-- KPI ROW 1 -->
+            <!-- KPI Row -->
             <div class="uni-kpi-row">
-                <!-- FIX 3: t-on-click removed from asset KPI cards — no valid action exists -->
-                <div class="uni-kpi-card uni-kpi-blue">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="() => this.openAssets()">
                     <div class="uni-kpi-icon"><i class="fa fa-cubes"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Total Assets</div>
                         <div class="uni-kpi-value" t-esc="state.assets.total_assets || 0"/>
-                        <div class="uni-kpi-change">All registered assets</div>
+                        <div class="uni-kpi-change positive">
+                            <i class="fa fa-check-circle"/>
+                            <t t-esc="state.assets.available || 0"/> available
+                        </div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green">
-                    <div class="uni-kpi-icon"><i class="fa fa-check-circle"/></div>
-                    <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Active Assets</div>
-                        <div class="uni-kpi-value" t-esc="state.assets.active_assets || 0"/>
-                        <div class="uni-kpi-change positive">Currently in use</div>
-                    </div>
-                </div>
-                <div class="uni-kpi-card uni-kpi-orange">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="() => this.openAssets()">
                     <div class="uni-kpi-icon"><i class="fa fa-wrench"/></div>
                     <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Under Maintenance</div>
-                        <div class="uni-kpi-value" t-esc="state.assets.under_maintenance || 0"/>
-                        <div class="uni-kpi-change negative">Sent for repair</div>
+                        <div class="uni-kpi-label">Maintenance Due</div>
+                        <div class="uni-kpi-value" t-esc="state.assets.maintenance_due || 0"/>
+                        <div class="uni-kpi-change">
+                            <i class="fa fa-exclamation-circle"/> Needs attention
+                        </div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-purple">
-                    <div class="uni-kpi-icon"><i class="fa fa-inr"/></div>
-                    <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Purchase Value</div>
-                        <div class="uni-kpi-value" t-esc="formatCurrency(state.assets.total_purchase_value)"/>
-                        <div class="uni-kpi-change">Total cost</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- KPI ROW 2 -->
-            <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-teal">
-                    <div class="uni-kpi-icon"><i class="fa fa-inbox"/></div>
+                <div class="uni-kpi-card uni-kpi-gold" t-on-click="() => this.openPurchaseRequests()">
+                    <div class="uni-kpi-icon"><i class="fa fa-shopping-cart"/></div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Pending Requests</div>
                         <div class="uni-kpi-value" t-esc="state.assets.pending_requests || 0"/>
-                        <div class="uni-kpi-change negative">Awaiting approval</div>
+                        <div class="uni-kpi-change">
+                            <i class="fa fa-clock-o"/> Awaiting approval
+                        </div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-navy">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="() => this.openHandoverRequests()">
                     <div class="uni-kpi-icon"><i class="fa fa-exchange"/></div>
                     <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Transfers This Month</div>
-                        <div class="uni-kpi-value" t-esc="state.assets.transfers_this_month || 0"/>
-                        <div class="uni-kpi-change">Department transfers</div>
-                    </div>
-                </div>
-                <div class="uni-kpi-card uni-kpi-gold">
-                    <div class="uni-kpi-icon"><i class="fa fa-shield"/></div>
-                    <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Under Warranty</div>
-                        <div class="uni-kpi-value" t-esc="state.assets.assets_under_warranty || 0"/>
-                        <div class="uni-kpi-change">Warranty active</div>
-                    </div>
-                </div>
-                <div class="uni-kpi-card uni-kpi-red">
-                    <div class="uni-kpi-icon"><i class="fa fa-exclamation-triangle"/></div>
-                    <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Unverified Assets</div>
-                        <div class="uni-kpi-value" t-esc="state.assets.unverified_assets || 0"/>
-                        <div class="uni-kpi-change negative">Not audited this year</div>
+                        <div class="uni-kpi-label">Pending Handovers</div>
+                        <div class="uni-kpi-value" t-esc="state.assets.pending_handovers || 0"/>
+                        <div class="uni-kpi-change">
+                            <i class="fa fa-arrow-right"/> In progress
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- CHARTS ROW -->
+            <!-- Charts Row -->
             <div class="uni-charts-row">
                 <div class="uni-chart-card">
-                    <div class="uni-chart-header"><h3>Assets by Category</h3></div>
+                    <div class="uni-chart-header">
+                        <h3>Assets by Category</h3>
+                    </div>
                     <div class="uni-canvas-wrap">
                         <canvas id="uni-asset-category-chart"/>
                     </div>
                 </div>
                 <div class="uni-chart-card wide">
-                    <div class="uni-chart-header"><h3>Asset Condition</h3></div>
+                    <div class="uni-chart-header">
+                        <h3>Assets by State</h3>
+                    </div>
                     <div class="uni-canvas-wrap">
-                        <canvas id="uni-asset-condition-chart"/>
+                        <canvas id="uni-asset-state-chart"/>
                     </div>
                 </div>
             </div>
 
-            <!-- RECENT TABLES -->
+            <!-- Tables Row -->
             <div class="uni-charts-row">
-                <div class="uni-chart-card">
-                    <div class="uni-chart-header">
-                        <h3>Recent Maintenance</h3>
-                        <!--
-                            FIX 3: "View All" button kept but t-on-click removed
-                            — no valid Odoo action registered for asset maintenance.
-                        -->
-                        <button class="uni-link-btn">View All</button>
-                    </div>
-                    <table class="uni-table">
-                        <thead>
-                            <tr><th>Ref</th><th>Asset</th><th>Date</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <t t-if="(state.assets.recent_maintenance || []).length === 0">
-                                <tr><td colspan="4" style="text-align:center;color:var(--uni-text-muted);padding:16px;">No records</td></tr>
-                            </t>
-                            <t t-foreach="(state.assets.recent_maintenance || [])" t-as="m" t-key="m.id">
-                                <tr>
-                                    <td><strong t-esc="m.name"/></td>
-                                    <!-- FIX 2a: dummy data now uses asset_id tuple so [1] returns the name -->
-                                    <td t-esc="m.asset_id ? m.asset_id[1] : '-'"/>
-                                    <!-- FIX 2a: dummy data now uses request_date -->
-                                    <td t-esc="m.request_date ? m.request_date.slice(0,10) : '-'"/>
-                                    <td><span t-attf-class="uni-badge #{assetStateClass(m.state)}" t-esc="assetStateLabel(m.state)"/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                </div>
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
-                        <h3>Recent Asset Requests</h3>
-                        <!-- FIX 3: t-on-click removed -->
-                        <button class="uni-link-btn">View All</button>
+                        <h3><i class="fa fa-shopping-cart" style="color:var(--amber)"/> Recent Purchase Requests</h3>
+                        <button class="uni-link-btn" t-on-click="() => this.openPurchaseRequests()">View All</button>
                     </div>
-                    <table class="uni-table">
-                        <thead>
-                            <tr><th>Ref</th><th>Requested By</th><th>Category</th><th>Date</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <t t-if="(state.assets.recent_requests || []).length === 0">
-                                <tr><td colspan="5" style="text-align:center;color:var(--uni-text-muted);padding:16px;">No requests</td></tr>
-                            </t>
-                            <t t-foreach="(state.assets.recent_requests || [])" t-as="r" t-key="r.id">
+                    <t t-if="state.assetPurchaseRequests and state.assetPurchaseRequests.length">
+                        <table class="uni-table">
+                            <thead>
                                 <tr>
-                                    <td><strong t-esc="r.name"/></td>
-                                    <!-- FIX 2b: dummy data now uses requester_id tuple -->
-                                    <td t-esc="r.requester_id ? r.requester_id[1] : '-'"/>
-                                    <!-- FIX 2b: dummy data now uses category_id tuple -->
-                                    <td t-esc="r.category_id ? r.category_id[1] : '-'"/>
-                                    <!-- FIX 2b: dummy data now uses request_date -->
-                                    <td t-esc="r.request_date ? r.request_date.slice(0,10) : '-'"/>
-                                    <td><span t-attf-class="uni-badge #{assetStateClass(r.state)}" t-esc="assetStateLabel(r.state)"/></td>
+                                    <th>Reference</th>
+                                    <th>Requested By</th>
+                                    <th>Item</th>
+                                    <th>Status</th>
                                 </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.assetPurchaseRequests" t-as="pr" t-key="pr.id">
+                                    <tr>
+                                        <td t-esc="pr.name"/>
+                                        <td t-esc="pr.requested_by"/>
+                                        <td t-esc="pr.item_description"/>
+                                        <td>
+                                            <span t-attf-class="uni-badge #{pr.state === 'done' ? 'success' : pr.state === 'rejected' ? 'danger' : 'warning'}"
+                                                  t-esc="pr.state_label"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                    <t t-else="">
+                        <div style="text-align:center;padding:32px;color:var(--text-muted);">
+                            <i class="fa fa-inbox fa-2x" style="display:block;margin-bottom:8px;"/>
+                            No purchase requests yet
+                        </div>
+                    </t>
                 </div>
             </div>
 
             <div class="uni-charts-row">
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
-                        <h3>Recent Asset Transfers</h3>
-                        <!-- FIX 3: t-on-click removed -->
-                        <button class="uni-link-btn">View All</button>
+                        <h3><i class="fa fa-exchange" style="color:var(--teal)"/> Recent Handover Requests</h3>
+                        <button class="uni-link-btn" t-on-click="() => this.openHandoverRequests()">View All</button>
                     </div>
-                    <table class="uni-table">
-                        <thead>
-                            <tr><th>Reference</th><th>Asset</th><th>From</th><th>To</th><th>Date</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <t t-if="(state.assets.recent_transfers || []).length === 0">
-                                <tr><td colspan="6" style="text-align:center;color:var(--uni-text-muted);padding:16px;">No transfers</td></tr>
-                            </t>
-                            <t t-foreach="(state.assets.recent_transfers || [])" t-as="tf" t-key="tf.id">
+                    <t t-if="state.assetHandovers and state.assetHandovers.length">
+                        <table class="uni-table">
+                            <thead>
                                 <tr>
-                                    <td><strong t-esc="tf.name"/></td>
-                                    <!-- FIX 2c: dummy data now uses asset_id tuple -->
-                                    <td t-esc="tf.asset_id ? tf.asset_id[1] : '-'"/>
-                                    <!-- FIX 2c: dummy data now uses from_department_id / to_department_id tuples -->
-                                    <td t-esc="tf.from_department_id ? tf.from_department_id[1] : '-'"/>
-                                    <td t-esc="tf.to_department_id ? tf.to_department_id[1] : '-'"/>
-                                    <!-- FIX 2c: dummy data now uses transfer_date -->
-                                    <td t-esc="tf.transfer_date ? tf.transfer_date.slice(0,10) : '-'"/>
-                                    <td><span t-attf-class="uni-badge #{assetStateClass(tf.state)}" t-esc="assetStateLabel(tf.state)"/></td>
+                                    <th>Reference</th>
+                                    <th>Asset</th>
+                                    <th>To Department</th>
+                                    <th>Status</th>
                                 </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.assetHandovers" t-as="hv" t-key="hv.id">
+                                    <tr>
+                                        <td t-esc="hv.name"/>
+                                        <td t-esc="hv.asset_name"/>
+                                        <td t-esc="hv.to_department"/>
+                                        <td>
+                                            <span t-attf-class="uni-badge #{hv.state === 'approved' or hv.state === 'completed' ? 'success' : hv.state === 'rejected' ? 'danger' : 'warning'}"
+                                                  t-esc="hv.state_label"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                    <t t-else="">
+                        <div style="text-align:center;padding:32px;color:var(--text-muted);">
+                            <i class="fa fa-inbox fa-2x" style="display:block;margin-bottom:8px;"/>
+                            No handover requests yet
+                        </div>
+                    </t>
                 </div>
             </div>
+
+            <!-- Low Stock Alert -->
+            <t t-if="state.assets.low_stock_alerts > 0">
+                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;margin-top:8px;">
+                    <i class="fa fa-exclamation-triangle" style="color:#f59e0b;font-size:1.2em;"/>
+                    <span><strong><t t-esc="state.assets.low_stock_alerts"/> consumable item(s)</strong> are running low on stock.</span>
+                    <button class="uni-link-btn" t-on-click="() => this.openAssets()">Review</button>
+                </div>
+            </t>
         </div>
     </t>
-
 </templates>

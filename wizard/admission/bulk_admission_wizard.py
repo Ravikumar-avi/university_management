@@ -75,23 +75,21 @@ class BulkAdmissionWizard(models.TransientModel):
             raise UserError(_('Import failed: %s') % str(e))
 
     def _parse_excel_file(self):
-        """Parse Excel file and return list of records"""
+        import openpyxl, io
         file_data = base64.b64decode(self.import_file)
-        workbook = xlrd.open_workbook(file_contents=file_data)
-        sheet = workbook.sheet_by_index(0)
+        wb = openpyxl.load_workbook(io.BytesIO(file_data), read_only=True, data_only=True)
+        ws = wb.active
 
+        rows = list(ws.iter_rows(values_only=True))
+        if not rows:
+            return []
+
+        headers = [str(h).strip().lower() if h else '' for h in rows[0]]
         records = []
-        headers = [str(cell.value).strip().lower() for cell in sheet.row(0)]
-
-        for row_idx in range(1, sheet.nrows):
-            row_data = {}
-            for col_idx, header in enumerate(headers):
-                cell = sheet.cell(row_idx, col_idx)
-                row_data[header] = cell.value
-
+        for row in rows[1:]:
+            row_data = {headers[i]: row[i] for i in range(len(headers)) if headers[i]}
             if row_data.get('name') or row_data.get('student_name'):
                 records.append(row_data)
-
         return records
 
     def _parse_csv_file(self):
@@ -141,49 +139,89 @@ class BulkAdmissionWizard(models.TransientModel):
                 error_msg = f"Row {idx}: {str(e)}"
                 errors.append(error_msg)
                 _logger.error(error_msg)
+                errors.append(f'Row {idx}: {e}')
+                _logger.error('Row %s failed: %s', idx, e)
 
         if errors:
             # Log errors but continue
             error_log = "\n".join(errors)
             _logger.warning(f"Bulk admission errors:\n{error_log}")
 
+        # Convert list of admission records into a recordset so `.ids` works
+        # Odoo expects a recordset for domain operations, but we currently
+        # accumulate admissions in a Python list. Convert the list of
+        # admissions into a proper recordset before returning.
+        if isinstance(created_admissions, list):
+            created_admissions = Admission.browse([adm.id for adm in created_admissions])
         return created_admissions
 
     def _prepare_admission_vals(self, record):
-        """Prepare admission values from record data"""
-        # Get or create student
         student_vals = {
             'name': record.get('name') or record.get('student_name'),
             'email': record.get('email'),
-            'mobile': record.get('mobile') or record.get('phone'),
+            'mobile': str(record.get('mobile') or record.get('phone') or '').strip() or False,
             'date_of_birth': self._parse_date(record.get('date_of_birth') or record.get('dob')),
             'gender': self._parse_gender(record.get('gender')),
-            'blood_group': record.get('blood_group'),
-            'aadhar_number': record.get('aadhar_number') or record.get('aadhar'),
-            'address': record.get('address'),
-            'city': record.get('city'),
-            'state': record.get('state'),
-            'pincode': record.get('pincode') or record.get('pin_code'),
-            'father_name': record.get('father_name'),
-            'mother_name': record.get('mother_name'),
-            'guardian_mobile': record.get('guardian_mobile') or record.get('parent_mobile'),
+            'blood_group': str(record.get('blood_group') or '').strip().lower() or False,
+            'aadhar_number': str(record.get('aadhar_number') or record.get('aadhar') or '').strip() or False,
+            'current_address': record.get('address') or record.get('current_address'),
+            'permanent_address': record.get('permanent_address') or record.get('address'),
+            # DO NOT pass 'state' — wizard sets it via program_id/batch_id
+            # DO NOT pass father_name/mother_name — those are on student.parent, not student.student
+            'program_id': self.program_id.id,
+            'batch_id': self.batch_id.id,
+            'academic_year_id': self.academic_year_id.id,
+            'admission_date': self.admission_date,
         }
 
         student = self.env['student.student'].create(student_vals)
 
-        # Prepare admission values
+        # Create parent records directly here
+        ParentObj = self.env['student.parent']
+        father_name = str(record.get('father_name') or '').strip()
+        mother_name = str(record.get('mother_name') or '').strip()
+        guardian_mobile = str(record.get('guardian_mobile') or record.get('parent_mobile') or '').strip()
+
+        if father_name:
+            ParentObj.create({
+                'student_id': student.id,
+                'name': father_name,
+                'relationship': 'father',
+                'phone': guardian_mobile or False,
+                'is_primary_contact': True,
+                'is_emergency_contact': True,
+            })
+        if mother_name:
+            ParentObj.create({
+                'student_id': student.id,
+                'name': mother_name,
+                'relationship': 'mother',
+            })
+
         admission_vals = {
-            'student_id': student.id,
+            'applicant_name': student_vals['name'],
+            'email': student_vals.get('email') or 'noemail@placeholder.com',
+            'mobile': student_vals.get('mobile') or '0000000000',
+            'date_of_birth': student_vals['date_of_birth'],
+            'gender': student_vals['gender'],
             'program_id': self.program_id.id,
             'department_id': self.department_id.id,
             'batch_id': self.batch_id.id,
             'academic_year_id': self.academic_year_id.id,
             'admission_date': self.admission_date,
-            'admission_type': record.get('admission_type', 'regular'),
-            'category': record.get('category', 'general'),
-            'quota': record.get('quota', 'merit'),
-            'previous_school': record.get('previous_school'),
-            'previous_percentage': float(record.get('previous_percentage', 0)),
+            'admission_category': str(record.get('category') or record.get('admission_category') or 'general').lower(),
+            'previous_qualification': str(record.get('previous_qualification') or 'Intermediate'),
+            'previous_school': str(record.get('previous_school') or record.get('previous_institution') or '-'),
+            'previous_board': str(record.get('previous_board') or '-'),
+            'previous_percentage': float(record.get('previous_percentage') or 0),
+            'previous_year': int(float(record.get('previous_year') or 0)) or fields.Date.today().year,
+            'current_address': student_vals.get('current_address') or '-',
+            'permanent_address': student_vals.get('permanent_address') or '-',
+            'father_name': father_name or '-',
+            'mother_name': mother_name or '-',
+            'student_id': student.id,
+            'application_fee_paid': True,  # bulk admission bypasses fee gate
+            'state': 'admitted',
         }
 
         return admission_vals

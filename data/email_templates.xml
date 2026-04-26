@@ -489,5 +489,398 @@
             </field>
         </record>
 
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  ASSET MANAGEMENT — 14 MAIL TEMPLATES (Section 7.2)            -->
+    <!--  All templates use QWeb and reference model fields dynamically  -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+
+    <!-- 1. asset_registered_hod_notify -->
+    <record id="mail_template_asset_registered_hod" model="mail.template">
+        <field name="name">Asset: New Asset Registered — HOD Notification</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="subject">New Asset Registered in Your Department: {{ object.name }} ({{ object.asset_code }})</field>
+        <field name="email_to">{{ object.hod_id.work_email or '' }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#4361ee; padding:20px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">New Asset Registered</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear {{ object.hod_id.name or 'HOD' }},</p>
+                    <p>A new asset has been registered under your department and is now active.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Asset Name</td><td style="padding:8px;">{{ object.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Asset Code</td><td style="padding:8px; color:#4361ee; font-weight:bold;">{{ object.asset_code }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Category</td><td style="padding:8px;">{{ object.category_id.name or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Location</td><td style="padding:8px;">{{ (object.building or '') + ' ' + (object.floor or '') + ' ' + (object.room or '') or '—' }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Registered By</td><td style="padding:8px;">{{ object.create_uid.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Purchase Cost</td><td style="padding:8px;">₹{{ object.purchase_cost or 0 }}</td></tr>
+                    </table>
+                    <p>Please ensure the QR label is printed and affixed to the asset.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 2. qr_scan_status_change -->
+    <record id="mail_template_qr_scan_status_change" model="mail.template">
+        <field name="name">Asset: QR Scan — Status Updated</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="subject">Asset Status Updated via QR Scan: {{ object.name }} → {{ object.status }}</field>
+        <field name="email_to">{{ object.hod_id.work_email or '' }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#f77f00; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Asset Status Updated via QR Scan</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Asset <strong>{{ object.name }} ({{ object.asset_code }})</strong> status has been updated.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">New Status</td><td style="padding:8px; font-weight:bold; color:#f77f00;">{{ object.status }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Location</td><td style="padding:8px;">{{ (object.building or '') + ' ' + (object.room or '') or '—' }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Last Scanned</td><td style="padding:8px;">{{ object.last_scan_date }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 3. handover_request_faculty -->
+    <record id="mail_template_handover_request_faculty" model="mail.template">
+        <field name="name">Asset: Handover Request — Faculty Notification</field>
+        <field name="model_id" ref="model_asset_handover"/>
+        <field name="subject">Handover Request Submitted: {{ object.name }} for {{ object.asset_id.name }}</field>
+        <field name="email_to">{{ object.requested_by.email or '' }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#4361ee; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Handover Request Submitted</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear {{ object.requested_by.name }},</p>
+                    <p>Your handover request <strong>{{ object.name }}</strong> has been submitted and is pending HOD approval.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Asset</td><td style="padding:8px;">{{ object.asset_id.name }} ({{ object.asset_code }})</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">From</td><td style="padding:8px;">{{ object.from_department_id.name or '—' }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">To</td><td style="padding:8px;">{{ object.to_department_id.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Receiving Person</td><td style="padding:8px;">{{ object.to_faculty_id.name or '—' }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Status</td><td style="padding:8px; color:#f77f00;">Pending HOD Approval</td></tr>
+                    </table>
+                    <p>You will be notified at each stage of the approval process.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 4. handover_request_principal -->
+    <record id="mail_template_handover_request_principal" model="mail.template">
+        <field name="name">Asset: Handover Request — Principal Approval Needed</field>
+        <field name="model_id" ref="model_asset_handover"/>
+        <field name="subject">Handover Request Awaiting Your Approval: {{ object.name }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#2d6a4f; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Handover Request — Your Approval Required</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear Principal,</p>
+                    <p>Handover request <strong>{{ object.name }}</strong> has been approved at HOD level and requires your final approval.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Asset</td><td style="padding:8px;">{{ object.asset_id.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">From Dept</td><td style="padding:8px;">{{ object.from_department_id.name or '—' }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">To Dept</td><td style="padding:8px;">{{ object.to_department_id.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Purpose</td><td style="padding:8px;">{{ object.purpose }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">HOD Remarks</td><td style="padding:8px;">{{ object.hod_remarks or '—' }}</td></tr>
+                    </table>
+                    <p>Please log in to your Principal Dashboard to approve or reject.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 5. purchase_request_principal -->
+    <record id="mail_template_purchase_request_principal" model="mail.template">
+        <field name="name">Asset: Purchase Request — Principal Review</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">Purchase Request Awaiting Your Approval: {{ object.name }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#1a1a2e; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Purchase Request — Principal Approval Required</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear Principal,</p>
+                    <p>A new purchase request requires your approval.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Reference</td><td style="padding:8px; color:#4361ee; font-weight:bold;">{{ object.name }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Requested By</td><td style="padding:8px;">{{ object.requested_by.name }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Department</td><td style="padding:8px;">{{ object.department_id.name or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Estimated Cost</td><td style="padding:8px; font-weight:bold;">₹{{ object.estimated_cost or 0 }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Priority</td><td style="padding:8px;">{{ object.priority }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Justification</td><td style="padding:8px;">{{ object.justification }}</td></tr>
+                    </table>
+                    <p>Log in to your Principal Dashboard to review and approve or reject this request.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 6. purchase_request_acc -->
+    <record id="mail_template_purchase_request_acc" model="mail.template">
+        <field name="name">Asset: Purchase Request — ACC Review with Vendor Quotes</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">Purchase Request Ready for ACC Review: {{ object.name }} — 3 Vendor Quotes Attached</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#7209b7; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">ACC Review Required</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear ACC Team,</p>
+                    <p>Purchase request <strong>{{ object.name }}</strong> has 3 vendor quotations uploaded and is awaiting your administrative review.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Requested By</td><td style="padding:8px;">{{ object.requested_by.name }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Estimated Cost</td><td style="padding:8px;">₹{{ object.estimated_cost or 0 }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Vendor 1</td><td style="padding:8px;">{{ object.vendor_quote_1_vendor or '—' }} — ₹{{ object.vendor_quote_1_amount or 0 }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Vendor 2</td><td style="padding:8px;">{{ object.vendor_quote_2_vendor or '—' }} — ₹{{ object.vendor_quote_2_amount or 0 }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Vendor 3</td><td style="padding:8px;">{{ object.vendor_quote_3_vendor or '—' }} — ₹{{ object.vendor_quote_3_amount or 0 }}</td></tr>
+                    </table>
+                    <p>Please review the quotes, select the preferred vendor, add your observations, and forward to the Trust Secretary.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 7. purchase_request_secretary -->
+    <record id="mail_template_purchase_request_secretary" model="mail.template">
+        <field name="name">Asset: Purchase Request — Secretary Final Approval</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">FINAL APPROVAL REQUIRED: Purchase Request {{ object.name }} — ACC Review Complete</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#dc2626; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">FINAL APPROVAL REQUIRED — Trust Secretary</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear Trust Secretary,</p>
+                    <p>Purchase request <strong>{{ object.name }}</strong> has completed ACC review and requires your <strong>final decision</strong>.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold; width:35%;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Requested By</td><td style="padding:8px;">{{ object.requested_by.name }}</td></tr>
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold;">ACC Preferred Vendor</td><td style="padding:8px; font-weight:bold;">{{ object.selected_vendor.name if object.selected_vendor else object.selected_vendor_name or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Selected Amount</td><td style="padding:8px; font-weight:bold; color:#dc2626;">₹{{ object.selected_quote_amount or object.estimated_cost or 0 }}</td></tr>
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold;">ACC Notes</td><td style="padding:8px;">{{ object.acc_notes or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Principal Remarks</td><td style="padding:8px;">{{ object.principal_remarks or '—' }}</td></tr>
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold;">Days Pending</td><td style="padding:8px;">{{ object.days_pending }} days</td></tr>
+                    </table>
+                    <p>All 3 vendor quotations are attached to the request record. Please log in to your Secretary Dashboard to issue your decision.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 8. purchase_request_trust_manager -->
+    <record id="mail_template_purchase_request_trust_manager" model="mail.template">
+        <field name="name">Asset: Purchase Request — Trust Manager Execution</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">ACTION REQUIRED: Secretary Approved {{ object.name }} — Please Execute Procurement</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#2d6a4f; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Procurement Execution Required</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear Trust Manager,</p>
+                    <p>The Trust Secretary has given <strong>FINAL APPROVAL</strong> for purchase request <strong>{{ object.name }}</strong>. Please proceed with procurement.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold; width:35%;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Preferred Vendor</td><td style="padding:8px; font-weight:bold;">{{ object.selected_vendor.name if object.selected_vendor else object.selected_vendor_name or '—' }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">Vendor Email</td><td style="padding:8px;">{{ object.selected_vendor.email if object.selected_vendor else '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Approved Amount</td><td style="padding:8px; font-weight:bold; color:#2d6a4f;">₹{{ object.selected_quote_amount or object.estimated_cost or 0 }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">Final Approval Date</td><td style="padding:8px;">{{ object.final_approval_date }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Secretary Remarks</td><td style="padding:8px;">{{ object.secretary_remarks or '—' }}</td></tr>
+                    </table>
+                    <p>Steps to complete:<br/>
+                    1. Contact the vendor and issue the Purchase Order<br/>
+                    2. Record the PO reference in the system<br/>
+                    3. Click "Confirm Execution" in your Trust Manager Dashboard</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 9. purchase_final_executed -->
+    <record id="mail_template_purchase_final_executed" model="mail.template">
+        <field name="name">Asset: Purchase Request — Execution Complete</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">Purchase Request {{ object.name }} — Procurement Complete (PO: {{ object.po_reference or '—' }})</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#16a34a; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">✓ Procurement Complete</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Purchase request <strong>{{ object.name }}</strong> has been fully executed by the Trust Manager.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold; width:35%;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Vendor</td><td style="padding:8px;">{{ object.selected_vendor.name if object.selected_vendor else object.selected_vendor_name or '—' }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">PO Reference</td><td style="padding:8px; font-weight:bold; color:#16a34a;">{{ object.po_reference or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Amount</td><td style="padding:8px;">₹{{ object.selected_quote_amount or object.estimated_cost or 0 }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">Executed By</td><td style="padding:8px;">{{ object.trust_manager_executed_by.name if object.trust_manager_executed_by else '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Execution Notes</td><td style="padding:8px;">{{ object.execution_notes or '—' }}</td></tr>
+                    </table>
+                    <p>The procurement process is now complete. Once the goods are received, please register the asset in the system.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 10. purchase_rejected -->
+    <record id="mail_template_purchase_rejected" model="mail.template">
+        <field name="name">Asset: Purchase Request — Rejected</field>
+        <field name="model_id" ref="model_asset_purchase_request"/>
+        <field name="subject">Purchase Request {{ object.name }} Rejected</field>
+        <field name="email_to">{{ object.requested_by.email or '' }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#dc2626; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Purchase Request Rejected</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear {{ object.requested_by.name }},</p>
+                    <p>Your purchase request <strong>{{ object.name }}</strong> has been <strong>rejected</strong>.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold; width:35%;">Item</td><td style="padding:8px;">{{ object.item_description }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Rejected By</td><td style="padding:8px;">{{ object.rejected_by.name if object.rejected_by else '—' }}</td></tr>
+                        <tr style="background:#fef2f2;"><td style="padding:8px; font-weight:bold;">Rejection Date</td><td style="padding:8px;">{{ object.rejection_date }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold; color:#dc2626;">Reason</td><td style="padding:8px;">{{ object.rejection_reason or '—' }}</td></tr>
+                    </table>
+                    <p>Please contact your Principal or the Secretary if you have questions regarding this decision.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 11. audit_assigned -->
+    <record id="mail_template_audit_assigned" model="mail.template">
+        <field name="name">Asset: Audit Assigned to Auditor</field>
+        <field name="model_id" ref="model_asset_audit"/>
+        <field name="subject">You Have Been Assigned an Asset Audit: {{ object.name }}</field>
+        <field name="email_to">{{ object.assigned_to.work_email or '' }}</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#2d6a4f; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Asset Audit Assigned</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Dear {{ object.assigned_to.name }},</p>
+                    <p>The Principal has assigned you as the auditor for audit <strong>{{ object.name }}</strong>.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold; width:35%;">Audit Scope</td><td style="padding:8px;">{{ object.audit_scope }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Department</td><td style="padding:8px;">{{ object.department_id.name if object.department_id else 'All Departments' }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">Total Assets</td><td style="padding:8px; font-weight:bold;">{{ object.total_assets }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Start Date</td><td style="padding:8px;">{{ object.start_date }}</td></tr>
+                        <tr style="background:#f0fff4;"><td style="padding:8px; font-weight:bold;">Target Completion</td><td style="padding:8px;">{{ object.target_completion_date or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Instructions</td><td style="padding:8px;">{{ object.notes or 'Verify physical condition, location accuracy, and presence of each asset.' }}</td></tr>
+                    </table>
+                    <p><strong>How to conduct the audit:</strong><br/>
+                    Visit each asset location → Scan the QR code with your phone → The "Conduct Audit" button will appear → Confirm condition and presence.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 12. audit_completed -->
+    <record id="mail_template_audit_completed" model="mail.template">
+        <field name="name">Asset: Audit Completed — Report Ready</field>
+        <field name="model_id" ref="model_asset_audit"/>
+        <field name="subject">Audit {{ object.name }} Completed — {{ object.missing_count }} Missing Asset(s)</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#1a1a2e; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">Asset Audit Completed</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Audit <strong>{{ object.name }}</strong> has been completed by {{ object.assigned_to.name }}.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; width:35%;">Total Assets</td><td style="padding:8px;">{{ object.total_assets }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Verified Present</td><td style="padding:8px; color:#16a34a; font-weight:bold;">{{ object.scanned_count - object.missing_count }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold; color:#dc2626;">Missing</td><td style="padding:8px; color:#dc2626; font-weight:bold;">{{ object.missing_count }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Discrepancies</td><td style="padding:8px;">{{ object.discrepancy_count }}</td></tr>
+                        <tr style="background:#f0f4ff;"><td style="padding:8px; font-weight:bold;">Completion</td><td style="padding:8px;">{{ object.completion_pct }}%</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Completed On</td><td style="padding:8px;">{{ object.end_date }}</td></tr>
+                    </table>
+                    <p>Please log in to view the full audit report and take action on any missing or discrepant assets.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 13. low_stock_alert -->
+    <record id="mail_template_low_stock_alert" model="mail.template">
+        <field name="name">Asset: Low Stock Alert — Consumable Below Threshold</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="subject">⚠️ Low Stock Alert: {{ object.name }} ({{ object.asset_code }}) — {{ object.stock_qty }} units remaining</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#f72585; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">⚠️ Low Stock Alert</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Consumable asset <strong>{{ object.name }}</strong> has dropped below the minimum stock threshold.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#fff0f6;"><td style="padding:8px; font-weight:bold; width:35%;">Asset</td><td style="padding:8px;">{{ object.name }} ({{ object.asset_code }})</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Current Stock</td><td style="padding:8px; font-weight:bold; color:#dc2626;">{{ object.stock_qty }} units</td></tr>
+                        <tr style="background:#fff0f6;"><td style="padding:8px; font-weight:bold;">Minimum Threshold</td><td style="padding:8px;">{{ object.min_stock_qty }} units</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Location</td><td style="padding:8px;">{{ (object.building or '') + ' ' + (object.room or '') or '—' }}</td></tr>
+                        <tr style="background:#fff0f6;"><td style="padding:8px; font-weight:bold;">Department</td><td style="padding:8px;">{{ object.department_id.name if object.department_id else '—' }}</td></tr>
+                    </table>
+                    <p>Please raise a Purchase Request to replenish this consumable before stock runs out.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
+    <!-- 14. unscanned_asset_alert -->
+    <record id="mail_template_unscanned_asset_alert" model="mail.template">
+        <field name="name">Asset: Unverified Asset — Not Scanned in 30+ Days</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="subject">📋 Unverified Asset: {{ object.name }} — Not Scanned for 30+ Days</field>
+        <field name="body_html"><![CDATA[
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <div style="background:#f77f00; padding:16px; border-radius:8px 8px 0 0;">
+                    <h2 style="color:white; margin:0;">📋 Asset Not Verified</h2>
+                </div>
+                <div style="background:#f9f9f9; padding:20px; border:1px solid #e0e0e0;">
+                    <p>Asset <strong>{{ object.name }}</strong> has not been scanned via QR code for 30 or more days and may need physical verification.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                        <tr style="background:#fff8e6;"><td style="padding:8px; font-weight:bold; width:35%;">Asset</td><td style="padding:8px;">{{ object.name }} ({{ object.asset_code }})</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Last Scanned</td><td style="padding:8px; color:#f77f00;">{{ object.last_scan_date or 'Never' }}</td></tr>
+                        <tr style="background:#fff8e6;"><td style="padding:8px; font-weight:bold;">Expected Location</td><td style="padding:8px;">{{ (object.building or '') + ' ' + (object.room or '') or '—' }}</td></tr>
+                        <tr><td style="padding:8px; font-weight:bold;">Department</td><td style="padding:8px;">{{ object.department_id.name if object.department_id else '—' }}</td></tr>
+                        <tr style="background:#fff8e6;"><td style="padding:8px; font-weight:bold;">Custodian</td><td style="padding:8px;">{{ object.custodian_name or '—' }}</td></tr>
+                    </table>
+                    <p>Please locate this asset and scan its QR code to confirm its physical presence and location.</p>
+                </div>
+            </div>
+        ]]></field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+
     </data>
 </odoo>

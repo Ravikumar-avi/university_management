@@ -13,6 +13,7 @@ class UniversityDashboard(models.TransientModel):
 
     @api.model
     def get_dashboard_data(self):
+        asset_summary = self._get_asset_summary()
         return {
             'overview': self._get_overview_data(),
             'students': self._get_students_data(),
@@ -26,7 +27,9 @@ class UniversityDashboard(models.TransientModel):
             'department_stats': self._get_department_stats(),
             'fee_monthly': self._get_fee_monthly_trend(),
             'semester_admissions': self._get_semester_admissions(),
-            'assets': self._get_asset_dummy_data(),
+            'assets': asset_summary['kpi'],
+            'asset_purchase_requests': asset_summary['purchase_requests'],
+            'asset_handovers': asset_summary['handovers'],
         }
 
     def _student_active_domain(self):
@@ -111,6 +114,109 @@ class UniversityDashboard(models.TransientModel):
             'active_routes': active_routes,
             'transport_students': transport_students,
         }
+
+    def _get_asset_summary(self):
+        """Return asset KPIs and recent records for the main university dashboard."""
+        env = self.env
+        kpi = {
+            'total_assets': 0, 'available': 0, 'maintenance_due': 0,
+            'pending_requests': 0, 'low_stock_alerts': 0, 'pending_handovers': 0,
+        }
+        purchase_requests = []
+        handovers = []
+
+        state_label_map = {
+            'draft': 'Draft', 'principal_review': 'Awaiting Principal',
+            'vendor_quotes': 'Awaiting Quotes', 'acc_review': 'ACC Review',
+            'secretary_review': 'Awaiting Secretary', 'trust_execution': 'Executing',
+            'done': 'Done', 'rejected': 'Rejected',
+        }
+        handover_label_map = {
+            'draft': 'Draft', 'pending_hod': 'Pending HOD',
+            'pending_principal': 'Pending Principal', 'approved': 'Approved',
+            'completed': 'Completed', 'rejected': 'Rejected',
+        }
+
+        try:
+            from datetime import date as _date
+            today_str = _date.today().strftime('%Y-%m-%d')
+
+            # asset.asset: state values = draft/active/under_maintenance/transferred/disposed/condemned/lost/audited
+            # asset.asset: status values = available/not_available/needs_purchase/in_audit
+            kpi['total_assets'] = env['asset.asset'].search_count(
+                [('state', 'not in', ['disposed', 'condemned', 'lost'])])
+            kpi['available'] = env['asset.asset'].search_count(
+                [('state', 'not in', ['disposed', 'condemned', 'lost']),
+                 ('status', '=', 'available')])
+            kpi['maintenance_due'] = env['asset.asset'].search_count(
+                [('next_service_date', '!=', False),
+                 ('next_service_date', '<=', today_str),
+                 ('state', 'in', ['active', 'audited'])])
+            # low_stock is a computed Boolean on asset.asset
+            kpi['low_stock_alerts'] = env['asset.asset'].search_count(
+                [('low_stock', '=', True),
+                 ('state', 'not in', ['disposed', 'condemned', 'lost'])])
+            kpi['pending_requests'] = env['asset.purchase.request'].search_count(
+                [('state', 'not in', ['done', 'rejected', 'draft'])])
+            kpi['pending_handovers'] = env['asset.handover'].search_count(
+                [('state', 'in', ['pending_hod', 'pending_principal'])])
+
+            # Recent purchase requests (exclude pure drafts to show meaningful data)
+            prs = env['asset.purchase.request'].search(
+                [], order='request_date desc', limit=6)
+            for pr in prs:
+                purchase_requests.append({
+                    'id': pr.id,
+                    'name': pr.name or '/',
+                    'requested_by': pr.requested_by.name if pr.requested_by else '',
+                    'item_description': (pr.item_description or '')[:60],
+                    'state': pr.state,
+                    'state_label': state_label_map.get(pr.state, pr.state),
+                })
+
+            # Recent handover requests
+            hvs = env['asset.handover'].search(
+                [], order='request_date desc', limit=6)
+            for hv in hvs:
+                handovers.append({
+                    'id': hv.id,
+                    'name': hv.name or '/',
+                    'asset_name': hv.asset_id.name if hv.asset_id else '',
+                    'to_department': hv.to_department_id.name if hv.to_department_id else '',
+                    'state': hv.state,
+                    'state_label': handover_label_map.get(hv.state, hv.state),
+                })
+
+            # Chart data: assets by category
+            by_category = []
+            categories = env['asset.category'].search([])
+            for cat in categories:
+                count = env['asset.asset'].search_count([
+                    ('category_id', '=', cat.id),
+                    ('state', 'not in', ['disposed', 'condemned', 'lost']),
+                ])
+                if count:
+                    by_category.append({'label': cat.name, 'value': count})
+
+            # Chart data: assets by state
+            state_labels = {
+                'draft': 'Draft', 'active': 'Active',
+                'under_maintenance': 'Maintenance', 'transferred': 'Transferred',
+                'audited': 'Audited',
+            }
+            by_state = []
+            for s_key, s_label in state_labels.items():
+                count = env['asset.asset'].search_count([('state', '=', s_key)])
+                if count:
+                    by_state.append({'key': s_key, 'label': s_label, 'value': count})
+
+            kpi['charts'] = {'by_category': by_category, 'by_state': by_state}
+
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning('Asset summary in university dashboard failed: %s', e)
+
+        return {'kpi': kpi, 'purchase_requests': purchase_requests, 'handovers': handovers}
 
     def _get_students_data(self):
         env = self.env
@@ -676,148 +782,6 @@ class UniversityDashboard(models.TransientModel):
             })
 
         return result
-
-    def _get_asset_dummy_data(self):
-        return {
-            'total_assets': 25,
-            'active_assets': 20,
-            'under_maintenance': 2,
-            'disposed_assets': 1,
-            'pending_requests': 4,
-            'transfers_this_month': 4,
-            'assets_under_warranty': 7,
-            'unverified_assets': 18,
-            'total_purchase_value': 3885000.0,
-            'total_book_value': 3128000.0,
-            'by_category': [
-                {'name': 'IT Equipment', 'count': 9},
-                {'name': 'Lab Equipment', 'count': 5},
-                {'name': 'Furniture', 'count': 3},
-                {'name': 'Vehicles', 'count': 2},
-                {'name': 'Electrical Equipment', 'count': 4},
-                {'name': 'Sports Equipment', 'count': 2},
-            ],
-            'by_condition': [
-                {'name': 'Good', 'count': 17},
-                {'name': 'Fair', 'count': 5},
-                {'name': 'Poor', 'count': 2},
-                {'name': 'Condemned', 'count': 1},
-            ],
-            'recent_maintenance': [
-                {
-                    'id': -1,
-                    'name': 'MAINT/2024/00005',
-                    'asset': 'Daikin Split AC 1.5 Ton (Set of 5)',
-                    'date': '2024-04-01',
-                    'state': 'assigned',
-                    'type': 'amc',
-                },
-                {
-                    'id': -2,
-                    'name': 'MAINT/2024/00004',
-                    'asset': 'Digital Oscilloscope 100MHz',
-                    'date': '2024-03-20',
-                    'state': 'completed',
-                    'type': 'calibration',
-                },
-                {
-                    'id': -3,
-                    'name': 'MAINT/2024/00003',
-                    'asset': 'Hydraulic Press 20 Ton',
-                    'date': '2024-02-20',
-                    'state': 'in_progress',
-                    'type': 'corrective',
-                },
-                {
-                    'id': -4,
-                    'name': 'MAINT/2024/00002',
-                    'asset': 'Kirloskar DG Set 62.5 KVA',
-                    'date': '2024-01-12',
-                    'state': 'completed',
-                    'type': 'preventive',
-                },
-                {
-                    'id': -5,
-                    'name': 'MAINT/2024/00001',
-                    'asset': 'Epson Multimedia Projector',
-                    'date': '2024-03-17',
-                    'state': 'completed',
-                    'type': 'corrective',
-                },
-            ],
-            'recent_requests': [
-                {
-                    'id': -11,
-                    'name': 'AREQ/2024/0004',
-                    'requester': 'Administrator',
-                    'category': 'IT Equipment',
-                    'date': '2024-04-03',
-                    'state': 'approved',
-                },
-                {
-                    'id': -12,
-                    'name': 'AREQ/2024/0003',
-                    'requester': 'Administrator',
-                    'category': 'Lab Equipment',
-                    'date': '2024-04-05',
-                    'state': 'draft',
-                },
-                {
-                    'id': -13,
-                    'name': 'AREQ/2024/0002',
-                    'requester': 'Administrator',
-                    'category': 'Furniture',
-                    'date': '2024-03-25',
-                    'state': 'pending_purchase',
-                },
-                {
-                    'id': -14,
-                    'name': 'AREQ/2024/0001',
-                    'requester': 'Administrator',
-                    'category': 'IT Equipment',
-                    'date': '2024-04-01',
-                    'state': 'submitted',
-                },
-            ],
-            'recent_transfers': [
-                {
-                    'id': -21,
-                    'name': 'TRF/2024/00004',
-                    'asset': 'Samsung Smart Board 75 Inch',
-                    'from_dept': 'Electronics and Communication Engg',
-                    'to_dept': 'Computer Science and Engineering',
-                    'date': '2024-04-01',
-                    'state': 'completed',
-                },
-                {
-                    'id': -22,
-                    'name': 'TRF/2024/00003',
-                    'asset': 'Dell Laptop Core i7',
-                    'from_dept': 'Computer Science and Engineering',
-                    'to_dept': 'Computer Science and Engineering',
-                    'date': '2024-03-20',
-                    'state': 'pending',
-                },
-                {
-                    'id': -23,
-                    'name': 'TRF/2024/00002',
-                    'asset': 'Lenovo ThinkPad — Faculty Laptop',
-                    'from_dept': 'Computer Science and Engineering',
-                    'to_dept': 'Computer Science and Engineering',
-                    'date': '2024-02-10',
-                    'state': 'completed',
-                },
-                {
-                    'id': -24,
-                    'name': 'TRF/2024/00001',
-                    'asset': 'HP Desktop PC Core i5',
-                    'from_dept': 'Administration',
-                    'to_dept': 'Administration',
-                    'date': '2024-01-15',
-                    'state': 'completed',
-                },
-            ],
-        }
 
     @staticmethod
     def _format_amount(amount):

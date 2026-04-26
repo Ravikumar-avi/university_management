@@ -90,21 +90,14 @@ class UniversityDashboard extends Component {
             },
             assets: {
                 total_assets: 0,
-                active_assets: 0,
-                under_maintenance: 0,
-                disposed_assets: 0,
+                available: 0,
+                maintenance_due: 0,
                 pending_requests: 0,
-                transfers_this_month: 0,
-                assets_under_warranty: 0,
-                unverified_assets: 0,
-                total_purchase_value: 0,
-                total_book_value: 0,
-                by_category: [],
-                by_condition: [],
-                recent_maintenance: [],
-                recent_requests: [],
-                recent_transfers: [],
+                low_stock_alerts: 0,
+                pending_handovers: 0,
             },
+            assetPurchaseRequests: [],
+            assetHandovers: [],
             recentAdmissions: [],
             recentPayments: [],
             departmentStats: [],
@@ -128,15 +121,6 @@ class UniversityDashboard extends Component {
 
         onWillUnmount(() => {
             UniversityCharts.destroyAll();
-            // Also destroy asset-specific charts
-            if (this._assetCategoryChart) {
-                this._assetCategoryChart.destroy();
-                this._assetCategoryChart = null;
-            }
-            if (this._assetConditionChart) {
-                this._assetConditionChart.destroy();
-                this._assetConditionChart = null;
-            }
         });
     }
 
@@ -149,9 +133,6 @@ class UniversityDashboard extends Component {
         // Re-render charts with new theme
         setTimeout(() => {
             UniversityCharts.renderAll(this.state);
-            if (this.state.activeModule === 'assets') {
-                this._renderAssetCharts();
-            }
         }, 100);
 
         // Show theme change notification
@@ -203,10 +184,6 @@ class UniversityDashboard extends Component {
 
             setTimeout(() => {
                 UniversityCharts.renderAll(this.state);
-                // FIX 1: Also render asset charts if we're on assets module
-                if (this.state.activeModule === 'assets') {
-                    this._renderAssetCharts();
-                }
             }, 100);
         }
     }
@@ -229,73 +206,11 @@ class UniversityDashboard extends Component {
         this.state.hostel = { ...this.state.hostel, ...(data.hostel || {}) };
         this.state.library = { ...this.state.library, ...(data.library || {}) };
 
-        // FIX 2: Dummy data uses correct field names matching the XML template
-        // (asset_id, request_date, requester_id, category_id, from_department_id,
-        //  to_department_id, transfer_date) so the tables render properly.
-        const assetFallback = {
-            total_assets: 25,
-            active_assets: 20,
-            under_maintenance: 2,
-            disposed_assets: 1,
-            pending_requests: 4,
-            transfers_this_month: 4,
-            assets_under_warranty: 7,
-            unverified_assets: 18,
-            total_purchase_value: 3885000,
-            total_book_value: 3128000,
-            by_category: [
-                { name: "IT Equipment", count: 9 },
-                { name: "Lab Equipment", count: 5 },
-                { name: "Furniture", count: 3 },
-                { name: "Vehicles", count: 2 },
-                { name: "Electrical Equipment", count: 4 },
-                { name: "Sports Equipment", count: 2 },
-            ],
-            by_condition: [
-                { name: "Good", count: 17 },
-                { name: "Fair", count: 5 },
-                { name: "Poor", count: 2 },
-                { name: "Condemned", count: 1 },
-            ],
-            // FIX 2a: use asset_id tuple and request_date (matches XML t-esc="m.asset_id[1]" / m.request_date)
-            recent_maintenance: [
-                { id: -1, name: "MAINT/2024/00005", asset_id: [-1, "Daikin Split AC 1.5 Ton (Set of 5)"], request_date: "2024-04-01", state: "assigned", type: "amc" },
-                { id: -2, name: "MAINT/2024/00004", asset_id: [-2, "Digital Oscilloscope 100MHz"], request_date: "2024-03-20", state: "completed", type: "calibration" },
-                { id: -3, name: "MAINT/2024/00003", asset_id: [-3, "Hydraulic Press 20 Ton"], request_date: "2024-02-20", state: "in_progress", type: "corrective" },
-                { id: -4, name: "MAINT/2024/00002", asset_id: [-4, "Kirloskar DG Set 62.5 KVA"], request_date: "2024-01-12", state: "completed", type: "preventive" },
-                { id: -5, name: "MAINT/2024/00001", asset_id: [-5, "Epson Multimedia Projector"], request_date: "2024-03-17", state: "completed", type: "corrective" },
-            ],
-            // FIX 2b: use requester_id tuple, category_id tuple, request_date (matches XML)
-            recent_requests: [
-                { id: -11, name: "AREQ/2024/0004", requester_id: [-11, "Administrator"], category_id: [-11, "IT Equipment"], request_date: "2024-04-03", state: "approved" },
-                { id: -12, name: "AREQ/2024/0003", requester_id: [-12, "Administrator"], category_id: [-12, "Lab Equipment"], request_date: "2024-04-05", state: "draft" },
-                { id: -13, name: "AREQ/2024/0002", requester_id: [-13, "Administrator"], category_id: [-13, "Furniture"], request_date: "2024-03-25", state: "pending_purchase" },
-                { id: -14, name: "AREQ/2024/0001", requester_id: [-14, "Administrator"], category_id: [-14, "IT Equipment"], request_date: "2024-04-01", state: "submitted" },
-            ],
-            // FIX 2c: use asset_id tuple, from_department_id, to_department_id, transfer_date (matches XML)
-            recent_transfers: [
-                { id: -21, name: "TRF/2024/00004", asset_id: [-21, "Samsung Smart Board 75 Inch"], from_department_id: [-21, "Electronics and Communication Engg"], to_department_id: [-21, "Computer Science and Engineering"], transfer_date: "2024-04-01", state: "completed" },
-                { id: -22, name: "TRF/2024/00003", asset_id: [-22, "Dell Laptop Core i7"], from_department_id: [-22, "Computer Science and Engineering"], to_department_id: [-22, "Computer Science and Engineering"], transfer_date: "2024-03-20", state: "pending" },
-                { id: -23, name: "TRF/2024/00002", asset_id: [-23, "Lenovo ThinkPad — Faculty Laptop"], from_department_id: [-23, "Computer Science and Engineering"], to_department_id: [-23, "Computer Science and Engineering"], transfer_date: "2024-02-10", state: "completed" },
-                { id: -24, name: "TRF/2024/00001", asset_id: [-24, "HP Desktop PC Core i5"], from_department_id: [-24, "Administration"], to_department_id: [-24, "Administration"], transfer_date: "2024-01-15", state: "completed" },
-            ],
-        };
-
-        const incomingAssets = data.assets || {};
-        const hasAssets =
-            (incomingAssets.total_assets || 0) > 0 ||
-            (incomingAssets.pending_requests || 0) > 0 ||
-            (incomingAssets.transfers_this_month || 0) > 0 ||
-            (incomingAssets.by_category || []).length > 0 ||
-            (incomingAssets.by_condition || []).length > 0 ||
-            (incomingAssets.recent_maintenance || []).length > 0 ||
-            (incomingAssets.recent_requests || []).length > 0 ||
-            (incomingAssets.recent_transfers || []).length > 0;
-
-        this.state.assets = {
-            ...this.state.assets,
-            ...(hasAssets ? incomingAssets : assetFallback),
-        };
+        if (data.assets) {
+            this.state.assets = { ...this.state.assets, ...data.assets };
+        }
+        this.state.assetPurchaseRequests = data.asset_purchase_requests || [];
+        this.state.assetHandovers = data.asset_handovers || [];
 
         this.state.recentAdmissions = data.recent_admissions || [];
         this.state.recentPayments = data.recent_payments || [];
@@ -308,102 +223,8 @@ class UniversityDashboard extends Component {
         this.state.activeModule = moduleKey;
 
         setTimeout(() => {
-            UniversityCharts.renderAll(this.state);
-            // FIX 1: Call asset chart renderer when switching to assets tab
-            if (moduleKey === 'assets') {
-                this._renderAssetCharts();
-            }
-        }, 100);
-    }
-
-    // FIX 1: This method is now properly called from setActiveModule and loadDashboardData
-    _renderAssetCharts() {
-        if (!window.Chart) {
-            return;
-        }
-
-        const categoryCanvas = document.getElementById("uni-asset-category-chart");
-        const conditionCanvas = document.getElementById("uni-asset-condition-chart");
-
-        // destroy old charts if already present
-        if (this._assetCategoryChart) {
-            this._assetCategoryChart.destroy();
-            this._assetCategoryChart = null;
-        }
-        if (this._assetConditionChart) {
-            this._assetConditionChart.destroy();
-            this._assetConditionChart = null;
-        }
-
-        const byCategory = (this.state.assets?.by_category || []);
-        const byCondition = (this.state.assets?.by_condition || []);
-
-        if (categoryCanvas && byCategory.length) {
-            this._assetCategoryChart = new Chart(categoryCanvas, {
-                type: "doughnut",
-                data: {
-                    labels: byCategory.map(x => x.name),
-                    datasets: [{
-                        data: byCategory.map(x => x.count),
-                        backgroundColor: [
-                            "#3b82f6",
-                            "#10b981",
-                            "#f59e0b",
-                            "#8b5cf6",
-                            "#ef4444",
-                            "#14b8a6",
-                        ],
-                        borderWidth: 1,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: "bottom",
-                        },
-                    },
-                },
-            });
-        }
-
-        if (conditionCanvas && byCondition.length) {
-            this._assetConditionChart = new Chart(conditionCanvas, {
-                type: "bar",
-                data: {
-                    labels: byCondition.map(x => x.name),
-                    datasets: [{
-                        label: "Assets",
-                        data: byCondition.map(x => x.count),
-                        backgroundColor: [
-                            "#10b981",
-                            "#f59e0b",
-                            "#ef4444",
-                            "#6b7280",
-                        ],
-                        borderWidth: 1,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false,
-                        },
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0,
-                            },
-                        },
-                    },
-                },
-            });
-        }
+            UniversityCharts.renderForModule(moduleKey, this.state);
+        }, 150);
     }
 
     // ── Navigation helpers ──────────────────────────────────────────────────
@@ -423,16 +244,17 @@ class UniversityDashboard extends Component {
     openFeePayments() { this.navigateTo("university_management.action_fee_payment"); }
     openFeeStructures() { this.navigateTo("university_management.action_fee_structure"); }
     openExaminations() { this.navigateTo("university_management.action_examination"); }
+    openHallTickets() { this.navigateTo("university_management.action_examination_hall_ticket"); }
+    openExamResults() { this.navigateTo("university_management.action_exam_result"); }
     openHostel() { this.navigateTo("university_management.action_hostel_hostel"); }
+    openHostelComplaints() { this.navigateTo("university_management.action_hostel_complaint"); }
     openLibrary() { this.navigateTo("university_management.action_library_book"); }
+    openLibraryIssues() { this.navigateTo("university_management.action_library_issue"); }
     openPlacement() { this.navigateTo("university_management.action_placement_drive"); }
     openTransport() { this.navigateTo("university_management.action_transport_vehicle"); }
-
-    // FIX 3: Asset navigation stubs — no-ops so clicks don't crash
-    openAssets() { /* disabled – no action defined */ }
-    openAssetRequests() { /* disabled – no action defined */ }
-    openAssetMaintenance() { /* disabled – no action defined */ }
-    openAssetTransfers() { /* disabled – no action defined */ }
+    openAssets() { this.navigateTo("university_management.action_asset_asset"); }
+    openPurchaseRequests() { this.navigateTo("university_management.action_asset_purchase_request"); }
+    openHandoverRequests() { this.navigateTo("university_management.action_asset_handover"); }
 
     // Utility methods
     formatNumber(num) {
@@ -446,29 +268,6 @@ class UniversityDashboard extends Component {
     formatCurrency(amount) {
         if (!amount) return '₹0';
         return '₹' + this.formatNumber(amount);
-    }
-
-    assetStateClass(state) {
-        const value = (state || "").toString().toLowerCase();
-
-        if (["completed", "approved", "issued", "done", "active"].includes(value)) {
-            return "success";
-        }
-        if (["pending", "submitted", "in_progress", "under_maintenance", "assigned", "verification", "pending_purchase"].includes(value)) {
-            return "warning";
-        }
-        if (["cancelled", "rejected", "disposed", "scrapped"].includes(value)) {
-            return "danger";
-        }
-        if (["draft"].includes(value)) {
-            return "secondary";
-        }
-        return "info";
-    }
-
-    assetStateLabel(state) {
-        const value = (state || "").toString().replace(/_/g, " ");
-        return value.charAt(0).toUpperCase() + value.slice(1);
     }
 
     getCurrentDate() {

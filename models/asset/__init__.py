@@ -5,3 +5,7 @@ from . import asset_request
 from . import asset_qr_scan_log
 from . import helpdesk_tickets
 from . import purchase_orders
+from . import asset_purchase_request
+from . import asset_handover
+from . import asset_audit
+from . import asset_alerts

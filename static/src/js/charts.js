@@ -591,6 +591,85 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // MASTER RENDER
     // ─────────────────────────────────────────────────────────────
+
+    // ─────────────────────────────────────────────────────────────
+    // ASSET: Assets by Category (Doughnut)
+    // ─────────────────────────────────────────────────────────────
+    renderAssetsByCategory(data) {
+        const id = 'uni-asset-category-chart';
+        const canvas = this._canvas(id);
+        if (!canvas || !data || !data.length) return;
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+        this.instances[id] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(d => d.label),
+                datasets: [{
+                    data: data.map(d => d.value),
+                    backgroundColor: [
+                        this.palette.blue, this.palette.green, this.palette.amber,
+                        this.palette.purple, this.palette.teal, this.palette.red,
+                        this.palette.orange, this.palette.indigo,
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverOffset: 8,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1500, easing: 'easeInOutQuart' },
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } },
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} assets` } },
+                },
+                cutout: '60%',
+            },
+        });
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // ASSET: Asset State Breakdown (Bar)
+    // ─────────────────────────────────────────────────────────────
+    renderAssetStateChart(data) {
+        const id = 'uni-asset-state-chart';
+        const canvas = this._canvas(id);
+        if (!canvas || !data || !data.length) return;
+        this._destroy(id);
+        const ctx = canvas.getContext('2d');
+        const colors = {
+            active: this.palette.green, draft: this.palette.blue,
+            under_maintenance: this.palette.amber, transferred: this.palette.teal,
+            audited: this.palette.indigo,
+        };
+        this.instances[id] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.label),
+                datasets: [{
+                    label: 'Assets',
+                    data: data.map(d => d.value),
+                    backgroundColor: data.map(d => colors[d.key] || this.palette.blue),
+                    borderRadius: 8,
+                    barPercentage: 0.6,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1500, easing: 'easeInOutQuart' },
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 },
+                         grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } },
+                },
+            },
+        });
+    },
+
     renderAll(state) {
         if (!this._initDefaults()) return;
 
@@ -628,6 +707,12 @@ const UniversityCharts = {
         // Library bar
         if (state.library) {
             this.renderLibraryChart(state.library);
+        }
+
+        // Asset charts
+        if (state.assets?.charts) {
+            this.renderAssetsByCategory(state.assets.charts.by_category || []);
+            this.renderAssetStateChart(state.assets.charts.by_state || []);
         }
     },
 
@@ -676,6 +761,13 @@ const UniversityCharts = {
                 case 'placement':
                     if (state.departmentStats?.length)
                         this.renderPlacementChart(state.departmentStats);
+                    break;
+
+                case 'assets':
+                    if (state.assets?.charts) {
+                        this.renderAssetsByCategory(state.assets.charts.by_category || []);
+                        this.renderAssetStateChart(state.assets.charts.by_state || []);
+                    }
                     break;
             }
         }, 100);

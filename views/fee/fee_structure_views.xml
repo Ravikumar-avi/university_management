@@ -356,6 +356,9 @@
         <field name="arch" type="xml">
             <form string="Fee Component">
                 <sheet>
+                    <group string="Fee">
+                        <field name="fee_structure_id"/>
+                    </group>
                     <group string="Component Details">
                         <group>
                             <field name="sequence"/>
@@ -398,6 +401,7 @@
             <list string="Fee Components">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+                <field name="fee_structure_id"/>
                 <field name="fee_type"/>
                 <field name="amount" widget="monetary" sum="Total"/>
                 <field name="is_mandatory" widget="boolean_toggle"/>

@@ -79,3 +79,13 @@ class AssetQRScanLog(models.Model):
 
     def unlink(self):
         raise UserError(_('QR scan log records cannot be deleted for audit trail purposes.'))
+
+    def action_open_map_link(self):
+        self.ensure_one()
+        if not self.gps_lat or not self.gps_lng:
+            raise UserError(_('No GPS coordinates recorded for this scan.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': 'https://maps.google.com/maps?q=%s,%s&z=18' % (self.gps_lat, self.gps_lng),
+            'target': 'new',
+        }

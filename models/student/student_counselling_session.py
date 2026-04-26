@@ -301,9 +301,15 @@ class StudentCounsellingSession(models.Model):
             # Sync program if discussed program differs
             if self.program_discussed_id:
                 update_vals['program_id'] = self.program_discussed_id.id
+            # A completed session always advances the enquiry to at least
+            # 'counselling_scheduled' — hides the Schedule Counselling button
+            # and signals that counselling has taken place.
+            non_overridable_states = ('seat_blocked', 'admitted', 'lost')
+            if self.enquiry_id.state not in non_overridable_states:
+                update_vals['state'] = 'counselling_scheduled'
             self.enquiry_id.write(update_vals)
 
-            # Move lead stage forward based on outcome
+            # Then let outcome further advance the state for definitive outcomes
             self._sync_enquiry_stage_from_outcome()
 
         self.message_post(
@@ -384,17 +390,22 @@ class StudentCounsellingSession(models.Model):
     # ── Private Helpers ───────────────────────────────────────────────
 
     def _sync_enquiry_stage_from_outcome(self):
-        """Update the parent enquiry state based on session outcome."""
+        """
+        Update the parent enquiry state based on session outcome.
+        Only applies for definitive outcomes — 'counselling_scheduled' is
+        already set by action_complete before this is called.
+        """
         self.ensure_one()
         if not self.outcome or not self.enquiry_id:
             return
+        # Only map outcomes that represent a clear forward/terminal step.
+        # 'needs_follow_up' and 'considering' stay as 'counselling_scheduled'
+        # (already set in action_complete).
         state_map = {
-            'interested':     'interested',
-            'needs_follow_up': 'counselling_scheduled',
-            'considering':    'counselling_scheduled',
-            'seat_blocked':   'seat_blocked',
-            'applied':        'admitted',
-            'not_interested': 'lost',
+            'interested':       'interested',
+            'seat_blocked':     'seat_blocked',
+            'applied':          'admitted',
+            'not_interested':   'lost',
             'chose_competitor': 'lost',
         }
         new_state = state_map.get(self.outcome)

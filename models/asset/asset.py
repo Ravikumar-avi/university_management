@@ -131,6 +131,48 @@ class Asset(models.Model):
         'university.department', string='Department',
         help='Department that owns / uses this asset',
     )
+    # ── HOD In-Charge ─────────────────────────────────────────────
+    hod_id = fields.Many2one(
+        'hr.employee',
+        string='HOD In-Charge',
+        tracking=True,
+        help='Head of Department responsible for this asset. '
+             'Receives notifications on registration, status changes, and alerts.',
+        index=True,
+    )
+    hod_name = fields.Char(
+        related='hod_id.name', store=True, string='HOD Name', readonly=True,
+    )
+    hod_user_id = fields.Many2one(
+        'res.users',
+        related='hod_id.resource_id.user_id',
+        store=True, string='HOD Odoo User', readonly=True,
+    )
+
+    # ── Asset Type & Operational Status ──────────────────────────
+    asset_type = fields.Selection([
+        ('physical', 'Physical'),
+        ('digital', 'Digital / Software'),
+        ('consumable', 'Consumable'),
+    ], string='Asset Type', default='physical', tracking=True)
+
+    status = fields.Selection([
+        ('available', 'Available'),
+        ('not_available', 'Not Available'),
+        ('needs_purchase', 'Needs Purchase'),
+        ('in_audit', 'In Audit'),
+    ], string='Operational Status', default='available', tracking=True)
+
+    license_expiry = fields.Date(string='License Expiry Date')
+
+    stock_qty = fields.Float(string='Stock Quantity', default=0.0)
+    min_stock_qty = fields.Float(string='Minimum Stock Threshold', default=0.0)
+    low_stock = fields.Boolean(
+        string='Low Stock',
+        compute='_compute_low_stock', store=True,
+    )
+    last_scan_lat = fields.Float(string='Last GPS Latitude', digits=(10, 6), readonly=True)
+    last_scan_lng = fields.Float(string='Last GPS Longitude', digits=(10, 6), readonly=True)
     assigned_to = fields.Selection([
         ('department', 'Department'),
         ('faculty', 'Faculty Member'),
@@ -562,16 +604,15 @@ class Asset(models.Model):
         for rec in self:
             if rec.state != 'draft':
                 raise ValidationError(_('Only draft assets can be activated.'))
-            # Create accounting asset only if accounting category is configured (optional)
             if rec.category_id and rec.category_id.account_asset_category_id:
                 try:
                     rec.action_create_accounting_asset()
                 except Exception:
-                    pass  # Accounting integration optional; proceed with activation
+                    pass
             rec.write({'state': 'active'})
-            # Regenerate QR on activation to ensure fresh token URL
             rec._generate_qr_code()
             rec.message_post(body=_('Asset activated and put into service.'))
+            rec._notify_hod_on_registration()
 
     def action_send_for_maintenance(self):
         self.ensure_one()
@@ -600,31 +641,29 @@ class Asset(models.Model):
         )
 
     def action_dispose(self):
-        """
-        Dispose the asset.
-        If linked to an accounting asset (base_accounting_kit), trigger
-        the set_to_close flow which creates a disposal journal entry.
-        """
         self.ensure_one()
         if not self.disposal_reason:
             raise ValidationError(_('Please select a disposal reason before disposing.'))
-
-        # Trigger accounting disposal move via base_accounting_kit
         if self.account_asset_id and self.account_asset_id.state == 'open':
-            self.account_asset_id.set_to_close()
-
+            try:
+                self.account_asset_id.set_to_close()
+            except Exception:
+                pass
         self.write({
             'state': 'disposed',
             'disposal_date': date.today(),
             'disposal_approved_by': self.env.user.id,
+            'status': 'not_available',
         })
+        reason_label = dict(self._fields['disposal_reason'].selection).get(
+            self.disposal_reason, self.disposal_reason
+        )
         self.message_post(
             body=_('Asset disposed. Reason: %s. Scrap value: ₹%s.') % (
-                dict(self._fields['disposal_reason'].selection).get(
-                    self.disposal_reason, ''),
-                self.disposal_amount or 0,
+                reason_label, self.disposal_amount or 0,
             )
         )
+        self._notify_lost_or_retired('disposed')
 
     def action_mark_lost(self):
         self.ensure_one()
@@ -632,10 +671,15 @@ class Asset(models.Model):
             'state': 'lost',
             'disposal_date': date.today(),
             'disposal_reason': 'lost',
+            'status': 'not_available',
         })
         if self.account_asset_id and self.account_asset_id.state == 'open':
-            self.account_asset_id.set_to_close()
+            try:
+                self.account_asset_id.set_to_close()
+            except Exception:
+                pass
         self.message_post(body=_('Asset marked as Lost / Stolen. FIR/complaint to be filed.'))
+        self._notify_lost_or_retired('lost')
 
     def action_condemn(self):
         self.ensure_one()
@@ -790,6 +834,165 @@ class Asset(models.Model):
             'context': {'default_asset_id': self.id},
         }
 
+    # ── Status Actions ────────────────────────────────────────────
+
+    def action_set_status_not_available(self):
+        for rec in self:
+            rec.write({'status': 'not_available'})
+            rec._notify_hod_status_change('Not Available')
+
+    def action_set_status_available(self):
+        for rec in self:
+            rec.write({'status': 'available'})
+            rec._notify_hod_status_change('Available')
+
+    def action_set_status_needs_purchase(self):
+        for rec in self:
+            rec.write({'status': 'needs_purchase'})
+            rec._notify_hod_status_change('Needs Purchase')
+            existing = self.env['asset.purchase.request'].search([
+                ('asset_id', '=', rec.id),
+                ('state', 'in', ('draft', 'principal_review', 'vendor_quotes',
+                                 'acc_review', 'secretary_review', 'trust_execution')),
+            ], limit=1)
+            if not existing:
+                self.env['asset.purchase.request'].create({
+                    'asset_id': rec.id,
+                    'item_description': 'Asset replacement/purchase required: %s' % rec.name,
+                    'justification': 'Asset status marked as "Needs Purchase" via QR scan or dashboard.',
+                    'requested_by': self.env.user.id,
+                    'department_id': rec.department_id.id if rec.department_id else False,
+                })
+                rec.message_post(
+                    body=_('Asset marked as "Needs Purchase". Draft purchase request auto-created.')
+                )
+
+    def action_open_issue_wizard(self):
+        self.ensure_one()
+        if self.asset_type != 'consumable':
+            raise UserError(_('Stock issue is only available for consumable assets.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Issue Consumable Stock'),
+            'res_model': 'asset.stock.issue.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_asset_id': self.id},
+        }
+
+    # ── HOD Notification Helpers ──────────────────────────────────
+
+    def _notify_hod_on_registration(self):
+        self.ensure_one()
+        hod_user = self._get_hod_user()
+        if not hod_user or not hod_user.partner_id:
+            return
+        subject = _('New Asset Registered in Your Department: %s (%s)') % (
+            self.name, self.asset_code
+        )
+        body = _(
+            '<p>Dear %s,</p>'
+            '<p>A new asset has been registered under your department.</p>'
+            '<p><b>Asset Name:</b> %s<br/>'
+            '<b>Asset Code:</b> %s<br/>'
+            '<b>Category:</b> %s<br/>'
+            '<b>Location:</b> %s<br/>'
+            '<b>Registered By:</b> %s</p>'
+            '<p>Please verify the asset details and ensure the QR label is printed and affixed.</p>'
+        ) % (
+                   hod_user.name, self.name, self.asset_code,
+                   self.category_id.name if self.category_id else '—',
+                   ' '.join(filter(None, [self.building, self.floor, self.room])) or '—',
+                   self.env.user.name,
+               )
+        try:
+            self.message_notify(
+                partner_ids=[hod_user.partner_id.id],
+                subject=subject, body=body,
+                message_type='email', subtype_xmlid='mail.mt_comment',
+            )
+        except Exception:
+            pass
+
+    def _notify_lost_or_retired(self, event_type):
+        self.ensure_one()
+        if event_type == 'lost':
+            subject = _('🚨 ASSET REPORTED LOST: %s (%s)') % (self.name, self.asset_code)
+            body_intro = _('has been reported as <b>LOST / STOLEN</b>')
+        else:
+            subject = _('Asset Disposed: %s (%s)') % (self.name, self.asset_code)
+            body_intro = _('has been <b>disposed</b>')
+
+        body = _(
+            '<p>Asset <b>%s (%s)</b> %s.</p>'
+            '<p><b>Category:</b> %s<br/>'
+            '<b>Location (last known):</b> %s<br/>'
+            '<b>Department:</b> %s<br/>'
+            '<b>Marked by:</b> %s on %s</p>%s'
+        ) % (
+                   self.name, self.asset_code, body_intro,
+                   self.category_id.name if self.category_id else '—',
+                   ' '.join(filter(None, [self.building, self.floor, self.room])) or '—',
+                   self.department_id.name if self.department_id else '—',
+                   self.env.user.name, date.today(),
+                   '<p><b>Please investigate and take appropriate action immediately.</b></p>'
+                   if event_type == 'lost' else '',
+               )
+
+        notify_partners = []
+        principal_group = self.env.ref(
+            'university_management.group_asset_principal', raise_if_not_found=False
+        )
+        if principal_group:
+            notify_partners += [u.partner_id.id for u in principal_group.users if u.partner_id]
+
+        hod_user = self._get_hod_user()
+        if hod_user and hod_user.partner_id:
+            notify_partners.append(hod_user.partner_id.id)
+
+        notify_partners = list(set(notify_partners))
+        if notify_partners:
+            try:
+                self.message_notify(
+                    partner_ids=notify_partners,
+                    subject=subject, body=body,
+                    message_type='email', subtype_xmlid='mail.mt_comment',
+                )
+            except Exception:
+                pass
+
+    def _notify_hod_status_change(self, new_status):
+        self.ensure_one()
+        hod_user = self._get_hod_user()
+        if not hod_user or not hod_user.partner_id:
+            return
+        try:
+            self.message_notify(
+                partner_ids=[hod_user.partner_id.id],
+                subject=_('Asset Status Updated: %s → %s') % (self.name, new_status),
+                body=_(
+                    '<p>Asset <b>%s (%s)</b> status has been updated to <b>%s</b> by %s.</p>'
+                    '<p>Location: %s | Department: %s</p>'
+                ) % (
+                         self.name, self.asset_code, new_status, self.env.user.name,
+                         ' '.join(filter(None, [self.building, self.floor, self.room])) or '—',
+                         self.department_id.name if self.department_id else '—',
+                     ),
+                message_type='email', subtype_xmlid='mail.mt_comment',
+            )
+        except Exception:
+            pass
+
+    def _get_hod_user(self):
+        self.ensure_one()
+        if self.hod_id and self.hod_id.resource_id and self.hod_id.resource_id.user_id:
+            return self.hod_id.resource_id.user_id
+        if self.department_id and hasattr(self.department_id, 'hod_id') and self.department_id.hod_id:
+            emp = self.department_id.hod_id
+            if hasattr(emp, 'resource_id') and emp.resource_id and emp.resource_id.user_id:
+                return emp.resource_id.user_id
+        return None
+
     # ── Scheduled Actions ─────────────────────────────────────────────
 
     @api.model
@@ -854,3 +1057,12 @@ class Asset(models.Model):
         self.env['account.asset.asset'].sudo().compute_generated_entries(
             date.today(), asset_type='purchase'
         )
+
+    @api.depends('stock_qty', 'min_stock_qty')
+    def _compute_low_stock(self):
+        for rec in self:
+            rec.low_stock = (
+                    rec.asset_type == 'consumable'
+                    and rec.min_stock_qty > 0
+                    and rec.stock_qty < rec.min_stock_qty
+            )

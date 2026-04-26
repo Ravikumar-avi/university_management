@@ -379,16 +379,22 @@ class StudentSeatBlocking(models.Model):
             'program_id': self.program_id.id,
             'academic_year_id': self.academic_year_id.id,
             'batch_id': self.batch_id.id if self.batch_id else False,
-            'previous_qualification': '',
-            'previous_school': '',
-            'previous_board': '',
-            'previous_percentage': 0.0,
-            'previous_year': fields.Date.today().year,
-            'current_address': '',
-            'permanent_address': '',
-            'father_name': '',
-            'mother_name': '',
+            'previous_qualification': self.enquiry_id.previous_qualification or '',
+            'previous_school': self.enquiry_id.previous_school or '',
+            'previous_board': '', # Not available in enquiry or seat blocking
+            'previous_percentage': self.enquiry_id.previous_percentage or 0.0,
+            'previous_year': self.enquiry_id.previous_year or fields.Date.today().year,
+            'current_address': self.enquiry_id.city or '', # Using city from enquiry as current address
+            'permanent_address': self.enquiry_id.city or '', # Using city from enquiry as permanent address
+            'father_name': '', # Not available in enquiry or seat blocking
+            'mother_name': '', # Not available in enquiry or seat blocking
             'admission_category': 'general',
+            'entrance_exam_taken': self.enquiry_id.entrance_exam_taken or False,
+            'entrance_exam_name': self.enquiry_id.entrance_exam_name or '',
+            'entrance_exam_score': self.enquiry_id.entrance_exam_score or 0.0,
+            'entrance_exam_rank': self.enquiry_id.entrance_exam_rank or 0,
+            'entrance_exam_percentile': self.enquiry_id.entrance_exam_percentile or 0.0,
+            'state_id': self.enquiry_id.state_id.id if self.enquiry_id.state_id else False,
             # Token payment carried forward as application fee paid
             'application_fee': self.token_amount,
             'application_fee_paid': True,
