@@ -68,6 +68,10 @@ class StudentEnquiry(models.Model):
         'university.academic.year', string='Target Academic Year',
         tracking=True,
     )
+    batch_id = fields.Many2one(
+        'university.batch', string='Batch',
+        tracking=True,
+    )
 
     # ── Personal Details ──────────────────────────────────────────────
     date_of_birth = fields.Date(string='Date of Birth')
@@ -255,12 +259,18 @@ class StudentEnquiry(models.Model):
                 'default_applicant_name': self.applicant_name,
                 'default_email': self.email or '',
                 'default_mobile': self.mobile,
+                'default_date_of_birth': self.date_of_birth or False,
+                'default_gender': self.gender or False,
                 'default_program_id': self.program_id.id,
                 'default_academic_year_id': self.academic_year_id.id
                     if self.academic_year_id else False,
+                'default_batch_id': self.batch_id.id if self.batch_id else False,
                 'default_counsellor_id': self.counsellor_id.id,
+                'default_entrance_exam_taken': self.entrance_exam_taken,
                 'default_entrance_exam_name': self.entrance_exam_name or '',
                 'default_entrance_exam_score': self.entrance_exam_score or 0.0,
+                'default_entrance_exam_rank': self.entrance_exam_rank or 0,
+                'default_entrance_exam_percentile': self.entrance_exam_percentile or 0.0,
                 'default_enquiry_id': self.id,
             },
         }

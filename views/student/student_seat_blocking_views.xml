@@ -143,10 +143,17 @@
                         <field name="enquiry_id" readonly="1"
                                invisible="not enquiry_id"
                                options="{'no_create': True}"/>
+                            <field name="entrance_exam_taken"/>
                             <field name="entrance_exam_name"
-                                   placeholder="e.g. JEE, KCET, COMEDK"/>
+                                   placeholder="e.g. JEE, KCET, COMEDK"
+                                   invisible="not entrance_exam_taken"/>
                             <field name="entrance_exam_score"
-                                   placeholder="Score or percentile"/>
+                                   placeholder="Score or percentile"
+                                   invisible="not entrance_exam_taken"/>
+                            <field name="entrance_exam_rank"
+                                   invisible="not entrance_exam_taken"/>
+                            <field name="entrance_exam_percentile"
+                                   invisible="not entrance_exam_taken"/>
                         </group>
                     </group>
 

@@ -164,8 +164,11 @@ class StudentSeatBlocking(models.Model):
         string='Counsellor Notes',
         help='Notes from the counselling session that led to this seat blocking.',
     )
+    entrance_exam_taken = fields.Boolean(string='Entrance Exam Taken', default=False)
     entrance_exam_name = fields.Char(string='Entrance Exam')
     entrance_exam_score = fields.Float(string='Score / Percentile')
+    entrance_exam_rank = fields.Integer(string='Rank')
+    entrance_exam_percentile = fields.Float(string='Percentile')
 
     # ── Status ────────────────────────────────────────────────────────
     state = fields.Selection([
@@ -389,11 +392,11 @@ class StudentSeatBlocking(models.Model):
             'father_name': '', # Not available in enquiry or seat blocking
             'mother_name': '', # Not available in enquiry or seat blocking
             'admission_category': 'general',
-            'entrance_exam_taken': self.enquiry_id.entrance_exam_taken or False,
-            'entrance_exam_name': self.enquiry_id.entrance_exam_name or '',
-            'entrance_exam_score': self.enquiry_id.entrance_exam_score or 0.0,
-            'entrance_exam_rank': self.enquiry_id.entrance_exam_rank or 0,
-            'entrance_exam_percentile': self.enquiry_id.entrance_exam_percentile or 0.0,
+            'entrance_exam_taken': self.entrance_exam_taken,
+            'entrance_exam_name': self.entrance_exam_name or '',
+            'entrance_exam_score': self.entrance_exam_score or 0.0,
+            'entrance_exam_rank': self.entrance_exam_rank or 0,
+            'entrance_exam_percentile': self.entrance_exam_percentile or 0.0,
             'state_id': self.enquiry_id.state_id.id if self.enquiry_id.state_id else False,
             # Token payment carried forward as application fee paid
             'application_fee': self.token_amount,

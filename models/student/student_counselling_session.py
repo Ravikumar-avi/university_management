@@ -278,6 +278,47 @@ class StudentCounsellingSession(models.Model):
                     'A completed session cannot have a future date.'
                 ))
 
+    # ── ORM Overrides ─────────────────────────────────────────────────
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            rec._sync_quick_counselling_to_enquiry()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if any(f in vals for f in ('session_date', 'session_mode', 'enquiry_id')):
+            for rec in self:
+                rec._sync_quick_counselling_to_enquiry()
+        return res
+
+    def _sync_quick_counselling_to_enquiry(self):
+        """
+        Push session_date → enquiry.counselling_date
+        and session_mode → enquiry.counselling_mode
+        whenever a session is created or those fields change.
+        Uses the LATEST session (by session_date) as the source of truth.
+        """
+        if not self.enquiry_id:
+            return
+        # Find the most recent session for this enquiry
+        latest = self.search(
+            [('enquiry_id', '=', self.enquiry_id.id)],
+            order='session_date desc',
+            limit=1,
+        )
+        if not latest:
+            return
+        update_vals = {}
+        if latest.session_date:
+            update_vals['counselling_date'] = latest.session_date
+        if latest.session_mode:
+            update_vals['counselling_mode'] = latest.session_mode
+        if update_vals:
+            self.enquiry_id.write(update_vals)
+
     # ── Business Actions ──────────────────────────────────────────────
 
     def action_complete(self):

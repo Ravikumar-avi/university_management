@@ -199,6 +199,8 @@
                                    options="{'no_create': True}"/>
                             <field name="academic_year_id"
                                    options="{'no_create': True}"/>
+                            <field name="batch_id"
+                                   options="{'no_create': True}"/>
                         </group>
                     </group>
 
