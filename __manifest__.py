@@ -336,6 +336,7 @@
 
 
         'templates/studentportal/studentdashboard_templates.xml',
+        'templates/alumniportal/alumni_portal_templates.xml',
         'templates/parentportal/parentdashboard_templates.xml',
         'templates/facultyportal/facultydashboard_templates.xml',
         'templates/hallticket/hallticket_templates.xml',

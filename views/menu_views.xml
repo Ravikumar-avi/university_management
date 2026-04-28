@@ -89,125 +89,151 @@
               action="action_university_timetable"
               sequence="90"/>
 
-    <!-- ========================================== -->
-    <!-- STUDENT MODULE -->
-    <!-- ========================================== -->
+    <!-- ================================= -->
+    <!-- ADMISSION MODULE-->
+    <!-- ================================= -->
     <menuitem id="menu_student"
               name="Students"
               parent="menu_university_root"
               sequence="20"/>
 
-    <menuitem id="menu_student_student"
-              name="All Students"
+    <!-- ADMISSION -->
+    <menuitem id="menu_student_admission_root"
+              name="Admission"
               parent="menu_student"
-              action="action_student"
-              sequence="10"/>
-
-    <menuitem id="menu_student_admission"
-              name="Admissions"
-              parent="menu_student"
-              action="action_student_admission"
-              sequence="20"/>
-
-    <menuitem id="menu_student_registration"
-              name="Registrations"
-              parent="menu_student"
-              action="action_student_registration"
-              sequence="30"/>
-
-    <menuitem id="menu_student_document"
-              name="Documents"
-              parent="menu_student"
-              action="action_student_document"
-              sequence="40"/>
-
-    <menuitem id="menu_student_attendance"
-              name="Attendance"
-              parent="menu_student"
-              action="action_student_attendance"
-              sequence="50"/>
-
-    <menuitem id="menu_student_parent"
-              name="Parents/Guardians"
-              parent="menu_student"
-              action="action_student_parent"
-              sequence="60"/>
-
-    <menuitem id="menu_student_id_card"
-              name="ID Cards"
-              parent="menu_student"
-              action="action_student_id_card"
-              sequence="70"/>
-
-    <menuitem id="menu_student_discipline"
-              name="Discipline Records"
-              parent="menu_student"
-              action="action_student_discipline"
-              sequence="80"/>
-
-    <menuitem id="menu_student_leave_root"
-              name="Leave Management"
-              parent="menu_student"
-              sequence="10"/>
-
-    <menuitem id="menu_student_leave_new"
-              name="Leave Application"
-              parent="menu_student"
-              action="action_student_leave"
-              sequence="20"/>
-
-    <menuitem id="menu_id_card_requests"
-              name="ID Card Requests"
-              parent="menu_student"
-              action="action_id_card_request"
               sequence="10"/>
 
     <menuitem id="menu_student_enquiry"
-              name="Student Enquiry"
-              parent="menu_student"
+              name="Enquiry"
+              parent="menu_student_admission_root"
               action="action_student_enquiry"
-              sequence="2"/>
+              sequence="1"/>
 
     <menuitem id="menu_student_counselling_sessions"
-              name="Counselling Sessions"
-              parent="menu_student"
+              name="Counselling"
+              parent="menu_student_admission_root"
               action="action_student_counselling_session"
-              sequence="3"/>
+              sequence="2"/>
 
     <menuitem id="menu_student_seat_blocking"
               name="Seat Blocking"
-              parent="menu_student"
+              parent="menu_student_admission_root"
               action="action_student_seat_blocking"
+              sequence="3"/>
+
+    <menuitem id="menu_student_admission"
+              name="Admissions"
+              parent="menu_student_admission_root"
+              action="action_student_admission"
               sequence="4"/>
 
+    <!-- STUDENT RECORDS -->
+    <menuitem id="menu_student_records_root"
+              name="Students"
+              parent="menu_student"
+              sequence="20"/>
+
+    <menuitem id="menu_student_student"
+              name="All Students"
+              parent="menu_student_records_root"
+              action="action_student"
+              sequence="1"/>
+
+    <menuitem id="menu_student_parent"
+              name="Parents/Guardians"
+              parent="menu_student_records_root"
+              action="action_student_parent"
+              sequence="2"/>
+
+    <menuitem id="menu_student_discipline"
+              name="Discipline Records"
+              parent="menu_student_records_root"
+              action="action_student_discipline"
+              sequence="3"/>
+
+    <!-- ACADEMICS -->
+    <menuitem id="menu_student_academic_root"
+              name="Academics"
+              parent="menu_student"
+              sequence="30"/>
+
+    <menuitem id="menu_student_registration"
+              name="Course Registrations"
+              parent="menu_student_academic_root"
+              action="action_student_registration"
+              sequence="1"/>
+
+    <menuitem id="menu_student_attendance"
+              name="Attendance"
+              parent="menu_student_academic_root"
+              action="action_student_attendance"
+              sequence="2"/>
+
+    <menuitem id="menu_student_document"
+              name="Documents"
+              parent="menu_student_academic_root"
+              action="action_student_document"
+              sequence="3"/>
+
+    <!-- ID CARDS -->
+    <menuitem id="menu_student_id_root"
+              name="ID Cards"
+              parent="menu_student"
+              sequence="40"/>
+
+    <menuitem id="menu_student_id_card"
+              name="ID Cards"
+              parent="menu_student_id_root"
+              action="action_student_id_card"
+              sequence="1"/>
+
+    <menuitem id="menu_id_card_requests"
+              name="ID Card Requests"
+              parent="menu_student_id_root"
+              action="action_id_card_request"
+              sequence="2"/>
+
+    <!-- LEAVE -->
+    <menuitem id="menu_student_leave_root"
+              name="Leave Management"
+              parent="menu_student"
+              sequence="50"/>
+
+    <menuitem id="menu_student_leave_new"
+              name="Leave Application"
+              parent="menu_student_leave_root"
+              action="action_student_leave"
+              sequence="1"/>
+
+    <!-- ASSIGNMENTS -->
     <menuitem id="menu_student_assignment_root"
               name="Assignments"
               parent="menu_student"
-              sequence="90"/>
+              sequence="60"/>
 
     <menuitem id="menu_student_assignment"
               name="Assignments &amp; Homework"
               parent="menu_student_assignment_root"
               action="action_student_assignment"
-              sequence="10"/>
+              sequence="1"/>
 
     <menuitem id="menu_student_assignment_submission"
               name="Submissions"
               parent="menu_student_assignment_root"
               action="action_student_assignment_submission"
-              sequence="20"/>
+              sequence="2"/>
 
     <menuitem id="menu_student_assignment_criteria"
               name="Grading Criteria"
               parent="menu_student_assignment_root"
               action="action_student_assignment_criteria"
-              sequence="30"/>
+              sequence="3"/>
 
     <menuitem id="menu_student_assignment_scores"
               name="Score Breakdown"
               parent="menu_student_assignment_root"
               action="action_student_assignment_submission_score"
-              sequence="40"/>
+              sequence="4"/>
 
     <!-- ========================================== -->
     <!-- FEE MODULE -->
@@ -386,256 +412,323 @@
           action="action_faculty_form16"
           sequence="55"/>
 
-    <!-- ========================================== -->
+    <!-- ================================= -->
     <!-- EXAMINATION MODULE -->
-    <!-- ========================================== -->
+    <!-- ================================= -->
     <menuitem id="menu_examination"
               name="Examinations"
               parent="menu_university_root"
               sequence="50"/>
 
-    <menuitem id="menu_examination_examination"
-              name="Examinations"
+    <!-- EXAM MANAGEMENT -->
+    <menuitem id="menu_exam_management_root"
+              name="Exam Management"
               parent="menu_examination"
-              action="action_examination"
               sequence="10"/>
+
+    <menuitem id="menu_examination_examination"
+              name="Exams"
+              parent="menu_exam_management_root"
+              action="action_examination"
+              sequence="1"/>
 
     <menuitem id="menu_exam_timetable"
               name="Exam Timetable"
-              parent="menu_examination"
+              parent="menu_exam_management_root"
               action="action_exam_timetable"
-              sequence="20"/>
+              sequence="2"/>
 
     <menuitem id="menu_exam_seating"
               name="Seating Arrangement"
-              parent="menu_examination"
+              parent="menu_exam_management_root"
               action="action_exam_seating"
-              sequence="30"/>
+              sequence="3"/>
 
     <menuitem id="menu_hall_ticket"
               name="Hall Tickets"
-              parent="menu_examination"
+              parent="menu_exam_management_root"
               action="action_examination_hall_ticket"
-              sequence="40"/>
+              sequence="4"/>
+
+    <!-- EVALUATION -->
+    <menuitem id="menu_exam_evaluation_root"
+              name="Evaluation"
+              parent="menu_examination"
+              sequence="20"/>
 
     <menuitem id="menu_exam_evaluation"
               name="Answer Sheet Evaluation"
-              parent="menu_examination"
+              parent="menu_exam_evaluation_root"
               action="action_exam_evaluation"
-              sequence="50"/>
+              sequence="1"/>
 
     <menuitem id="menu_exam_result"
               name="Results"
-              parent="menu_examination"
+              parent="menu_exam_evaluation_root"
               action="action_exam_result"
-              sequence="60"/>
+              sequence="2"/>
 
     <menuitem id="menu_marksheet"
               name="Marksheets"
-              parent="menu_examination"
+              parent="menu_exam_evaluation_root"
               action="action_examination_marksheet"
-              sequence="70"/>
-
-    <menuitem id="menu_grade_system"
-              name="Grade System"
-              parent="menu_examination"
-              action="action_grade_system"
-              sequence="80"/>
+              sequence="3"/>
 
     <menuitem id="menu_revaluation"
               name="Revaluation Requests"
-              parent="menu_examination"
+              parent="menu_exam_evaluation_root"
               action="action_examination_revaluation"
-              sequence="90"/>
+              sequence="4"/>
+
+    <!-- ONLINE EXAMS -->
+    <menuitem id="menu_online_exam_root"
+              name="Online Exams"
+              parent="menu_examination"
+              sequence="30"/>
 
     <menuitem id="menu_mcq_question_bank"
               name="Question Banks"
-              parent="menu_examination"
+              parent="menu_online_exam_root"
               action="action_mcq_question_bank"
-              sequence="100"/>
+              sequence="1"/>
 
     <menuitem id="menu_mcq_question"
               name="MCQ Questions"
-              parent="menu_examination"
+              parent="menu_online_exam_root"
               action="action_mcq_question"
-              sequence="110"/>
+              sequence="2"/>
 
     <menuitem id="menu_online_exam"
               name="Online Exams"
-              parent="menu_examination"
+              parent="menu_online_exam_root"
               action="action_online_exam"
-              sequence="120"/>
+              sequence="3"/>
 
     <menuitem id="menu_online_exam_attempt"
               name="Exam Attempts"
-              parent="menu_examination"
+              parent="menu_online_exam_root"
               action="action_online_exam_attempt"
-              sequence="130"/>
+              sequence="4"/>
 
-    <!-- ========================================== -->
-    <!-- LIBRARY MODULE -->
-    <!-- ========================================== -->
+    <!-- CONFIGURATION -->
+    <menuitem id="menu_exam_config_root"
+              name="Configuration"
+              parent="menu_examination"
+              sequence="40"/>
+
+    <menuitem id="menu_grade_system"
+              name="Grade System"
+              parent="menu_exam_config_root"
+              action="action_grade_system"
+              sequence="1"/>
+
+    <!-- ================================= -->
+    <!-- LIBRARY Module -->
+    <!-- ================================= -->
     <menuitem id="menu_library"
               name="Library"
               parent="menu_university_root"
               sequence="60"/>
 
+    <!-- LIBRARY MANAGEMENT -->
+    <menuitem id="menu_library_management_root"
+              name="Library Management"
+              parent="menu_library"
+              sequence="10"/>
+
     <menuitem id="menu_library_book"
               name="Books"
-              parent="menu_library"
+              parent="menu_library_management_root"
               action="action_library_book"
-              sequence="10"/>
+              sequence="1"/>
 
     <menuitem id="menu_library_authors"
               name="Authors"
-              parent="menu_library"
+              parent="menu_library_management_root"
               action="action_library_author"
-              sequence="20"/>
-
-    <menuitem id="menu_library_racks"
-              name="Racks/Shelves"
-              parent="menu_library"
-              action="action_library_rack"
-              sequence="30"/>
+              sequence="2"/>
 
     <menuitem id="menu_library_category"
               name="Book Categories"
-              parent="menu_library"
+              parent="menu_library_management_root"
               action="action_library_category"
+              sequence="3"/>
+
+    <menuitem id="menu_library_racks"
+              name="Racks/Shelves"
+              parent="menu_library_management_root"
+              action="action_library_rack"
+              sequence="4"/>
+
+    <!-- CIRCULATION -->
+    <menuitem id="menu_library_circulation_root"
+              name="Circulation"
+              parent="menu_library"
               sequence="20"/>
 
     <menuitem id="menu_library_issue"
-              name="Issue/Return"
-              parent="menu_library"
+              name="Issue / Return"
+              parent="menu_library_circulation_root"
               action="action_library_issue"
-              sequence="30"/>
-
-    <menuitem id="menu_library_member"
-              name="Library Members"
-              parent="menu_library"
-              action="action_library_member"
-              sequence="40"/>
+              sequence="1"/>
 
     <menuitem id="menu_library_reservation"
               name="Book Reservations"
-              parent="menu_library"
+              parent="menu_library_circulation_root"
               action="action_library_reservation"
-              sequence="50"/>
+              sequence="2"/>
+
+    <menuitem id="menu_library_member"
+              name="Library Members"
+              parent="menu_library_circulation_root"
+              action="action_library_member"
+              sequence="3"/>
+
+    <!-- FINANCE -->
+    <menuitem id="menu_library_finance_root"
+              name="Fines &amp; Charges"
+              parent="menu_library"
+              sequence="30"/>
 
     <menuitem id="menu_library_fine"
               name="Fines"
-              parent="menu_library"
+              parent="menu_library_finance_root"
               action="action_library_fine"
-              sequence="60"/>
+              sequence="1"/>
 
+    <!-- E-LIBRARY -->
     <menuitem id="menu_library_elibrary_root"
               name="E-Library"
               parent="menu_library"
-              sequence="70"/>
+              sequence="40"/>
 
     <menuitem id="menu_library_digital_resource"
               name="Digital Resources"
               parent="menu_library_elibrary_root"
               action="action_library_digital_resource"
-              sequence="10"/>
+              sequence="1"/>
 
     <menuitem id="menu_library_digital_collection"
               name="Collections / Databases"
               parent="menu_library_elibrary_root"
               action="action_library_digital_collection"
-              sequence="20"/>
+              sequence="2"/>
 
     <menuitem id="menu_library_digital_access"
               name="Access Logs"
               parent="menu_library_elibrary_root"
               action="action_library_digital_access"
-              sequence="30"/>
+              sequence="3"/>
 
     <menuitem id="menu_library_opac_search_log"
               name="OPAC Search Analytics"
               parent="menu_library_elibrary_root"
               action="action_library_opac_search_log"
-              sequence="40"/>
+              sequence="4"/>
 
-    <!-- ========================================== -->
+    <!-- ================================= -->
     <!-- HOSTEL MODULE -->
-    <!-- ========================================== -->
+    <!-- ================================= -->
     <menuitem id="menu_hostel"
               name="Hostel"
               parent="menu_university_root"
               sequence="70"/>
 
-    <menuitem id="menu_hostel_hostel"
-              name="Hostels"
+    <!-- HOSTEL MANAGEMENT -->
+    <menuitem id="menu_hostel_management_root"
+              name="Hostel Management"
               parent="menu_hostel"
-              action="action_hostel_hostel"
               sequence="10"/>
+
+    <menuitem id="menu_hostel_hostels"
+              name="Hostels"
+              parent="menu_hostel_management_root"
+              action="action_hostel_hostel"
+              sequence="1"/>
 
     <menuitem id="menu_hostel_room"
               name="Rooms"
-              parent="menu_hostel"
+              parent="menu_hostel_management_root"
               action="action_hostel_room"
+              sequence="2"/>
+
+    <!-- ALLOCATION -->
+    <menuitem id="menu_hostel_allocation_root"
+              name="Allocation"
+              parent="menu_hostel"
               sequence="20"/>
 
     <menuitem id="menu_hostel_allocation"
               name="Room Allocation"
-              parent="menu_hostel"
+              parent="menu_hostel_allocation_root"
               action="action_hostel_allocation"
+              sequence="1"/>
+
+    <!-- OPERATIONS -->
+    <menuitem id="menu_hostel_operations_root"
+              name="Operations"
+              parent="menu_hostel"
               sequence="30"/>
 
     <menuitem id="menu_hostel_attendance"
               name="Hostel Attendance"
-              parent="menu_hostel"
+              parent="menu_hostel_operations_root"
               action="action_hostel_attendance"
+              sequence="1"/>
+
+    <menuitem id="menu_hostel_visitor"
+              name="Visitors"
+              parent="menu_hostel_operations_root"
+              action="action_hostel_visitor"
+              sequence="2"/>
+
+    <!-- SUPPORT -->
+    <menuitem id="menu_hostel_support_root"
+              name="Support"
+              parent="menu_hostel"
               sequence="40"/>
 
     <menuitem id="menu_hostel_complaint"
               name="Complaints"
-              parent="menu_hostel"
+              parent="menu_hostel_support_root"
               action="action_hostel_complaint"
-              sequence="50"/>
+              sequence="1"/>
 
-    <menuitem id="menu_hostel_visitor"
-              name="Visitors"
-              parent="menu_hostel"
-              action="action_hostel_visitor"
-              sequence="60"/>
-
-    <!-- Mess Management Submenu -->
+    <!-- MESS MANAGEMENT -->
     <menuitem id="menu_hostel_mess_management"
               name="Mess Management"
               parent="menu_hostel"
-              sequence="70"/>
+              sequence="50"/>
 
     <menuitem id="menu_hostel_mess"
               name="Mess/Canteen"
               parent="menu_hostel_mess_management"
               action="action_hostel_mess"
-              sequence="10"/>
+              sequence="1"/>
 
     <menuitem id="menu_mess_item"
               name="Food Items"
               parent="menu_hostel_mess_management"
               action="action_mess_item"
-              sequence="20"/>
+              sequence="2"/>
 
     <menuitem id="menu_mess_menu"
               name="Daily Menu"
               parent="menu_hostel_mess_management"
               action="action_mess_menu"
-              sequence="30"/>
+              sequence="3"/>
 
     <menuitem id="menu_mess_attendance"
               name="Mess Attendance"
               parent="menu_hostel_mess_management"
               action="action_mess_attendance"
-              sequence="40"/>
+              sequence="4"/>
 
     <menuitem id="menu_mess_feedback"
               name="Mess Feedback"
               parent="menu_hostel_mess_management"
               action="action_mess_feedback"
-              sequence="50"/>
+              sequence="5"/>
 
     <!-- ========================================== -->
     <!-- TRANSPORT MODULE -->

@@ -419,6 +419,59 @@ class Student(models.Model):
 
     def action_graduate(self):
         self.write({'state': 'graduated'})
+        for student in self:
+            student._create_alumni_record()
+
+    def _create_alumni_record(self):
+        """Auto-create an alumni record when a student is graduated."""
+        self.ensure_one()
+        Alumni = self.env['alumni.alumni']
+
+        # Skip if already linked to an alumni record
+        if Alumni.search([('student_id', '=', self.id)], limit=1):
+            return
+
+        # Compute graduation year from batch or current year
+        import datetime
+        graduation_year = datetime.date.today().year
+        if self.batch_id and self.batch_id.end_year:
+            graduation_year = self.batch_id.end_year
+
+        admission_year = 0
+        if self.batch_id and self.batch_id.start_year:
+            admission_year = self.batch_id.start_year
+        elif self.admission_date:
+            admission_year = self.admission_date.year
+
+        # Reuse or create a res.partner for this alumni
+        partner = self.partner_id
+        if not partner:
+            partner = self.env['res.partner'].create({
+                'name': self.name,
+                'email': self.email or self.personal_email or '',
+                'mobile': self.mobile or self.personal_mobile or '',
+            })
+
+        alumni_vals = {
+            'partner_id': partner.id,
+            'student_id': self.id,
+            'name': self.name,
+            'registration_number': self.registration_number or '',
+            'program_id': self.program_id.id if self.program_id else False,
+            'department_id': self.department_id.id if self.department_id else False,
+            'batch_id': self.batch_id.id if self.batch_id else False,
+            'admission_year': admission_year,
+            'graduation_year': graduation_year,
+            'cgpa': self.cgpa or 0.0,
+            'email': self.email or self.personal_email or '',
+            'mobile': self.mobile or self.personal_mobile or '',
+            'photo': self.image_1920 or False,
+        }
+        alumni = Alumni.create(alumni_vals)
+        # Log on the student record
+        self.message_post(
+            body=f'Alumni record created: <a href="/odoo/alumni/{alumni.id}">{self.name}</a>',
+        )
 
     def action_reset_to_draft(self):
         self.write({'state': 'draft'})
