@@ -75,7 +75,7 @@
 
                     <group>
                         <group string="Eligibility">
-                            <field name="min_percentage" widget="percentage"/>
+                            <field name="min_percentage" widget="float" digits="[6,2]"/>
                         </group>
                         <group string="Accreditation">
                             <field name="is_accredited" widget="boolean_toggle"/>

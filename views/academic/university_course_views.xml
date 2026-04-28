@@ -118,7 +118,7 @@
                         </group>
                         <group string="Attendance">
                             <field name="minimum_attendance"
-                                   widget="percentage"/>
+                                   widget="float" digits="[6,2]"/>
                         </group>
                     </group>
 

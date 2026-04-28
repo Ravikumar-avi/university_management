@@ -370,7 +370,7 @@
                                     <field name="useful_life_years"/>
                                     <field name="residual_value" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
-                                    <field name="depreciation_rate" widget="percentage" readonly="1"/>
+                                    <field name="depreciation_rate" widget="float" digits="[6,2]" readonly="1"/>
                                 </group>
                                 <group string="Current Values (from Accounting)">
                                     <field name="accumulated_depreciation" widget="monetary"
