@@ -660,26 +660,63 @@ class UniversityDashboard(models.TransientModel):
     def _get_recent_admissions(self):
         result = []
         try:
-            admissions = self.env['student.admission'].search(
-                [('state', 'not in', ['cancelled'])],
-                order='application_date desc',
+            # Try fetching from student.student first (photos are stored there)
+            students = self.env['student.student'].search(
+                [],
+                order='create_date desc',
                 limit=8,
             )
-            state_selection = dict(
-                admissions.fields_get(['state'])['state']['selection']
-            ) if admissions else {}
-
-            for adm in admissions:
+            for stu in students:
+                photo_b64 = False
+                try:
+                    if stu.student_photo:
+                        photo_b64 = stu.student_photo.decode('utf-8') if isinstance(stu.student_photo, bytes) else stu.student_photo
+                except Exception:
+                    photo_b64 = False
                 result.append({
-                    'id': adm.id,
-                    'name': adm.applicant_name or 'Unknown',
-                    'program': adm.program_id.name if adm.program_id else '',
-                    'date': adm.application_date.strftime('%d %b %Y') if adm.application_date else '',
-                    'state': adm.state,
-                    'state_label': state_selection.get(adm.state, adm.state),
+                    'id': stu.id,
+                    'name': stu.name or 'Unknown',
+                    'program': stu.program_id.name if stu.program_id else '',
+                    'date': stu.create_date.strftime('%d %b %Y') if stu.create_date else '',
+                    'state': stu.state or 'active',
+                    'state_label': (stu.state or 'active').replace('_', ' ').title(),
+                    'photo': photo_b64,
                 })
         except Exception as e:
             _logger.warning("Recent admissions fetch error: %s", e)
+
+        # Fallback to student.admission if no student records found
+        if not result:
+            try:
+                admissions = self.env['student.admission'].search(
+                    [('state', 'not in', ['cancelled'])],
+                    order='application_date desc',
+                    limit=8,
+                )
+                state_selection = dict(
+                    admissions.fields_get(['state'])['state']['selection']
+                ) if admissions else {}
+
+                for adm in admissions:
+                    photo_b64 = False
+                    try:
+                        if adm.applicant_photo:
+                            photo_b64 = adm.applicant_photo.decode('utf-8') if isinstance(adm.applicant_photo, bytes) else adm.applicant_photo
+                        elif adm.student_id and adm.student_id.student_photo:
+                            photo_b64 = adm.student_id.student_photo.decode('utf-8') if isinstance(adm.student_id.student_photo, bytes) else adm.student_id.student_photo
+                    except Exception:
+                        photo_b64 = False
+                    result.append({
+                        'id': adm.id,
+                        'name': adm.applicant_name or 'Unknown',
+                        'program': adm.program_id.name if adm.program_id else '',
+                        'date': adm.application_date.strftime('%d %b %Y') if adm.application_date else '',
+                        'state': adm.state,
+                        'state_label': state_selection.get(adm.state, adm.state),
+                        'photo': photo_b64,
+                    })
+            except Exception as e:
+                _logger.warning("Recent admissions fallback fetch error: %s", e)
 
         return result
 
@@ -693,12 +730,19 @@ class UniversityDashboard(models.TransientModel):
             )
 
             for pmt in payments:
+                photo_b64 = False
+                try:
+                    if pmt.student_id and pmt.student_id.student_photo:
+                        photo_b64 = pmt.student_id.student_photo.decode('utf-8') if isinstance(pmt.student_id.student_photo, bytes) else pmt.student_id.student_photo
+                except Exception:
+                    photo_b64 = False
                 result.append({
                     'id': pmt.id,
                     'student': pmt.student_id.name if pmt.student_id else 'Unknown',
                     'amount': self._format_amount(pmt.total_amount),
                     'method': pmt.payment_method or '',
                     'state': pmt.state,
+                    'photo': photo_b64,
                 })
         except Exception as e:
             _logger.warning("Recent payments fetch error: %s", e)

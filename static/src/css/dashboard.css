@@ -885,6 +885,20 @@
     transition: all 0.3s ease;
 }
 
+.uni-list-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 8px 12px rgba(26,43,76,0.2);
+    transition: all 0.3s ease;
+}
+
+.uni-list-item:hover .uni-list-avatar-img {
+    transform: rotate(5deg) scale(1.1);
+}
+
 .uni-list-item:hover .uni-list-avatar {
     transform: rotate(5deg) scale(1.1);
 }

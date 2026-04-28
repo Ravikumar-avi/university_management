@@ -251,7 +251,12 @@
                     <div class="uni-list">
                         <t t-foreach="state.recentAdmissions" t-as="adm" t-key="adm.id">
                             <div class="uni-list-item">
-                                <div class="uni-list-avatar" t-esc="adm.name[0]"/>
+                                <t t-if="adm.photo">
+                                    <img t-attf-src="data:image/png;base64,#{adm.photo}" class="uni-list-avatar-img" alt=""/>
+                                </t>
+                                <t t-else="">
+                                    <div class="uni-list-avatar" t-esc="adm.name[0]"/>
+                                </t>
                                 <div class="uni-list-info">
                                     <div class="uni-list-name" t-esc="adm.name"/>
                                     <div class="uni-list-sub" t-esc="adm.program"/>
@@ -556,7 +561,12 @@
                     <div class="uni-list">
                         <t t-foreach="state.recentPayments" t-as="pmt" t-key="pmt.id">
                             <div class="uni-list-item">
-                                <div class="uni-list-avatar" t-esc="pmt.student[0]"/>
+                                <t t-if="pmt.photo">
+                                    <img t-attf-src="data:image/png;base64,#{pmt.photo}" class="uni-list-avatar-img" alt=""/>
+                                </t>
+                                <t t-else="">
+                                    <div class="uni-list-avatar" t-esc="pmt.student[0]"/>
+                                </t>
                                 <div class="uni-list-info">
                                     <div class="uni-list-name" t-esc="pmt.student"/>
                                     <div class="uni-list-sub" t-esc="pmt.method"/>
