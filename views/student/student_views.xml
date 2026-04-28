@@ -51,7 +51,7 @@
                                 icon="fa-calendar-check-o">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
-                                    <field name="attendance_percentage" widget="percentage"/>
+                                    <field name="attendance_percentage" widget="float" digits="[6,1]"/><span>%</span>
                                 </span>
                                 <span class="o_stat_text">Attendance</span>
                             </div>
@@ -238,16 +238,19 @@
 
                     <group>
                         <group string="Facilities">
-                            <field name="is_hosteller" widget="boolean_toggle"/>
+                            <field name="is_hosteller" widget="boolean_toggle" readonly="1"/>
                             <field name="hostel_allocation_id"
                                    invisible="not is_hosteller"
-                                   options="{'no_create': True}"/>
-                            <field name="uses_transport" widget="boolean_toggle"/>
+                                   readonly="1"
+                                   options="{'no_create': True, 'no_open': False}"/>
+                            <field name="uses_transport" widget="boolean_toggle" readonly="1"/>
                             <field name="transport_allocation_id"
                                    invisible="not uses_transport"
-                                   options="{'no_create': True}"/>
+                                   readonly="1"
+                                   options="{'no_create': True, 'no_open': False}"/>
                             <field name="library_member_id"
-                                   options="{'no_create': True}"/>
+                                   readonly="1"
+                                   options="{'no_create': True, 'no_open': False}"/>
                         </group>
                         <group string="Portal Access">
                             <field name="user_id" readonly="1"/>
@@ -418,7 +421,7 @@
                        decoration-success="cgpa &gt;= 8.5"
                        decoration-warning="cgpa &gt;= 6.0 and cgpa &lt; 8.5"
                        decoration-danger="cgpa &lt; 6.0"/>
-                <field name="attendance_percentage" widget="percentage" optional="show"
+                <field name="attendance_percentage" widget="float" digits="[6,1]" optional="show"
                        decoration-success="attendance_percentage &gt;= 75"
                        decoration-warning="attendance_percentage &gt;= 65 and attendance_percentage &lt; 75"
                        decoration-danger="attendance_percentage &lt; 65"/>

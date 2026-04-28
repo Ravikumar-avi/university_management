@@ -111,7 +111,25 @@ class LibraryMember(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('library.member') or '/'
-        return super(LibraryMember, self).create(vals)
+        record = super(LibraryMember, self).create(vals)
+        if record.member_type == 'student' and record.student_id:
+            record.student_id.sudo().library_member_id = record.id
+        return record
+
+    def write(self, vals):
+        res = super(LibraryMember, self).write(vals)
+        for record in self:
+            if record.member_type == 'student' and record.student_id:
+                record.student_id.sudo().library_member_id = record.id
+        return res
+
+    def unlink(self):
+        students = self.filtered(
+            lambda r: r.member_type == 'student' and r.student_id
+        ).mapped('student_id')
+        res = super(LibraryMember, self).unlink()
+        students.sudo().write({'library_member_id': False})
+        return res
 
     # -------------------------------------------------------------------------
     # Compute Methods

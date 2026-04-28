@@ -70,7 +70,27 @@ class HostelAllocation(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('hostel.allocation') or '/'
-        return super(HostelAllocation, self).create(vals)
+        record = super(HostelAllocation, self).create(vals)
+        if record.student_id:
+            record.student_id.sudo().hostel_allocation_id = record.id
+            record.student_id.sudo().is_hosteller = True
+        return record
+
+    def write(self, vals):
+        res = super(HostelAllocation, self).write(vals)
+        for record in self:
+            if record.student_id:
+                record.student_id.sudo().hostel_allocation_id = record.id
+                record.student_id.sudo().is_hosteller = True
+        return res
+
+    def unlink(self):
+        students = self.filtered(lambda r: r.student_id).mapped('student_id')
+        res = super(HostelAllocation, self).unlink()
+        for student in students:
+            if not self.env['hostel.allocation'].search([('student_id', '=', student.id)], limit=1):
+                student.sudo().write({'hostel_allocation_id': False, 'is_hosteller': False})
+        return res
 
     @api.onchange('room_id')
     def _onchange_room_rent(self):

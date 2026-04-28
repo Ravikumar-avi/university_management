@@ -61,7 +61,27 @@ class TransportAllocation(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('transport.allocation') or '/'
-        return super(TransportAllocation, self).create(vals)
+        record = super(TransportAllocation, self).create(vals)
+        if record.student_id:
+            record.student_id.sudo().transport_allocation_id = record.id
+            record.student_id.sudo().uses_transport = True
+        return record
+
+    def write(self, vals):
+        res = super(TransportAllocation, self).write(vals)
+        for record in self:
+            if record.student_id:
+                record.student_id.sudo().transport_allocation_id = record.id
+                record.student_id.sudo().uses_transport = True
+        return res
+
+    def unlink(self):
+        students = self.filtered(lambda r: r.student_id).mapped('student_id')
+        res = super(TransportAllocation, self).unlink()
+        for student in students:
+            if not self.env['transport.allocation'].search([('student_id', '=', student.id)], limit=1):
+                student.sudo().write({'transport_allocation_id': False, 'uses_transport': False})
+        return res
 
     @api.onchange('route_id')
     def _onchange_route_fee(self):
