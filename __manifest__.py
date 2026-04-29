@@ -366,6 +366,9 @@
             'university_management/static/src/js/naac_dashboard.js',
             'university_management/static/src/xml/nba_dashboard_templates.xml',
             'university_management/static/src/js/nba_dashboard.js',
+            'university_management/static/src/css/ai_assistant.css',
+            'university_management/static/src/xml/ai_assistant_templates.xml',
+            'university_management/static/src/js/ai_assistant.js',
         ],
     },
 

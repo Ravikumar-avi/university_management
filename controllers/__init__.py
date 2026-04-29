@@ -15,3 +15,4 @@ from . import portal_fee
 from . import asset_qr_controller
 from . import library_opac_controller
 from . import online_exam_controller
+from . import ai_assistant
