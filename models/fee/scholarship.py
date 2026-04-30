@@ -58,7 +58,7 @@ class Scholarship(models.Model):
 
     journal_id = fields.Many2one('account.journal',
                                  string='Journal',
-                                 domain="[('type', '=', 'general'), ('company_id', '=', company_id)]")
+                                 domain="[('type', 'in', ['bank', 'cash', 'general']), ('company_id', '=', company_id)]")
 
     analytic_account_id = fields.Many2one('account.analytic.account',
                                           string='Analytic Account')
@@ -194,6 +194,20 @@ class Scholarship(models.Model):
         """Create batch payments for all awarded scholarships"""
         awarded_applications = self.application_ids.filtered(lambda a: a.state == 'awarded')
 
+        # Resolve journal: use the one configured on the scholarship, or fall back to
+        # the first available bank/cash journal in the company.
+        journal = self.journal_id
+        if not journal:
+            journal = self.env['account.journal'].search([
+                ('type', 'in', ['bank', 'cash']),
+                ('company_id', '=', self.env.company.id),
+            ], limit=1)
+        if not journal:
+            raise ValidationError(_(
+                'No payment journal found. Please set a journal on the scholarship "%s" '
+                'or configure a bank/cash journal for this company.'
+            ) % self.name)
+
         payment_vals_list = []
         for application in awarded_applications:
             if application.awarded_amount > 0:
@@ -203,9 +217,9 @@ class Scholarship(models.Model):
                     'partner_id': application.student_id.partner_id.id,
                     'amount': application.awarded_amount,
                     'currency_id': self.currency_id.id,
-                    'payment_date': fields.Date.today(),
-                    'journal_id': self.journal_id.id if self.journal_id else False,
-                    'ref': f'Scholarship: {self.name} - {application.student_id.name}',
+                    'date': fields.Date.today(),
+                    'journal_id': journal.id,
+                    'memo': f'Scholarship: {self.name} - {application.student_id.name}',
                 }
                 payment_vals_list.append(payment_vals)
 
@@ -349,11 +363,20 @@ class ScholarshipApplication(models.Model):
             else:
                 record.documents_verified = False
 
-    @api.depends('payment_id', 'invoice_id')
+    @api.depends('payment_id', 'payment_id.state', 'invoice_id', 'invoice_id.payment_state')
     def _compute_payment_state(self):
+        # In Odoo 17+, account.payment no longer has payment_state.
+        # Use payment.state (draft/posted/cancel) and map to our selection.
+        # account.move (invoice) still has payment_state.
         for record in self:
             if record.payment_id:
-                record.payment_state = record.payment_id.state
+                pay_state = record.payment_id.state
+                if pay_state == 'posted':
+                    record.payment_state = 'paid'
+                elif pay_state == 'cancel':
+                    record.payment_state = 'reversed'
+                else:
+                    record.payment_state = 'in_payment'
             elif record.invoice_id:
                 record.payment_state = record.invoice_id.payment_state
             else:
@@ -394,6 +417,20 @@ class ScholarshipApplication(models.Model):
         if not self.awarded_amount or self.awarded_amount <= 0:
             return
 
+        # Resolve journal: use the one configured on the scholarship, or fall back to
+        # the first available bank/cash journal in the company.
+        journal = self.scholarship_id.journal_id
+        if not journal:
+            journal = self.env['account.journal'].search([
+                ('type', 'in', ['bank', 'cash']),
+                ('company_id', '=', self.env.company.id),
+            ], limit=1)
+        if not journal:
+            raise ValidationError(_(
+                'No payment journal found. Please set a journal on the scholarship "%s" '
+                'or configure a bank/cash journal for this company.'
+            ) % self.scholarship_id.name)
+
         # Determine if student is supplier or customer
         partner_type = 'supplier' if self.student_id.partner_id.supplier_rank > 0 else 'customer'
 
@@ -403,9 +440,9 @@ class ScholarshipApplication(models.Model):
             'partner_id': self.student_id.partner_id.id,
             'amount': self.awarded_amount,
             'currency_id': self.currency_id.id,
-            'payment_date': self.award_date or fields.Date.today(),
-            'journal_id': self.scholarship_id.journal_id.id if self.scholarship_id.journal_id else False,
-            'ref': f'Scholarship: {self.scholarship_id.name} - {self.name}',
+            'date': self.award_date or fields.Date.today(),
+            'journal_id': journal.id,
+            'memo': f'Scholarship: {self.scholarship_id.name} - {self.name}',
         }
 
         payment = self.env['account.payment'].create(payment_vals)
@@ -424,19 +461,24 @@ class ScholarshipApplication(models.Model):
         move_vals = {
             'move_type': 'entry',
             'date': fields.Date.today(),
-            'journal_id': self.scholarship_id.journal_id.id if self.scholarship_id.journal_id else False,
+            'journal_id': payment.journal_id.id,
             'line_ids': [],
             'ref': f'Scholarship Expense: {self.name}',
         }
 
         # Debit: Scholarship Expense Account
-        move_vals['line_ids'].append((0, 0, {
+        debit_line_vals = {
             'account_id': self.scholarship_id.expense_account_id.id,
             'debit': self.awarded_amount,
             'credit': 0,
             'name': f'Scholarship: {self.scholarship_id.name} - {self.student_id.name}',
-            'analytic_account_id': self.scholarship_id.analytic_account_id.id,
-        }))
+        }
+        # Odoo 17+ uses analytic_distribution (JSON dict) instead of analytic_account_id
+        if self.scholarship_id.analytic_account_id:
+            debit_line_vals['analytic_distribution'] = {
+                str(self.scholarship_id.analytic_account_id.id): 100
+            }
+        move_vals['line_ids'].append((0, 0, debit_line_vals))
 
         # Credit: Bank Account (from payment)
         bank_account = payment.destination_account_id
