@@ -173,6 +173,17 @@ class Student(models.Model):
     bank_branch = fields.Char(string='Branch')
     ifsc_code = fields.Char(string='IFSC Code')
 
+    # Linked res.partner.bank record (auto-managed by _sync_bank_account)
+    # Appears under the student contact's Bank Accounts tab.
+    # Used by scholarship payments as partner_bank_id.
+    bank_account_id = fields.Many2one(
+        'res.partner.bank',
+        string='Bank Account',
+        readonly=True,
+        help='Auto-created/updated from bank details above. '
+             'Visible on the student contact under Bank Accounts.',
+    )
+
     # Government IDs
     aadhar_number = fields.Char(string='Aadhar Number')
     pan_number = fields.Char(string='PAN Number')
@@ -244,7 +255,82 @@ class Student(models.Model):
             )
             vals['partner_id'] = partner_id
 
-        return super().create(vals)
+        student = super().create(vals)
+
+        # Sync bank details to res.partner.bank if supplied at creation
+        bank_fields = {'bank_account_number', 'bank_name', 'bank_branch', 'ifsc_code'}
+        if bank_fields & set(vals):
+            student._sync_bank_account()
+
+        return student
+
+    def write(self, vals):
+        res = super().write(vals)
+        # Re-sync res.partner.bank whenever any bank field changes
+        bank_fields = {'bank_account_number', 'bank_name', 'bank_branch', 'ifsc_code'}
+        if bank_fields & set(vals):
+            for student in self:
+                student._sync_bank_account()
+        return res
+
+    def _sync_bank_account(self):
+        """
+        Create or update the res.partner.bank record linked to this student's
+        partner so that:
+          1. Bank account appears on student contact under Bank Accounts tab.
+          2. Scholarship payments can use partner_bank_id to direct money
+             to the correct bank account.
+        """
+        self.ensure_one()
+
+        acc_number = (self.bank_account_number or '').strip()
+        if not acc_number:
+            return
+
+        partner_id = self.partner_id.id
+        if not partner_id:
+            return
+
+        PartnerBank = self.env['res.partner.bank']
+
+        bank_vals = {
+            'acc_number': acc_number,
+            'partner_id': partner_id,
+            'acc_holder_name': self.name or '',
+            'send_money': True,  # mark as trusted for outbound payments
+        }
+
+        if self.ifsc_code:
+            bank_vals['bic'] = self.ifsc_code.strip()
+
+        if self.bank_name:
+            bank_name = self.bank_name.strip()
+            ResBank = self.env['res.bank']
+            res_bank = ResBank.search([('name', '=ilike', bank_name)], limit=1)
+            if not res_bank:
+                res_bank = ResBank.create({
+                    'name': bank_name,
+                    'bic': self.ifsc_code.strip() if self.ifsc_code else False,
+                })
+            bank_vals['bank_id'] = res_bank.id
+
+        existing = PartnerBank.search([
+            ('partner_id', '=', partner_id),
+            ('acc_number', '=', acc_number),
+        ], limit=1)
+
+        if existing:
+            existing.write(bank_vals)
+            if self.bank_account_id.id != existing.id:
+                self.bank_account_id = existing.id
+        else:
+            new_bank = PartnerBank.create(bank_vals)
+            self.bank_account_id = new_bank.id
+
+        _logger.info(
+            'student._sync_bank_account: partner=%s acc=%s bank_account_id=%s',
+            partner_id, acc_number, self.bank_account_id.id,
+        )
 
     @api.model
     def _find_or_create_partner(self, name, email=False, mobile=False):

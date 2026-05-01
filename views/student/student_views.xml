@@ -233,6 +233,10 @@
                             <field name="bank_name"/>
                             <field name="bank_branch"/>
                             <field name="ifsc_code"/>
+                            <field name="bank_account_id"
+                                   readonly="1"
+                                   options="{'no_create': True, 'no_open': False}"
+                                   help="Auto-linked contact bank account. Appears under the student contact Bank Accounts tab."/>
                         </group>
                     </group>
 
