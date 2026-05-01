@@ -1,13 +1,14 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, useState, useRef, markup } from "@odoo/owl";
+import { Component, useState, useRef, onMounted, onWillUnmount, markup } from "@odoo/owl";
 
 class UniversityAIAssistant extends Component {
     static template = "university_management.AIAssistant";
 
     setup() {
         this.messagesRef = useRef("messages");
+        this.wrapperRef = useRef("wrapper");
 
         this.state = useState({
             isOpen: false,
@@ -22,6 +23,27 @@ class UniversityAIAssistant extends Component {
             ],
             conversationHistory: [],
         });
+
+        // Click-outside handler
+        this._onDocumentClick = this._onDocumentClick.bind(this);
+
+        onMounted(() => {
+            document.addEventListener("mousedown", this._onDocumentClick);
+        });
+
+        onWillUnmount(() => {
+            document.removeEventListener("mousedown", this._onDocumentClick);
+        });
+    }
+
+    // ── Click outside to close ────────────────────────────────────────────
+
+    _onDocumentClick(ev) {
+        if (!this.state.isOpen) return;
+        const wrapper = this.wrapperRef.el;
+        if (wrapper && !wrapper.contains(ev.target)) {
+            this.state.isOpen = false;
+        }
     }
 
     // ── Open / Close ──────────────────────────────────────────────────────
@@ -120,7 +142,7 @@ class UniversityAIAssistant extends Component {
         }
     }
 
-    // ── JSON-RPC helper (Odoo 18 compatible, no rpc service) ─────────────
+    // ── JSON-RPC helper (Odoo 18 compatible) ─────────────────────────────
 
     async _jsonRpc(url, params) {
         const response = await fetch(url, {

@@ -2,20 +2,27 @@
 <templates xml:space="preserve">
 
 <t t-name="university_management.AIAssistant">
-    <div class="uni-ai-wrapper">
+    <div class="uni-ai-wrapper" t-ref="wrapper">
 
-        <!-- ── FAB: large white circle, blue border on hover ── -->
+        <!-- ── FAB: hidden when chat is open ── -->
+        <t t-if="!state.isOpen">
         <button class="uni-ai-fab" t-on-click="toggleChat" title="AI Assistant">
-            <!-- Two-sparkle icon: big 4-point star + small 4-point star (matches reference exactly) -->
             <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="sparkleGrad" x1="1" y1="1" x2="0" y2="0">
+                        <stop offset="0.1" stop-color="rgb(0, 195, 255)"/>
+                        <stop offset="1" stop-color="rgb(47, 0, 255)"/>
+                    </linearGradient>
+                </defs>
                 <!-- Large sparkle -->
                 <path d="M22 6 C22 6 24 18 28 22 C32 26 44 28 44 28 C44 28 32 30 28 34 C24 38 22 50 22 50 C22 50 20 38 16 34 C12 30 0 28 0 28 C0 28 12 26 16 22 C20 18 22 6 22 6 Z"
-                      fill="#3D4EE8"/>
+                      fill="url(#sparkleGrad)"/>
                 <!-- Small sparkle -->
                 <path d="M44 8 C44 8 45 13 47 15 C49 17 54 18 54 18 C54 18 49 19 47 21 C45 23 44 28 44 28 C44 28 43 23 41 21 C39 19 34 18 34 18 C34 18 39 17 41 15 C43 13 44 8 44 8 Z"
-                      fill="#3D4EE8"/>
+                      fill="url(#sparkleGrad)"/>
             </svg>
         </button>
+        </t>
 
         <!-- ── Chat Window ── -->
         <t t-if="state.isOpen">
@@ -26,19 +33,27 @@
                     <div class="uni-ai-header__spacer"/>
                     <div class="uni-ai-header__center">
                         <div class="uni-ai-header__title">
-                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M8 2 C8 2 8.8 7 10 8.5 C11.2 10 16 10.8 16 10.8 C16 10.8 11.2 11.6 10 13 C8.8 14.5 8 19 8 19 C8 19 7.2 14.5 6 13 C4.8 11.5 0 10.8 0 10.8 C0 10.8 4.8 10 6 8.5 C7.2 7 8 2 8 2 Z" fill="#3D4EE8"/>
-                                <path d="M16 1 C16 1 16.5 3.5 17.5 4.5 C18.5 5.5 21 6 21 6 C21 6 18.5 6.5 17.5 7.5 C16.5 8.5 16 11 16 11 C16 11 15.5 8.5 14.5 7.5 C13.5 6.5 11 6 11 6 C11 6 13.5 5.5 14.5 4.5 C15.5 3.5 16 1 16 1 Z" fill="#3D4EE8"/>
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="headerGrad" x1="1" y1="1" x2="0" y2="0">
+                                        <stop offset="0.1" stop-color="rgb(0, 195, 255)"/>
+                                        <stop offset="1" stop-color="rgb(47, 0, 255)"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M10 2 C10 2 11 8 13 10 C15 12 21 13 21 13 C21 13 15 14 13 16 C11 18 10 24 10 24 C10 24 9 18 7 16 C5 14 0 13 0 13 C0 13 5 12 7 10 C9 8 10 2 10 2 Z" fill="url(#headerGrad)"/>
+                                <path d="M20 1 C20 1 20.6 4 22 5.5 C23.4 7 26 7.5 26 7.5 C26 7.5 23.4 8 22 9.5 C20.6 11 20 14 20 14 C20 14 19.4 11 18 9.5 C16.6 8 14 7.5 14 7.5 C14 7.5 16.6 7 18 5.5 C19.4 4 20 1 20 1 Z" fill="url(#headerGrad)"/>
                             </svg>
                             AI Business Companion
                         </div>
-                        <div class="uni-ai-header__subtitle">University Assistant</div>
+                        <div class="uni-ai-header__subtitle">All Journeys</div>
                     </div>
                     <div class="uni-ai-header__actions">
-                        <button class="uni-ai-icon-btn" t-on-click="toggleChat" title="Minimise">
+                        <button class="uni-ai-icon-btn" t-on-click="closeChat" title="Minimise">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M8 3L3 8M3 8H8M3 8V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M16 21L21 16M21 16H16M21 16V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <!-- top-right arrow pointing ↙ inward -->
+                                <path d="M20 4L13 11M13 11H18M13 11V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <!-- bottom-left arrow pointing ↗ inward -->
+                                <path d="M4 20L11 13M11 13H6M11 13V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
