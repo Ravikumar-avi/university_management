@@ -211,6 +211,17 @@ class Scholarship(models.Model):
         payment_vals_list = []
         for application in awarded_applications:
             if application.awarded_amount > 0:
+                # Fetch student's bank account for direct transfer
+                bank_account_id = False
+                if application.student_id.bank_account_id:
+                    bank_account_id = application.student_id.bank_account_id.id
+                else:
+                    partner_bank = self.env['res.partner.bank'].search([
+                        ('partner_id', '=', application.student_id.partner_id.id)
+                    ], limit=1)
+                    if partner_bank:
+                        bank_account_id = partner_bank.id
+
                 payment_vals = {
                     'payment_type': 'outbound',
                     'partner_type': 'supplier' if application.student_id.partner_id.supplier_rank > 0 else 'customer',
@@ -221,6 +232,10 @@ class Scholarship(models.Model):
                     'journal_id': journal.id,
                     'memo': f'Scholarship: {self.name} - {application.student_id.name}',
                 }
+
+                if bank_account_id:
+                    payment_vals['partner_bank_id'] = bank_account_id
+
                 payment_vals_list.append(payment_vals)
 
         if payment_vals_list:
@@ -434,6 +449,17 @@ class ScholarshipApplication(models.Model):
         # Determine if student is supplier or customer
         partner_type = 'supplier' if self.student_id.partner_id.supplier_rank > 0 else 'customer'
 
+        # Fetch student's bank account for direct transfer
+        bank_account_id = False
+        if self.student_id.bank_account_id:
+            bank_account_id = self.student_id.bank_account_id.id
+        else:
+            partner_bank = self.env['res.partner.bank'].search([
+                ('partner_id', '=', self.student_id.partner_id.id)
+            ], limit=1)
+            if partner_bank:
+                bank_account_id = partner_bank.id
+
         payment_vals = {
             'payment_type': 'outbound',
             'partner_type': partner_type,
@@ -444,6 +470,9 @@ class ScholarshipApplication(models.Model):
             'journal_id': journal.id,
             'memo': f'Scholarship: {self.scholarship_id.name} - {self.name}',
         }
+
+        if bank_account_id:
+            payment_vals['partner_bank_id'] = bank_account_id
 
         payment = self.env['account.payment'].create(payment_vals)
         payment.action_post()
