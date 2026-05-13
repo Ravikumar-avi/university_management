@@ -700,6 +700,11 @@
     overflow: hidden;
 }
 
+/* Cards containing scrollable content must not clip their scroll containers */
+.uni-chart-card.has-scroll {
+    overflow: visible;
+}
+
 .uni-chart-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--uni-card-shadow-hover);
@@ -797,6 +802,31 @@
     border-radius: 0 12px 12px 0;
 }
 
+/* ==================== SCROLLABLE TABLE WRAPPER ==================== */
+.uni-table-scroll {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.uni-table-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.uni-table-scroll::-webkit-scrollbar-track {
+    background: var(--uni-border-light, #f1f5f9);
+    border-radius: 4px;
+}
+
+.uni-table-scroll::-webkit-scrollbar-thumb {
+    background: var(--uni-accent, #6366f1);
+    border-radius: 4px;
+}
+
+.uni-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--uni-accent-dark, #4f46e5);
+}
+
 /* ==================== BADGE ==================== */
 .uni-badge {
     display: inline-block;
@@ -849,6 +879,27 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.uni-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.uni-list::-webkit-scrollbar-track {
+    background: var(--uni-border-light, #f1f5f9);
+    border-radius: 4px;
+}
+
+.uni-list::-webkit-scrollbar-thumb {
+    background: var(--uni-accent, #6366f1);
+    border-radius: 4px;
+}
+
+.uni-list::-webkit-scrollbar-thumb:hover {
+    background: var(--uni-accent-dark, #4f46e5);
 }
 
 .uni-list-item {
@@ -864,9 +915,9 @@
 }
 
 .uni-list-item:hover {
-    transform: translateX(8px) scale(1.02);
     border-color: var(--uni-accent);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    background: var(--uni-bg, #f8fafc);
 }
 
 .uni-list-avatar {
