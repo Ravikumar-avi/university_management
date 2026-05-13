@@ -194,6 +194,14 @@
                 <div class="uni-chart-card">
                     <div class="uni-chart-header">
                         <h3>Students by Department</h3>
+                        <select class="uni-batch-filter" t-on-change="filterDeptByBatch">
+                            <option value="">Batches</option>
+                            <t t-foreach="state.batches" t-as="batch" t-key="batch.id">
+                                <option t-att-value="batch.id"
+                                        t-att-selected="state.selectedBatch === batch.id"
+                                        t-esc="batch.name"/>
+                            </t>
+                        </select>
                     </div>
                     <div class="uni-canvas-wrap">
                         <canvas id="uni-department-chart"/>

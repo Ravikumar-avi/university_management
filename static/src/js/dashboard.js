@@ -104,6 +104,8 @@ class UniversityDashboard extends Component {
             feeCollectionMonthly: [],
             semesterAdmissions: [],
             lastUpdated: null,
+            batches: [],
+            selectedBatch: null,
         });
 
         // Apply theme on mount
@@ -164,13 +166,13 @@ class UniversityDashboard extends Component {
         this.state.isLoading = true;
 
         try {
-            const data = await this.orm.call(
-                "university.dashboard",
-                "get_dashboard_data",
-                []
-            );
+            const [data, batches] = await Promise.all([
+                this.orm.call("university.dashboard", "get_dashboard_data", []),
+                this.orm.call("university.dashboard", "get_batches", []),
+            ]);
 
             this.updateState(data);
+            this.state.batches = batches;
             this.state.lastUpdated = new Date();
 
         } catch (error) {
@@ -225,6 +227,24 @@ class UniversityDashboard extends Component {
         setTimeout(() => {
             UniversityCharts.renderForModule(moduleKey, this.state);
         }, 150);
+    }
+
+    async filterDeptByBatch(ev) {
+        const batchId = ev.target.value ? parseInt(ev.target.value) : null;
+        this.state.selectedBatch = batchId;
+        try {
+            const stats = await this.orm.call(
+                "university.dashboard",
+                "get_department_stats_by_batch",
+                [batchId]
+            );
+            this.state.departmentStats = stats;
+            setTimeout(() => {
+                UniversityCharts.renderDepartmentDistribution(stats);
+            }, 50);
+        } catch (e) {
+            console.error("Batch filter error:", e);
+        }
     }
 
     // ── Navigation helpers ──────────────────────────────────────────────────

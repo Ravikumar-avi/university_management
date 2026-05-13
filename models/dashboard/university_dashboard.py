@@ -36,6 +36,35 @@ class UniversityDashboard(models.TransientModel):
         """Central place for student live/active states."""
         return [('state', 'in', ['active', 'enrolled', 'admitted'])]
 
+    @api.model
+    def get_batches(self):
+        """Return all batches for the batch filter dropdown."""
+        batches = self.env['university.batch'].search([], order='start_year desc')
+        return [{'id': b.id, 'name': b.name} for b in batches]
+
+    @api.model
+    def get_department_stats_by_batch(self, batch_id=None):
+        """Return department student distribution filtered by batch."""
+        result = []
+        try:
+            base_domain = self._student_active_domain()
+            if batch_id:
+                base_domain = [('batch_id', '=', batch_id)] + base_domain
+
+            departments = self.env['university.department'].search([])
+            for dept in departments:
+                domain = [('department_id', '=', dept.id)] + base_domain
+                students = self.env['student.student'].search_count(domain)
+                if not students:
+                    continue
+                result.append({
+                    'name': dept.name,
+                    'students': students,
+                })
+        except Exception as e:
+            _logger.warning("Department stats by batch error: %s", e)
+        return result
+
     def _get_overview_data(self):
         env = self.env
         today = date.today()

@@ -753,6 +753,34 @@
     letter-spacing: -0.3px;
 }
 
+/* ==================== BATCH FILTER ==================== */
+.uni-batch-filter {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--uni-bg, #f8fafc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%236366f1'/%3E%3C/svg%3E") no-repeat right 10px center;
+    background-size: 8px 5px;
+    border: 1.5px solid var(--uni-accent, #6366f1);
+    border-radius: 999px;
+    padding: 4px 26px 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--uni-accent, #6366f1);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    min-width: 0;
+    width: auto;
+    white-space: nowrap;
+}
+
+.uni-batch-filter:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.uni-batch-filter:hover {
+    background-color: rgba(99, 102, 241, 0.06);
+}
+
 /* ==================== TABLE ==================== */
 .uni-table {
     width: 100%;
