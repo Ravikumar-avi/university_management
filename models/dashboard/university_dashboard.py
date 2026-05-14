@@ -65,6 +65,54 @@ class UniversityDashboard(models.TransientModel):
             _logger.warning("Department stats by batch error: %s", e)
         return result
 
+    @api.model
+    def get_departments(self):
+        """Return all departments for filter dropdowns."""
+        depts = self.env['university.department'].search([])
+        return [{'id': d.id, 'name': d.name} for d in depts]
+
+    @api.model
+    def get_fee_trend_filtered(self, batch_id=None, department_id=None):
+        """Return monthly fee collection trend filtered by batch and/or department."""
+        from calendar import monthrange
+        today = date.today()
+        result = []
+        monthly_vals = []
+        try:
+            for i in range(7, -1, -1):
+                year = today.year
+                month = today.month - i
+                while month <= 0:
+                    month += 12
+                    year -= 1
+                _, last_day = monthrange(year, month)
+                start = date(year, month, 1).strftime('%Y-%m-%d')
+                end = date(year, month, last_day).strftime('%Y-%m-%d')
+                domain = [
+                    ('state', 'in', ['paid', 'partial']),
+                    ('payment_date', '>=', start),
+                    ('payment_date', '<=', end),
+                ]
+                if batch_id:
+                    domain.append(('student_id.batch_id', '=', batch_id))
+                if department_id:
+                    domain.append(('department_id', '=', department_id))
+                payments = self.env['fee.payment'].search(domain)
+                total = sum(payments.mapped('total_amount'))
+                label = date(year, month, 1).strftime('%b')
+                monthly_vals.append({'label': label, 'value': total})
+        except Exception as e:
+            _logger.warning("Fee trend filtered error: %s", e)
+
+        max_val = max((mv['value'] for mv in monthly_vals), default=1) or 1
+        for mv in monthly_vals:
+            result.append({
+                'label': mv['label'],
+                'value': mv['value'],
+                'height': round(mv['value'] / max_val * 100),
+            })
+        return result
+
     def _get_overview_data(self):
         env = self.env
         today = date.today()

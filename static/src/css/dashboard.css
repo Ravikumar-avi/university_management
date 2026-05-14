@@ -754,6 +754,12 @@
 }
 
 /* ==================== BATCH FILTER ==================== */
+.uni-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .uni-batch-filter {
     appearance: none;
     -webkit-appearance: none;

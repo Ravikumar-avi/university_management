@@ -106,6 +106,9 @@ class UniversityDashboard extends Component {
             lastUpdated: null,
             batches: [],
             selectedBatch: null,
+            departments: [],
+            feeTrendBatch: null,
+            feeTrendDept: null,
         });
 
         // Apply theme on mount
@@ -166,13 +169,15 @@ class UniversityDashboard extends Component {
         this.state.isLoading = true;
 
         try {
-            const [data, batches] = await Promise.all([
+            const [data, batches, departments] = await Promise.all([
                 this.orm.call("university.dashboard", "get_dashboard_data", []),
                 this.orm.call("university.dashboard", "get_batches", []),
+                this.orm.call("university.dashboard", "get_departments", []),
             ]);
 
             this.updateState(data);
             this.state.batches = batches;
+            this.state.departments = departments;
             this.state.lastUpdated = new Date();
 
         } catch (error) {
@@ -244,6 +249,27 @@ class UniversityDashboard extends Component {
             }, 50);
         } catch (e) {
             console.error("Batch filter error:", e);
+        }
+    }
+
+    async filterFeeTrend(ev) {
+        const field = ev.target.dataset.field;
+        const value = ev.target.value ? parseInt(ev.target.value) : null;
+        if (field === 'batch') this.state.feeTrendBatch = value;
+        if (field === 'dept') this.state.feeTrendDept = value;
+
+        try {
+            const trend = await this.orm.call(
+                "university.dashboard",
+                "get_fee_trend_filtered",
+                [this.state.feeTrendBatch, this.state.feeTrendDept]
+            );
+            this.state.feeCollectionMonthly = trend;
+            setTimeout(() => {
+                UniversityCharts.renderFeeTrend(trend);
+            }, 50);
+        } catch (e) {
+            console.error("Fee trend filter error:", e);
         }
     }
 

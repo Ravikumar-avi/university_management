@@ -211,6 +211,24 @@
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
                         <h3>Monthly Fee Collection Trend</h3>
+                        <div class="uni-filter-group">
+                            <select class="uni-batch-filter" data-field="batch" t-on-change="filterFeeTrend">
+                                <option value="">Batch</option>
+                                <t t-foreach="state.batches" t-as="batch" t-key="batch.id">
+                                    <option t-att-value="batch.id"
+                                            t-att-selected="state.feeTrendBatch === batch.id"
+                                            t-esc="batch.name"/>
+                                </t>
+                            </select>
+                            <select class="uni-batch-filter" data-field="dept" t-on-change="filterFeeTrend">
+                                <option value="">Department</option>
+                                <t t-foreach="state.departments" t-as="dept" t-key="dept.id">
+                                    <option t-att-value="dept.id"
+                                            t-att-selected="state.feeTrendDept === dept.id"
+                                            t-esc="dept.name"/>
+                                </t>
+                            </select>
+                        </div>
                     </div>
                     <div class="uni-canvas-wrap">
                         <canvas id="uni-fee-trend-chart"/>
@@ -560,6 +578,24 @@
                 <div class="uni-chart-card wide">
                     <div class="uni-chart-header">
                         <h3>Monthly Fee Collection Trend</h3>
+                        <div class="uni-filter-group">
+                            <select class="uni-batch-filter" data-field="batch" t-on-change="filterFeeTrend">
+                                <option value="">Batch</option>
+                                <t t-foreach="state.batches" t-as="batch" t-key="batch.id">
+                                    <option t-att-value="batch.id"
+                                            t-att-selected="state.feeTrendBatch === batch.id"
+                                            t-esc="batch.name"/>
+                                </t>
+                            </select>
+                            <select class="uni-batch-filter" data-field="dept" t-on-change="filterFeeTrend">
+                                <option value="">Department</option>
+                                <t t-foreach="state.departments" t-as="dept" t-key="dept.id">
+                                    <option t-att-value="dept.id"
+                                            t-att-selected="state.feeTrendDept === dept.id"
+                                            t-esc="dept.name"/>
+                                </t>
+                            </select>
+                        </div>
                     </div>
                     <div class="uni-canvas-wrap">
                         <canvas id="uni-fee-trend-chart"/>
