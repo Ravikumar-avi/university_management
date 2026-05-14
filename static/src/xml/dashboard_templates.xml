@@ -547,7 +547,7 @@
                     </div>
                 </div>
                 <!-- Pending / Overdue -->
-                <div class="uni-kpi-card uni-kpi-red" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openFeeOverdue">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-exclamation-circle"/>
                     </div>
@@ -559,7 +559,7 @@
                     </div>
                 </div>
                 <!-- Late Payments -->
-                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFeeOverdue">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-clock-o"/>
                     </div>

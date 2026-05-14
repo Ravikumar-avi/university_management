@@ -289,6 +289,24 @@ class UniversityDashboard extends Component {
     openFaculty() { this.navigateTo("university_management.action_faculty"); }
     openFeePayments() { this.navigateTo("university_management.action_fee_payment"); }
     openFeeStructures() { this.navigateTo("university_management.action_fee_structure"); }
+
+    openFeeOverdue() {
+        try {
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Fee Payments",
+                res_model: "fee.payment",
+                view_mode: "kanban,list,form",
+                views: [[false, "kanban"], [false, "list"], [false, "form"]],
+                domain: [["state", "in", ["draft", "invoiced", "pending", "partial", "verified"]]],
+                context: {
+                    search_default_group_by_state: 1,
+                },
+            });
+        } catch (e) {
+            console.warn("openFeeOverdue failed:", e);
+        }
+    }
     openExaminations() { this.navigateTo("university_management.action_examination"); }
     openHallTickets() { this.navigateTo("university_management.action_examination_hall_ticket"); }
     openExamResults() { this.navigateTo("university_management.action_exam_result"); }

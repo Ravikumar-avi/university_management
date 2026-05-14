@@ -586,7 +586,7 @@
         <field name="name">Fee Payments</field>
         <field name="res_model">fee.payment</field>
         <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
-        <field name="context">{'search_default_filter_today': 1}</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Record a new Fee Payment
