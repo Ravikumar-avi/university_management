@@ -304,6 +304,21 @@ class UniversityDashboard extends Component {
         }
     }
 
+    openAdmissionRecord(id, model) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                res_model: model || 'student.student',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                res_id: id,
+                target: 'current',
+            });
+        } catch (e) {
+            console.warn('openAdmissionRecord failed:', e);
+        }
+    }
+
     drillDownSemester(semId, semName, count) {
         try {
             this.action.doAction({

@@ -756,6 +756,7 @@ class UniversityDashboard(models.TransientModel):
                     photo_b64 = False
                 result.append({
                     'id': stu.id,
+                    'model': 'student.student',
                     'name': stu.name or 'Unknown',
                     'program': stu.program_id.name if stu.program_id else '',
                     'date': stu.create_date.strftime('%d %b %Y') if stu.create_date else '',
@@ -789,6 +790,7 @@ class UniversityDashboard(models.TransientModel):
                         photo_b64 = False
                     result.append({
                         'id': adm.id,
+                        'model': 'student.admission',
                         'name': adm.applicant_name or 'Unknown',
                         'program': adm.program_id.name if adm.program_id else '',
                         'date': adm.application_date.strftime('%d %b %Y') if adm.application_date else '',
