@@ -101,7 +101,7 @@ class UniversityDashboard(models.TransientModel):
                 payments = self.env['fee.payment'].search(domain)
                 total = sum(payments.mapped('total_amount'))
                 label = date(year, month, 1).strftime('%b')
-                monthly_vals.append({'label': label, 'value': total})
+                monthly_vals.append({'label': label, 'value': total, 'date_start': start, 'date_end': end})
         except Exception as e:
             _logger.warning("Fee trend filtered error: %s", e)
 
@@ -111,6 +111,8 @@ class UniversityDashboard(models.TransientModel):
                 'label': mv['label'],
                 'value': mv['value'],
                 'height': round(mv['value'] / max_val * 100),
+                'date_start': mv['date_start'],
+                'date_end': mv['date_end'],
             })
         return result
 
@@ -910,7 +912,7 @@ class UniversityDashboard(models.TransientModel):
                 ])
                 total = sum(payments.mapped('total_amount'))
                 label = date(year, month, 1).strftime('%b')
-                monthly_vals.append({'label': label, 'value': total})
+                monthly_vals.append({'label': label, 'value': total, 'date_start': start, 'date_end': end})
         except Exception as e:
             _logger.warning("Fee monthly trend fetch error: %s", e)
 
@@ -920,6 +922,8 @@ class UniversityDashboard(models.TransientModel):
                 'label': mv['label'],
                 'value': mv['value'],
                 'height': round(mv['value'] / max_val * 100),
+                'date_start': mv['date_start'],
+                'date_end': mv['date_end'],
             })
 
         return result

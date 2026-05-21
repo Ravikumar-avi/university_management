@@ -92,7 +92,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 1. MONTHLY FEE COLLECTION TREND (Bar with animation)
     // ─────────────────────────────────────────────────────────────
-    renderFeeTrend(feeMonthly) {
+    renderFeeTrend(feeMonthly, onDrillDown) {
         const id = 'uni-fee-trend-chart';
         const canvas = this._canvas(id);
         if (!canvas || !feeMonthly.length) return;
@@ -136,10 +136,12 @@ const UniversityCharts = {
                         callbacks: {
                             label: (ctx) => {
                                 let value = ctx.parsed.y;
-                                if (value >= 10000000) return '₹ ' + (value/10000000).toFixed(2) + ' Cr';
-                                if (value >= 100000) return '₹ ' + (value/100000).toFixed(2) + ' L';
-                                if (value >= 1000) return '₹ ' + (value/1000).toFixed(2) + ' K';
-                                return '₹ ' + value;
+                                let formatted;
+                                if (value >= 10000000) formatted = '₹ ' + (value/10000000).toFixed(2) + ' Cr';
+                                else if (value >= 100000) formatted = '₹ ' + (value/100000).toFixed(2) + ' L';
+                                else if (value >= 1000) formatted = '₹ ' + (value/1000).toFixed(2) + ' K';
+                                else formatted = '₹ ' + value;
+                                return onDrillDown ? formatted + ' — click to view' : formatted;
                             }
                         }
                     }
@@ -162,12 +164,18 @@ const UniversityCharts = {
                         ticks: { font: { size: 11, weight: '500' } }
                     }
                 },
-                onClick: (event, item) => {
-                    if (item.length > 0) {
-                        const index = item[0].index;
-                        console.log('Month clicked:', labels[index], values[index]);
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        const month = feeMonthly[index];
+                        if (month) {
+                            onDrillDown(month.label, month.date_start, month.date_end);
+                        }
                     }
-                }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1189,12 +1197,12 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown) {
         if (!this._initDefaults()) return;
 
         // Fee trend
         if (state.feeCollectionMonthly && state.feeCollectionMonthly.length) {
-            this.renderFeeTrend(state.feeCollectionMonthly);
+            this.renderFeeTrend(state.feeCollectionMonthly, onFeeDrillDown);
         }
 
         // Semester admissions
@@ -1263,14 +1271,14 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
             switch (module) {
                 case 'overview':
                     if (state.feeCollectionMonthly?.length)
-                        this.renderFeeTrend(state.feeCollectionMonthly);
+                        this.renderFeeTrend(state.feeCollectionMonthly, onFeeDrillDown);
                     if (state.departmentStats?.length)
                         this.renderDepartmentDistribution(state.departmentStats, onDeptDrillDown);
                     break;
@@ -1293,7 +1301,7 @@ const UniversityCharts = {
 
                 case 'fees':
                     if (state.feeCollectionMonthly?.length)
-                        this.renderFeeTrend(state.feeCollectionMonthly);
+                        this.renderFeeTrend(state.feeCollectionMonthly, onFeeDrillDown);
                     break;
 
                 case 'exams':

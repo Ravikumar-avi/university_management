@@ -139,7 +139,8 @@ class UniversityDashboard extends Component {
             UniversityCharts.renderAll(
                 this.state,
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
-                (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+                (progId, progName, count) => this.drillDownProgram(progId, progName, count),
+                (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
             );
         }, 100);
 
@@ -196,7 +197,8 @@ class UniversityDashboard extends Component {
                 UniversityCharts.renderAll(
                     this.state,
                     (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
-                    (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+                    (progId, progName, count) => this.drillDownProgram(progId, progName, count),
+                    (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
                 );
             }, 100);
         }
@@ -241,7 +243,8 @@ class UniversityDashboard extends Component {
                 moduleKey,
                 this.state,
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
-                (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+                (progId, progName, count) => this.drillDownProgram(progId, progName, count),
+                (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
             );
         }, 150);
     }
@@ -280,7 +283,7 @@ class UniversityDashboard extends Component {
             );
             this.state.feeCollectionMonthly = trend;
             setTimeout(() => {
-                UniversityCharts.renderFeeTrend(trend);
+                UniversityCharts.renderFeeTrend(trend, (label, ds, de) => this.drillDownFeeTrend(label, ds, de));
             }, 50);
         } catch (e) {
             console.error("Fee trend filter error:", e);
@@ -295,6 +298,38 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownFeeTrend(monthLabel, dateStart, dateEnd) {
+        try {
+            // Show ALL fee payments related to this month:
+            // 1. Payments actually received in this month (payment_date in range)
+            // 2. Fees that were DUE in this month (due_date in range) — including
+            //    those paid late (after the month) or still unpaid
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Fee Collection — ${monthLabel} (due or paid this month)`,
+                res_model: 'fee.payment',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    '|',
+                    // Paid/received in this calendar month
+                    '&',
+                        ['payment_date', '>=', dateStart],
+                        ['payment_date', '<=', dateEnd],
+                    // Due in this calendar month (regardless of when paid)
+                    '&',
+                        ['due_date', '>=', dateStart],
+                        ['due_date', '<=', dateEnd],
+                ],
+                context: {
+                    search_default_group_by_state: 1,
+                },
+            });
+        } catch (e) {
+            console.warn('drillDownFeeTrend failed:', e);
         }
     }
 
