@@ -135,9 +135,10 @@ class UniversityDashboard extends Component {
         localStorage.setItem('university_theme', theme);
         this.applyTheme(theme);
 
-        // Re-render charts with new theme
         setTimeout(() => {
-            UniversityCharts.renderAll(this.state);
+            UniversityCharts.renderAll(this.state, (deptId, deptName, count) => {
+                this.drillDownDepartment(deptId, deptName, count);
+            });
         }, 100);
 
         // Show theme change notification
@@ -190,7 +191,9 @@ class UniversityDashboard extends Component {
             this.state.isLoading = false;
 
             setTimeout(() => {
-                UniversityCharts.renderAll(this.state);
+                UniversityCharts.renderAll(this.state, (deptId, deptName, count) => {
+                    this.drillDownDepartment(deptId, deptName, count);
+                });
             }, 100);
         }
     }
@@ -230,7 +233,9 @@ class UniversityDashboard extends Component {
         this.state.activeModule = moduleKey;
 
         setTimeout(() => {
-            UniversityCharts.renderForModule(moduleKey, this.state);
+            UniversityCharts.renderForModule(moduleKey, this.state, (deptId, deptName, count) => {
+                this.drillDownDepartment(deptId, deptName, count);
+            });
         }, 150);
     }
 
@@ -245,7 +250,9 @@ class UniversityDashboard extends Component {
             );
             this.state.departmentStats = stats;
             setTimeout(() => {
-                UniversityCharts.renderDepartmentDistribution(stats);
+                UniversityCharts.renderDepartmentDistribution(stats, (deptId, deptName, count) => {
+                    this.drillDownDepartment(deptId, deptName, count);
+                });
             }, 50);
         } catch (e) {
             console.error("Batch filter error:", e);
@@ -281,6 +288,32 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownDepartment(deptId, deptName, studentCount) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `${deptName} — Students (${studentCount})`,
+                res_model: 'student.student',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['department_id', '=', deptId],
+                    ['state', 'in', ['active', 'enrolled', 'admitted']],
+                ],
+                context: {
+                    search_default_department_id: deptId,
+                },
+            });
+        } catch (e) {
+            console.warn('drillDownDepartment failed:', e);
+            // Fallback: navigate to all students filtered
+            this.notification.add(
+                `Showing students for ${deptName}`,
+                { type: 'info', sticky: false }
+            );
         }
     }
 

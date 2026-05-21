@@ -58,6 +58,7 @@ class UniversityDashboard(models.TransientModel):
                 if not students:
                     continue
                 result.append({
+                    'id': dept.id,
                     'name': dept.name,
                     'students': students,
                 })
@@ -873,6 +874,7 @@ class UniversityDashboard(models.TransientModel):
                     pass
 
                 result.append({
+                    'id': dept.id,
                     'name': dept.name,
                     'students': students,
                     'btech_students': btech,

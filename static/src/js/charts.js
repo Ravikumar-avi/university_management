@@ -232,13 +232,16 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 3. DEPARTMENT STUDENT DISTRIBUTION (Doughnut with animation)
     // ─────────────────────────────────────────────────────────────
-    renderDepartmentDistribution(deptStats) {
+    renderDepartmentDistribution(deptStats, onDrillDown) {
         const id = 'uni-department-chart';
         const canvas = this._canvas(id);
         if (!canvas || !deptStats.length) return;
 
         this._destroy(id);
         const ctx = canvas.getContext('2d');
+
+        // Store deptStats on the canvas for external access
+        canvas._deptStats = deptStats;
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -283,6 +286,13 @@ const UniversityCharts = {
                                     pointStyle: 'circle',
                                 }));
                             }
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.index;
+                            const dept = deptStats[index];
+                            if (dept && onDrillDown) {
+                                onDrillDown(dept.id, dept.name, dept.students);
+                            }
                         }
                     },
                     tooltip: {
@@ -291,11 +301,23 @@ const UniversityCharts = {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                                 const value = ctx.parsed;
                                 const percentage = ((value / total) * 100).toFixed(1);
-                                return `${ctx.label}: ${value} students (${percentage}%)`;
+                                return `${ctx.label}: ${value} students (${percentage}%) — click to view`;
                             }
                         }
                     }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        const dept = deptStats[index];
+                        if (dept) {
+                            onDrillDown(dept.id, dept.name, dept.students);
+                        }
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1148,7 +1170,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state) {
+    renderAll(state, onDrillDown) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1163,7 +1185,7 @@ const UniversityCharts = {
 
         // Department charts (overview)
         if (state.departmentStats && state.departmentStats.length) {
-            this.renderDepartmentDistribution(state.departmentStats);
+            this.renderDepartmentDistribution(state.departmentStats, onDrillDown);
         }
 
         // Program pie
@@ -1222,7 +1244,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state) {
+    renderForModule(module, state, onDrillDown) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1231,7 +1253,7 @@ const UniversityCharts = {
                     if (state.feeCollectionMonthly?.length)
                         this.renderFeeTrend(state.feeCollectionMonthly);
                     if (state.departmentStats?.length)
-                        this.renderDepartmentDistribution(state.departmentStats);
+                        this.renderDepartmentDistribution(state.departmentStats, onDrillDown);
                     break;
 
                 case 'students':
