@@ -938,7 +938,7 @@ class UniversityDashboard(models.TransientModel):
                 count = self.env['student.registration'].search_count([
                     ('semester_id', '=', sem.id),
                 ])
-                vals.append({'label': sem.name, 'value': count})
+                vals.append({'label': sem.name, 'value': count, 'id': sem.id})
         except Exception as e:
             _logger.warning("Semester admissions fetch error: %s", e)
 
@@ -948,6 +948,7 @@ class UniversityDashboard(models.TransientModel):
                 'label': v['label'],
                 'value': v['value'],
                 'height': round(v['value'] / max_val * 100),
+                'id': v['id'],
             })
 
         return result

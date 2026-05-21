@@ -140,7 +140,8 @@ class UniversityDashboard extends Component {
                 this.state,
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                 (progId, progName, count) => this.drillDownProgram(progId, progName, count),
-                (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
+                (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
+                (semId, semName, count) => this.drillDownSemester(semId, semName, count)
             );
         }, 100);
 
@@ -198,7 +199,8 @@ class UniversityDashboard extends Component {
                     this.state,
                     (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                     (progId, progName, count) => this.drillDownProgram(progId, progName, count),
-                    (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
+                    (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
+                    (semId, semName, count) => this.drillDownSemester(semId, semName, count)
                 );
             }, 100);
         }
@@ -244,7 +246,8 @@ class UniversityDashboard extends Component {
                 this.state,
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                 (progId, progName, count) => this.drillDownProgram(progId, progName, count),
-                (label, ds, de) => this.drillDownFeeTrend(label, ds, de)
+                (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
+                (semId, semName, count) => this.drillDownSemester(semId, semName, count)
             );
         }, 150);
     }
@@ -298,6 +301,26 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownSemester(semId, semName, count) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `${semName} — Registrations (${count})`,
+                res_model: 'student.registration',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['semester_id', '=', semId],
+                ],
+                context: {
+                    search_default_semester_id: semId,
+                },
+            });
+        } catch (e) {
+            console.warn('drillDownSemester failed:', e);
         }
     }
 

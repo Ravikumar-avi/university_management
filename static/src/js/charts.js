@@ -183,7 +183,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 2. SEMESTER ADMISSIONS TREND (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderSemesterAdmissions(semData) {
+    renderSemesterAdmissions(semData, onDrillDown) {
         const id = 'uni-semester-chart';
         const canvas = this._canvas(id);
         if (!canvas || !semData.length) return;
@@ -221,7 +221,11 @@ const UniversityCharts = {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.parsed.y} students`
+                            label: (ctx) => {
+                                const sem = semData[ctx.dataIndex];
+                                const suffix = onDrillDown ? ' — click to view' : '';
+                                return `${ctx.parsed.y} students${suffix}`;
+                            }
                         }
                     }
                 },
@@ -232,7 +236,19 @@ const UniversityCharts = {
                         ticks: { stepSize: 1 }
                     },
                     x: { grid: { display: false } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        const sem = semData[index];
+                        if (sem) {
+                            onDrillDown(sem.id, sem.label, sem.value);
+                        }
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1197,7 +1213,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1207,7 +1223,7 @@ const UniversityCharts = {
 
         // Semester admissions
         if (state.semesterAdmissions && state.semesterAdmissions.length) {
-            this.renderSemesterAdmissions(state.semesterAdmissions);
+            this.renderSemesterAdmissions(state.semesterAdmissions, onSemDrillDown);
         }
 
         // Department charts (overview)
@@ -1271,7 +1287,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1285,7 +1301,7 @@ const UniversityCharts = {
 
                 case 'students':
                     if (state.semesterAdmissions?.length)
-                        this.renderSemesterAdmissions(state.semesterAdmissions);
+                        this.renderSemesterAdmissions(state.semesterAdmissions, onSemDrillDown);
                     if (state.students?.program_distribution)
                         this.renderProgramChart(state.students.program_distribution, onProgramDrillDown);
                     break;
