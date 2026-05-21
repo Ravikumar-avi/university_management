@@ -172,8 +172,8 @@
                 <separator/>
 
                 <filter name="filter_this_week" string="This Week"
-                        domain="[('start_date', '&gt;=', (context_today() - relativedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
-                                 ('start_date', '&lt;=', (context_today() + relativedelta(days=6-context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                        domain="[('start_date', '&gt;=', (context_today() + relativedelta(weekday=0, days=-6)).strftime('%Y-%m-%d')),
+                                 ('start_date', '&lt;=', (context_today() + relativedelta(weekday=6)).strftime('%Y-%m-%d'))]"/>
 
                 <separator/>
 
@@ -206,18 +206,12 @@
                 </group>
 
                 <searchpanel>
-                    <field name="day_of_week" string="Day"
-                           select="multi"
-                           icon="fa-calendar"/>
                     <field name="program_id" string="Program"
                            select="multi"
                            icon="fa-graduation-cap"/>
                     <field name="department_id" string="Department"
                            select="multi"
                            icon="fa-building"/>
-                    <field name="class_type" string="Type"
-                           select="multi"
-                           icon="fa-tags"/>
                 </searchpanel>
             </search>
         </field>
