@@ -60,6 +60,8 @@ class UniversityCourse(models.Model):
                                    'course_id', 'student_id', string='Enrolled Students')
     total_enrolled = fields.Integer(string='Total Enrolled', compute='_compute_enrolled', store=True)
     max_students = fields.Integer(string='Max Students', default=60)
+    is_full = fields.Boolean(string='Is Full', compute='_compute_capacity_flags', store=True)
+    has_available_seats = fields.Boolean(string='Has Available Seats', compute='_compute_capacity_flags', store=True)
 
     # Classroom
     classroom_id = fields.Many2one('university.classroom', string='Assigned Classroom')
@@ -117,6 +119,12 @@ class UniversityCourse(models.Model):
     def _compute_enrolled(self):
         for record in self:
             record.total_enrolled = len(record.student_ids)
+
+    @api.depends('total_enrolled', 'max_students')
+    def _compute_capacity_flags(self):
+        for record in self:
+            record.is_full = record.total_enrolled >= record.max_students
+            record.has_available_seats = record.total_enrolled < record.max_students
 
     @api.constrains('total_enrolled', 'max_students')
     def _check_enrollment(self):

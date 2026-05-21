@@ -302,9 +302,9 @@
                 <filter name="filter_has_students" string="Has Students"
                         domain="[('total_enrolled', '&gt;', 0)]"/>
                 <filter name="filter_full" string="Full Capacity"
-                        domain="[('total_enrolled', '&gt;=', 'max_students')]"/>
+                        domain="[('is_full', '=', True)]"/>
                 <filter name="filter_available" string="Available Seats"
-                        domain="[('total_enrolled', '&lt;', 'max_students')]"/>
+                        domain="[('has_available_seats', '=', True)]"/>
 
                 <separator/>
 
