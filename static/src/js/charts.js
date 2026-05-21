@@ -391,7 +391,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 5. PROGRAM DISTRIBUTION (Pie)
     // ─────────────────────────────────────────────────────────────
-    renderProgramChart(programDist) {
+    renderProgramChart(programDist, onDrillDown) {
         const id = 'uni-program-chart';
         const canvas = this._canvas(id);
         if (!canvas || !programDist || !programDist.length) return;
@@ -426,6 +426,13 @@ const UniversityCharts = {
                             padding: 16,
                             usePointStyle: true,
                             pointStyle: 'circle',
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            const index = legendItem.index;
+                            const prog = programDist[index];
+                            if (prog && onDrillDown) {
+                                onDrillDown(prog.id, prog.name, prog.count);
+                            }
                         }
                     },
                     tooltip: {
@@ -433,11 +440,23 @@ const UniversityCharts = {
                             label: (ctx) => {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((ctx.parsed / total) * 100).toFixed(1);
-                                return `${ctx.label}: ${ctx.parsed} students (${percentage}%)`;
+                                return `${ctx.label}: ${ctx.parsed} students (${percentage}%) — click to view`;
                             }
                         }
                     }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        const prog = programDist[index];
+                        if (prog) {
+                            onDrillDown(prog.id, prog.name, prog.count);
+                        }
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1170,7 +1189,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDrillDown) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1185,12 +1204,12 @@ const UniversityCharts = {
 
         // Department charts (overview)
         if (state.departmentStats && state.departmentStats.length) {
-            this.renderDepartmentDistribution(state.departmentStats, onDrillDown);
+            this.renderDepartmentDistribution(state.departmentStats, onDeptDrillDown);
         }
 
         // Program pie
         if (state.students && state.students.program_distribution) {
-            this.renderProgramChart(state.students.program_distribution);
+            this.renderProgramChart(state.students.program_distribution, onProgramDrillDown);
         }
 
         // Faculty doughnut
@@ -1244,7 +1263,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDrillDown) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1253,14 +1272,14 @@ const UniversityCharts = {
                     if (state.feeCollectionMonthly?.length)
                         this.renderFeeTrend(state.feeCollectionMonthly);
                     if (state.departmentStats?.length)
-                        this.renderDepartmentDistribution(state.departmentStats, onDrillDown);
+                        this.renderDepartmentDistribution(state.departmentStats, onDeptDrillDown);
                     break;
 
                 case 'students':
                     if (state.semesterAdmissions?.length)
                         this.renderSemesterAdmissions(state.semesterAdmissions);
                     if (state.students?.program_distribution)
-                        this.renderProgramChart(state.students.program_distribution);
+                        this.renderProgramChart(state.students.program_distribution, onProgramDrillDown);
                     break;
 
                 case 'faculty':

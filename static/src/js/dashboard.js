@@ -136,9 +136,11 @@ class UniversityDashboard extends Component {
         this.applyTheme(theme);
 
         setTimeout(() => {
-            UniversityCharts.renderAll(this.state, (deptId, deptName, count) => {
-                this.drillDownDepartment(deptId, deptName, count);
-            });
+            UniversityCharts.renderAll(
+                this.state,
+                (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
+                (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+            );
         }, 100);
 
         // Show theme change notification
@@ -191,9 +193,11 @@ class UniversityDashboard extends Component {
             this.state.isLoading = false;
 
             setTimeout(() => {
-                UniversityCharts.renderAll(this.state, (deptId, deptName, count) => {
-                    this.drillDownDepartment(deptId, deptName, count);
-                });
+                UniversityCharts.renderAll(
+                    this.state,
+                    (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
+                    (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+                );
             }, 100);
         }
     }
@@ -233,9 +237,12 @@ class UniversityDashboard extends Component {
         this.state.activeModule = moduleKey;
 
         setTimeout(() => {
-            UniversityCharts.renderForModule(moduleKey, this.state, (deptId, deptName, count) => {
-                this.drillDownDepartment(deptId, deptName, count);
-            });
+            UniversityCharts.renderForModule(
+                moduleKey,
+                this.state,
+                (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
+                (progId, progName, count) => this.drillDownProgram(progId, progName, count)
+            );
         }, 150);
     }
 
@@ -288,6 +295,27 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownProgram(progId, progName, studentCount) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `${progName} — Students (${studentCount})`,
+                res_model: 'student.student',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['program_id', '=', progId],
+                    ['state', 'in', ['active', 'enrolled', 'admitted']],
+                ],
+                context: {
+                    search_default_program_id: progId,
+                },
+            });
+        } catch (e) {
+            console.warn('drillDownProgram failed:', e);
         }
     }
 

@@ -342,6 +342,7 @@ class UniversityDashboard(models.TransientModel):
                 )
                 if count:
                     program_distribution.append({
+                        'id': prog.id,
                         'name': prog.name,
                         'count': count,
                         'percentage': round(count / total * 100, 1),
