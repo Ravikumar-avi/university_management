@@ -304,6 +304,21 @@ class UniversityDashboard extends Component {
         }
     }
 
+    openPaymentRecord(id) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                res_model: 'fee.payment',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                res_id: id,
+                target: 'current',
+            });
+        } catch (e) {
+            console.warn('openPaymentRecord failed:', e);
+        }
+    }
+
     openAdmissionRecord(id, model) {
         try {
             this.action.doAction({

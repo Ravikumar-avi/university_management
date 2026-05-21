@@ -608,7 +608,7 @@
                     </div>
                     <div class="uni-list">
                         <t t-foreach="state.recentPayments" t-as="pmt" t-key="pmt.id">
-                            <div class="uni-list-item">
+                            <div class="uni-list-item" style="cursor:pointer;" t-on-click="() => this.openPaymentRecord(pmt.id)">
                                 <t t-if="pmt.photo">
                                     <img t-attf-src="data:image/png;base64,#{pmt.photo}" class="uni-list-avatar-img" alt=""/>
                                 </t>
