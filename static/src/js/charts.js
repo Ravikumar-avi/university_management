@@ -615,13 +615,14 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 8. LIBRARY ACTIVITY (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderLibraryChart(library) {
+    renderLibraryChart(library, onDrillDown) {
         const id = 'uni-library-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
 
         this._destroy(id);
         const ctx = canvas.getContext('2d');
+        const barKeys = ['total', 'issued', 'overdue'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'bar',
@@ -646,26 +647,27 @@ const UniversityCharts = {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: {
-                    duration: 2000,
-                    easing: 'easeInOutQuart',
-                },
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.parsed.y} books`
+                            label: (ctx) => `${ctx.parsed.y} books${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e2e8f0' },
-                        ticks: { stepSize: 1 }
-                    },
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
                     x: { grid: { display: false } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(barKeys[elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -934,7 +936,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // LI-2. BOOKS STATUS DOUGHNUT (Available / Issued / Overdue)
     // ─────────────────────────────────────────────────────────────
-    renderLibraryStatusChart(library) {
+    renderLibraryStatusChart(library, onDrillDown) {
         const id = 'uni-library-status-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -973,7 +975,6 @@ const UniversityCharts = {
                             pointStyle: 'circle',
                             generateLabels(chart) {
                                 const d = chart.data;
-                                const total = d.datasets[0].data.reduce((a, b) => a + b, 0);
                                 return d.labels.map((label, i) => ({
                                     text: `${label} (${d.datasets[0].data[i]})`,
                                     fillStyle: d.datasets[0].backgroundColor[i],
@@ -984,6 +985,10 @@ const UniversityCharts = {
                                     pointStyle: 'circle',
                                 }));
                             }
+                        },
+                        onClick: (e, legendItem) => {
+                            const keys = ['available', 'issued', 'overdue'];
+                            if (onDrillDown) onDrillDown(keys[legendItem.index]);
                         }
                     },
                     tooltip: {
@@ -1353,7 +1358,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1394,8 +1399,8 @@ const UniversityCharts = {
 
         // Library bar
         if (state.library) {
-            this.renderLibraryChart(state.library);
-            this.renderLibraryStatusChart(state.library);
+            this.renderLibraryChart(state.library, onLibActivityDD);
+            this.renderLibraryStatusChart(state.library, onLibStatusDD);
         }
 
         // Placement charts
@@ -1427,7 +1432,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1475,8 +1480,8 @@ const UniversityCharts = {
 
                 case 'library':
                     if (state.library) {
-                        this.renderLibraryChart(state.library);
-                        this.renderLibraryStatusChart(state.library);
+                        this.renderLibraryChart(state.library, onLibActivityDD);
+                        this.renderLibraryStatusChart(state.library, onLibStatusDD);
                     }
                     break;
 

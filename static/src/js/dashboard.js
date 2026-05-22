@@ -150,7 +150,9 @@ class UniversityDashboard extends Component {
                 (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
                 (k, l) => this.drillDownHostelOccupancy(k, l),
                 (k) => this.drillDownHostelRooms(k),
-                (sk, sl) => this.drillDownComplaint(sk, sl)
+                (sk, sl) => this.drillDownComplaint(sk, sl),
+                (k) => this.drillDownLibrary(k),
+                (k) => this.drillDownLibrary(k)
             );
         }, 100);
 
@@ -218,7 +220,9 @@ class UniversityDashboard extends Component {
                     (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
                     (k, l) => this.drillDownHostelOccupancy(k, l),
                     (k) => this.drillDownHostelRooms(k),
-                    (sk, sl) => this.drillDownComplaint(sk, sl)
+                    (sk, sl) => this.drillDownComplaint(sk, sl),
+                    (k) => this.drillDownLibrary(k),
+                    (k) => this.drillDownLibrary(k)
                 );
             }, 100);
         }
@@ -274,7 +278,9 @@ class UniversityDashboard extends Component {
                 (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
                 (k, l) => this.drillDownHostelOccupancy(k, l),
                 (k) => this.drillDownHostelRooms(k),
-                (sk, sl) => this.drillDownComplaint(sk, sl)
+                (sk, sl) => this.drillDownComplaint(sk, sl),
+                (k) => this.drillDownLibrary(k),
+                (k) => this.drillDownLibrary(k)
             );
         }, 150);
     }
@@ -329,6 +335,43 @@ class UniversityDashboard extends Component {
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
         }
+    }
+
+    drillDownLibrary(key) {
+        const config = {
+            total: {
+                name: 'Library — All Books',
+                model: 'library.book',
+                domain: [],
+            },
+            issued: {
+                name: 'Library — Currently Issued',
+                model: 'library.issue',
+                domain: [['state', '=', 'issued']],
+            },
+            overdue: {
+                name: 'Library — Overdue Returns',
+                model: 'library.issue',
+                domain: [['state', '=', 'overdue']],
+            },
+            available: {
+                name: 'Library — Available Books',
+                model: 'library.book',
+                domain: [['state', '=', 'available']],
+            },
+        };
+        const c = config[key];
+        if (!c) return;
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: c.name,
+                res_model: c.model,
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: c.domain,
+            });
+        } catch (e) { console.warn('drillDownLibrary failed:', e); }
     }
 
     drillDownHostelOccupancy(key, label) {
