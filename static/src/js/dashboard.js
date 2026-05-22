@@ -152,7 +152,10 @@ class UniversityDashboard extends Component {
                 (k) => this.drillDownHostelRooms(k),
                 (sk, sl) => this.drillDownComplaint(sk, sl),
                 (k) => this.drillDownLibrary(k),
-                (k) => this.drillDownLibrary(k)
+                (k) => this.drillDownLibrary(k),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
             );
         }, 100);
 
@@ -222,7 +225,10 @@ class UniversityDashboard extends Component {
                     (k) => this.drillDownHostelRooms(k),
                     (sk, sl) => this.drillDownComplaint(sk, sl),
                     (k) => this.drillDownLibrary(k),
-                    (k) => this.drillDownLibrary(k)
+                    (k) => this.drillDownLibrary(k),
+                    (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                    (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                    (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
                 );
             }, 100);
         }
@@ -280,7 +286,10 @@ class UniversityDashboard extends Component {
                 (k) => this.drillDownHostelRooms(k),
                 (sk, sl) => this.drillDownComplaint(sk, sl),
                 (k) => this.drillDownLibrary(k),
-                (k) => this.drillDownLibrary(k)
+                (k) => this.drillDownLibrary(k),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
             );
         }, 150);
     }
@@ -335,6 +344,35 @@ class UniversityDashboard extends Component {
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
         }
+    }
+
+    drillDownPlacement(deptId, deptName, type) {
+        try {
+            if (type === 'placed') {
+                const domain = [['state', '=', 'selected']];
+                if (deptId) domain.push(['department_id', '=', deptId]);
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: deptId ? `${deptName} — Placed Students` : 'All Placed Students',
+                    res_model: 'placement.application',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain,
+                });
+            } else {
+                // not_placed — students with no selected placement application
+                const domain = [['state', 'in', ['active', 'enrolled', 'admitted']]];
+                if (deptId) domain.push(['department_id', '=', deptId]);
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: deptId ? `${deptName} — Not Yet Placed Students` : 'Students Not Yet Placed',
+                    res_model: 'student.student',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain,
+                });
+            }
+        } catch (e) { console.warn('drillDownPlacement failed:', e); }
     }
 
     drillDownLibrary(key) {

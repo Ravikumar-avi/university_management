@@ -349,7 +349,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 4. DEPARTMENT PLACEMENT % (Horizontal Bar)
     // ─────────────────────────────────────────────────────────────
-    renderPlacementChart(deptStats) {
+    renderPlacementChart(deptStats, onDrillDown) {
         const id = 'uni-placement-chart';
         const canvas = this._canvas(id);
         if (!canvas || !deptStats.length) return;
@@ -381,33 +381,31 @@ const UniversityCharts = {
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: {
-                    duration: 2000,
-                    easing: 'easeInOutQuart',
-                },
+                animation: { duration: 2000, easing: 'easeInOutQuart' },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.parsed.x}% placement rate`
+                            label: (ctx) => `${ctx.parsed.x}% placement rate${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
                 },
                 scales: {
                     x: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: '#e2e8f0' },
-                        ticks: {
-                            callback: (v) => v + '%',
-                            stepSize: 20
-                        }
+                        beginAtZero: true, max: 100, grid: { color: '#e2e8f0' },
+                        ticks: { callback: (v) => v + '%', stepSize: 20 }
                     },
-                    y: {
-                        grid: { display: false },
-                        ticks: { font: { weight: '600' } }
+                    y: { grid: { display: false }, ticks: { font: { weight: '600' } } }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const dept = deptStats[elements[0].index];
+                        if (dept) onDrillDown(dept.id, dept.name, 'placed');
                     }
-                }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1008,7 +1006,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // PL-2. PLACEMENT SUMMARY DOUGHNUT (Placed vs Not Placed)
     // ─────────────────────────────────────────────────────────────
-    renderPlacementSummaryChart(overview) {
+    renderPlacementSummaryChart(overview, onDrillDown) {
         const id = 'uni-placement-summary-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -1019,6 +1017,7 @@ const UniversityCharts = {
         const placed    = overview.students_placed || 0;
         const total     = overview.total_students  || 0;
         const notPlaced = Math.max(0, total - placed);
+        const sliceKeys = ['placed', 'not_placed'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -1040,18 +1039,29 @@ const UniversityCharts = {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' },
+                        onClick: (e, legendItem) => {
+                            if (onDrillDown) onDrillDown(null, null, sliceKeys[legendItem.index]);
+                        }
                     },
                     tooltip: {
                         callbacks: {
                             label: (c) => {
                                 const total = c.dataset.data.reduce((a, b) => a + b, 0);
                                 const pct = total ? ((c.parsed / total) * 100).toFixed(1) : 0;
-                                return ` ${c.label}: ${c.parsed} students (${pct}%)`;
+                                return ` ${c.label}: ${c.parsed} students (${pct}%)${onDrillDown ? ' — click to view' : ''}`;
                             }
                         }
                     }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(null, null, sliceKeys[elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1059,7 +1069,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // PL-3. PLACED VS TOTAL STUDENTS PER DEPT (Stacked Bar)
     // ─────────────────────────────────────────────────────────────
-    renderPlacementStackedChart(deptStats) {
+    renderPlacementStackedChart(deptStats, onDrillDown) {
         const id = 'uni-placement-stacked-chart';
         const canvas = this._canvas(id);
         if (!canvas || !deptStats || !deptStats.length) return;
@@ -1067,8 +1077,8 @@ const UniversityCharts = {
         this._destroy(id);
         const ctx = canvas.getContext('2d');
 
-        const labels   = deptStats.map(d => d.name);
-        const placed   = deptStats.map(d => Math.round((d.placement_rate || 0) / 100 * (d.students || 0)));
+        const labels    = deptStats.map(d => d.name);
+        const placed    = deptStats.map(d => Math.round((d.placement_rate || 0) / 100 * (d.students || 0)));
         const notPlaced = deptStats.map((d, i) => Math.max(0, (d.students || 0) - placed[i]));
 
         this.instances[id] = new Chart(ctx, {
@@ -1101,12 +1111,23 @@ const UniversityCharts = {
                         position: 'bottom',
                         labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
                     },
-                    tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y} students` } }
+                    tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y} students${onDrillDown ? ' — click to view' : ''}` } }
                 },
                 scales: {
                     y: { beginAtZero: true, stacked: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
                     x: { stacked: true, grid: { display: false }, ticks: { font: { weight: '600' } } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const el = elements[0];
+                        const dept = deptStats[el.index];
+                        const sliceKey = el.datasetIndex === 0 ? 'placed' : 'not_placed';
+                        if (dept) onDrillDown(dept.id, dept.name, sliceKey);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1358,7 +1379,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1405,11 +1426,11 @@ const UniversityCharts = {
 
         // Placement charts
         if (state.departmentStats && state.departmentStats.length) {
-            this.renderPlacementChart(state.departmentStats);
-            this.renderPlacementStackedChart(state.departmentStats);
+            this.renderPlacementChart(state.departmentStats, onPlacementDeptDD);
+            this.renderPlacementStackedChart(state.departmentStats, onPlacementStackDD);
         }
         if (state.overview) {
-            this.renderPlacementSummaryChart(state.overview);
+            this.renderPlacementSummaryChart(state.overview, onPlacementSumDD);
         }
 
         // Exams bar
@@ -1432,7 +1453,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1487,11 +1508,11 @@ const UniversityCharts = {
 
                 case 'placement':
                     if (state.departmentStats?.length) {
-                        this.renderPlacementChart(state.departmentStats);
-                        this.renderPlacementStackedChart(state.departmentStats);
+                        this.renderPlacementChart(state.departmentStats, onPlacementDeptDD);
+                        this.renderPlacementStackedChart(state.departmentStats, onPlacementStackDD);
                     }
                     if (state.overview)
-                        this.renderPlacementSummaryChart(state.overview);
+                        this.renderPlacementSummaryChart(state.overview, onPlacementSumDD);
                     break;
 
                 case 'transport':
