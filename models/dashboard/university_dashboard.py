@@ -276,7 +276,7 @@ class UniversityDashboard(models.TransientModel):
                     ('state', 'not in', ['disposed', 'condemned', 'lost']),
                 ])
                 if count:
-                    by_category.append({'label': cat.name, 'value': count})
+                    by_category.append({'id': cat.id, 'label': cat.name, 'value': count})
 
             # Chart data: assets by state
             state_labels = {

@@ -145,7 +145,9 @@ class UniversityDashboard extends Component {
                 (s, l) => this.drillDownFacultyStatus(s, l),
                 (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
                 (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
-                (key) => this.drillDownExam(key)
+                (key) => this.drillDownExam(key),
+                (catId, catName) => this.drillDownAssetCategory(catId, catName),
+                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
             );
         }, 100);
 
@@ -208,7 +210,9 @@ class UniversityDashboard extends Component {
                     (s, l) => this.drillDownFacultyStatus(s, l),
                     (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
                     (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
-                    (key) => this.drillDownExam(key)
+                    (key) => this.drillDownExam(key),
+                    (catId, catName) => this.drillDownAssetCategory(catId, catName),
+                    (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
                 );
             }, 100);
         }
@@ -259,7 +263,9 @@ class UniversityDashboard extends Component {
                 (s, l) => this.drillDownFacultyStatus(s, l),
                 (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
                 (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
-                (key) => this.drillDownExam(key)
+                (key) => this.drillDownExam(key),
+                (catId, catName) => this.drillDownAssetCategory(catId, catName),
+                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
             );
         }, 150);
     }
@@ -314,6 +320,61 @@ class UniversityDashboard extends Component {
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
         }
+    }
+
+    drillDownAssetCategory(catId, catName) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Assets — ${catName}`,
+                res_model: 'asset.asset',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['category_id', '=', catId],
+                    ['state', 'not in', ['disposed', 'condemned', 'lost']],
+                ],
+            });
+        } catch (e) { console.warn('drillDownAssetCategory failed:', e); }
+    }
+
+    drillDownAssetState(stateKey, stateLabel) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Assets — ${stateLabel}`,
+                res_model: 'asset.asset',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [['state', '=', stateKey]],
+            });
+        } catch (e) { console.warn('drillDownAssetState failed:', e); }
+    }
+
+    openPurchaseRecord(id) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                res_model: 'asset.purchase.request',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                res_id: id,
+                target: 'current',
+            });
+        } catch (e) { console.warn('openPurchaseRecord failed:', e); }
+    }
+
+    openHandoverRecord(id) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                res_model: 'asset.handover',
+                view_mode: 'form',
+                views: [[false, 'form']],
+                res_id: id,
+                target: 'current',
+            });
+        } catch (e) { console.warn('openHandoverRecord failed:', e); }
     }
 
     drillDownExam(key) {

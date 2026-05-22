@@ -1250,7 +1250,7 @@
                             </thead>
                             <tbody>
                                 <t t-foreach="state.assetPurchaseRequests" t-as="pr" t-key="pr.id">
-                                    <tr>
+                                    <tr style="cursor:pointer;" t-on-click="() => this.openPurchaseRecord(pr.id)">
                                         <td t-esc="pr.name"/>
                                         <td t-esc="pr.requested_by"/>
                                         <td t-esc="pr.item_description"/>
@@ -1292,7 +1292,7 @@
                             </thead>
                             <tbody>
                                 <t t-foreach="state.assetHandovers" t-as="hv" t-key="hv.id">
-                                    <tr>
+                                    <tr style="cursor:pointer;" t-on-click="() => this.openHandoverRecord(hv.id)">
                                         <td t-esc="hv.name"/>
                                         <td t-esc="hv.asset_name"/>
                                         <td t-esc="hv.to_department"/>

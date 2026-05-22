@@ -1199,7 +1199,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // ASSET: Assets by Category (Doughnut)
     // ─────────────────────────────────────────────────────────────
-    renderAssetsByCategory(data) {
+    renderAssetsByCategory(data, onDrillDown) {
         const id = 'uni-asset-category-chart';
         const canvas = this._canvas(id);
         if (!canvas || !data || !data.length) return;
@@ -1226,10 +1226,39 @@ const UniversityCharts = {
                 maintainAspectRatio: false,
                 animation: { duration: 1500, easing: 'easeInOutQuart' },
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } },
-                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} assets` } },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            usePointStyle: true,
+                            generateLabels(chart) {
+                                return chart.data.labels.map((label, i) => ({
+                                    text: `${label} (${chart.data.datasets[0].data[i]})`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[i],
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    hidden: false,
+                                    index: i,
+                                    pointStyle: 'circle',
+                                }));
+                            }
+                        },
+                        onClick: (e, legendItem) => {
+                            if (onDrillDown) onDrillDown(data[legendItem.index].id, data[legendItem.index].label);
+                        }
+                    },
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} assets${onDrillDown ? ' — click to view' : ''}` } },
                 },
                 cutout: '60%',
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        onDrillDown(data[index].id, data[index].label);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             },
         });
     },
@@ -1237,7 +1266,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // ASSET: Asset State Breakdown (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderAssetStateChart(data) {
+    renderAssetStateChart(data, onDrillDown) {
         const id = 'uni-asset-state-chart';
         const canvas = this._canvas(id);
         if (!canvas || !data || !data.length) return;
@@ -1264,17 +1293,29 @@ const UniversityCharts = {
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: { duration: 1500, easing: 'easeInOutQuart' },
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => `${c.parsed.y} assets${onDrillDown ? ' — click to view' : ''}` } }
+                },
                 scales: {
                     y: { beginAtZero: true, ticks: { stepSize: 1 },
                          grid: { color: 'rgba(0,0,0,0.05)' } },
                     x: { grid: { display: false } },
                 },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        onDrillDown(data[index].key, data[index].label);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             },
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1340,15 +1381,15 @@ const UniversityCharts = {
 
         // Asset charts
         if (state.assets?.charts) {
-            this.renderAssetsByCategory(state.assets.charts.by_category || []);
-            this.renderAssetStateChart(state.assets.charts.by_state || []);
+            this.renderAssetsByCategory(state.assets.charts.by_category || [], onAssetCatDD);
+            this.renderAssetStateChart(state.assets.charts.by_state || [], onAssetStateDD);
         }
     },
 
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1417,8 +1458,8 @@ const UniversityCharts = {
 
                 case 'assets':
                     if (state.assets?.charts) {
-                        this.renderAssetsByCategory(state.assets.charts.by_category || []);
-                        this.renderAssetStateChart(state.assets.charts.by_state || []);
+                        this.renderAssetsByCategory(state.assets.charts.by_category || [], onAssetCatDD);
+                        this.renderAssetStateChart(state.assets.charts.by_state || [], onAssetStateDD);
                     }
                     break;
             }
