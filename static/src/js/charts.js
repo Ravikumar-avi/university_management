@@ -557,7 +557,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 7. HOSTEL OCCUPANCY (Doughnut)
     // ─────────────────────────────────────────────────────────────
-    renderHostelOccupancy(hostel) {
+    renderHostelOccupancy(hostel, onDrillDown) {
         const id = 'uni-hostel-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -567,6 +567,7 @@ const UniversityCharts = {
 
         const occupied = hostel.occupied_rooms || 0;
         const vacant   = Math.max(0, (hostel.total_rooms || 0) - occupied);
+        const sliceKeys = ['occupied', 'vacant'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -584,26 +585,29 @@ const UniversityCharts = {
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '70%',
-                animation: {
-                    animateRotate: true,
-                    animateScale: true,
-                    duration: 2000,
-                },
+                animation: { animateRotate: true, animateScale: true, duration: 2000 },
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: {
-                            padding: 16,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
+                        labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' },
+                        onClick: (e, legendItem) => {
+                            if (onDrillDown) onDrillDown(sliceKeys[legendItem.index], legendItem.text);
                         }
                     },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.label}: ${ctx.parsed} rooms`
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed} rooms${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(sliceKeys[elements[0].index], ['Occupied', 'Vacant'][elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -805,7 +809,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // HO-2. HOSTEL ROOMS SUMMARY (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderHostelRoomsChart(hostel) {
+    renderHostelRoomsChart(hostel, onDrillDown) {
         const id = 'uni-hostel-rooms-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -816,6 +820,7 @@ const UniversityCharts = {
         const total    = hostel.total_rooms    || 0;
         const occupied = hostel.occupied_rooms || 0;
         const vacant   = Math.max(0, total - occupied);
+        const barKeys  = ['total', 'occupied', 'vacant'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'bar',
@@ -836,12 +841,20 @@ const UniversityCharts = {
                 animation: { duration: 2000, easing: 'easeInOutQuart' },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => `${c.label}: ${c.parsed.y} rooms` } }
+                    tooltip: { callbacks: { label: (c) => `${c.parsed.y} rooms${onDrillDown ? ' — click to view' : ''}` } }
                 },
                 scales: {
                     y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
                     x: { grid: { display: false } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(barKeys[elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -849,7 +862,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // HO-3. HOSTEL COMPLAINTS STATUS (Doughnut)
     // ─────────────────────────────────────────────────────────────
-    renderHostelComplaintsChart(hostel) {
+    renderHostelComplaintsChart(hostel, onDrillDown) {
         const id = 'uni-hostel-complaints-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -857,13 +870,11 @@ const UniversityCharts = {
         this._destroy(id);
         const ctx = canvas.getContext('2d');
 
-        const breakdown = hostel.complaints_breakdown || [];
-        // Fallback: show pending vs resolved
-        const labels = breakdown.length ? breakdown.map(d => d.label) : ['Pending', 'Resolved'];
-        const values = breakdown.length ? breakdown.map(d => d.value) : [
-            hostel.pending_complaints || 0,
-            Math.max(0, 0)
-        ];
+        const breakdown = (hostel.complaints_breakdown || []).filter(d => d.value > 0);
+        if (!breakdown.length) return;
+
+        const labels = breakdown.map(d => d.label);
+        const values = breakdown.map(d => d.value);
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -871,7 +882,7 @@ const UniversityCharts = {
                 labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: [this.palette.red, this.palette.amber, this.palette.green, this.palette.blue],
+                    backgroundColor: [this.palette.red, this.palette.amber, this.palette.green, this.palette.blue, this.palette.teal],
                     borderWidth: 3,
                     borderColor: '#ffffff',
                     hoverOffset: 10,
@@ -885,10 +896,37 @@ const UniversityCharts = {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                        labels: {
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            generateLabels(chart) {
+                                return chart.data.labels.map((label, i) => ({
+                                    text: `${label} (${chart.data.datasets[0].data[i]})`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[i],
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    hidden: false,
+                                    index: i,
+                                    pointStyle: 'circle',
+                                }));
+                            }
+                        },
+                        onClick: (e, legendItem) => {
+                            if (onDrillDown) onDrillDown(breakdown[legendItem.index].key, breakdown[legendItem.index].label);
+                        }
                     },
-                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} complaints` } }
-                }
+                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} complaints${onDrillDown ? ' — click to view' : ''}` } }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        onDrillDown(breakdown[index].key, breakdown[index].label);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1315,7 +1353,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1349,9 +1387,9 @@ const UniversityCharts = {
 
         // Hostel doughnut
         if (state.hostel && state.hostel.total_rooms) {
-            this.renderHostelOccupancy(state.hostel);
-            this.renderHostelRoomsChart(state.hostel);
-            this.renderHostelComplaintsChart(state.hostel);
+            this.renderHostelOccupancy(state.hostel, onHostelOccDD);
+            this.renderHostelRoomsChart(state.hostel, onHostelRoomsDD);
+            this.renderHostelComplaintsChart(state.hostel, onComplaintDD);
         }
 
         // Library bar
@@ -1389,7 +1427,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1429,9 +1467,9 @@ const UniversityCharts = {
 
                 case 'hostel':
                     if (state.hostel?.total_rooms) {
-                        this.renderHostelOccupancy(state.hostel);
-                        this.renderHostelRoomsChart(state.hostel);
-                        this.renderHostelComplaintsChart(state.hostel);
+                        this.renderHostelOccupancy(state.hostel, onHostelOccDD);
+                        this.renderHostelRoomsChart(state.hostel, onHostelRoomsDD);
+                        this.renderHostelComplaintsChart(state.hostel, onComplaintDD);
                     }
                     break;
 

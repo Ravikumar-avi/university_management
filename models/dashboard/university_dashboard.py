@@ -694,11 +694,15 @@ class UniversityDashboard(models.TransientModel):
         complaints_breakdown = []
         try:
             all_complaints = env['hostel.complaint'].search([])
-            state_map = {}
+            state_map = {}  # {(key, label): count}
             for c in all_complaints:
-                label = (c.state or 'unknown').replace('_', ' ').title()
-                state_map[label] = state_map.get(label, 0) + 1
-            complaints_breakdown = [{'label': k, 'value': v} for k, v in sorted(state_map.items(), key=lambda x: -x[1])]
+                key = c.state or 'unknown'
+                label = key.replace('_', ' ').title()
+                state_map[(key, label)] = state_map.get((key, label), 0) + 1
+            complaints_breakdown = [
+                {'key': k[0], 'label': k[1], 'value': v}
+                for k, v in sorted(state_map.items(), key=lambda x: -x[1])
+            ]
         except Exception:
             pass
 

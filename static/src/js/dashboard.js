@@ -147,7 +147,10 @@ class UniversityDashboard extends Component {
                 (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
                 (key) => this.drillDownExam(key),
                 (catId, catName) => this.drillDownAssetCategory(catId, catName),
-                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
+                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
+                (k, l) => this.drillDownHostelOccupancy(k, l),
+                (k) => this.drillDownHostelRooms(k),
+                (sk, sl) => this.drillDownComplaint(sk, sl)
             );
         }, 100);
 
@@ -212,7 +215,10 @@ class UniversityDashboard extends Component {
                     (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
                     (key) => this.drillDownExam(key),
                     (catId, catName) => this.drillDownAssetCategory(catId, catName),
-                    (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
+                    (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
+                    (k, l) => this.drillDownHostelOccupancy(k, l),
+                    (k) => this.drillDownHostelRooms(k),
+                    (sk, sl) => this.drillDownComplaint(sk, sl)
                 );
             }, 100);
         }
@@ -265,7 +271,10 @@ class UniversityDashboard extends Component {
                 (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
                 (key) => this.drillDownExam(key),
                 (catId, catName) => this.drillDownAssetCategory(catId, catName),
-                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel)
+                (stateKey, stateLabel) => this.drillDownAssetState(stateKey, stateLabel),
+                (k, l) => this.drillDownHostelOccupancy(k, l),
+                (k) => this.drillDownHostelRooms(k),
+                (sk, sl) => this.drillDownComplaint(sk, sl)
             );
         }, 150);
     }
@@ -320,6 +329,75 @@ class UniversityDashboard extends Component {
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
         }
+    }
+
+    drillDownHostelOccupancy(key, label) {
+        try {
+            if (key === 'occupied') {
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: 'Hostel — Occupied Rooms',
+                    res_model: 'hostel.allocation',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain: [['state', 'in', ['active', 'allocated', 'occupied']]],
+                });
+            } else {
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: 'Hostel — Vacant Rooms',
+                    res_model: 'hostel.room',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain: [['active', '=', true], ['status', '=', 'available']],
+                });
+            }
+        } catch (e) { console.warn('drillDownHostelOccupancy failed:', e); }
+    }
+
+    drillDownHostelRooms(key) {
+        try {
+            const actions = {
+                total: {
+                    name: 'Hostel — All Rooms',
+                    model: 'hostel.room',
+                    domain: [['active', '=', true]],
+                },
+                occupied: {
+                    name: 'Hostel — Occupied Allocations',
+                    model: 'hostel.allocation',
+                    domain: [['state', 'in', ['active', 'allocated', 'occupied']]],
+                },
+                vacant: {
+                    name: 'Hostel — Vacant Rooms',
+                    model: 'hostel.room',
+                    domain: [['active', '=', true], ['status', '=', 'available']],
+                },
+            };
+            const a = actions[key];
+            if (!a) return;
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: a.name,
+                res_model: a.model,
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: a.domain,
+            });
+        } catch (e) { console.warn('drillDownHostelRooms failed:', e); }
+    }
+
+    drillDownComplaint(stateKey, stateLabel) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Hostel Complaints — ${stateLabel}`,
+                res_model: 'hostel.complaint',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [['state', '=', stateKey]],
+            });
+        } catch (e) { console.warn('drillDownComplaint failed:', e); }
     }
 
     drillDownAssetCategory(catId, catName) {
