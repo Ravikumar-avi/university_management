@@ -1203,13 +1203,14 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 10. TRANSPORT OVERVIEW (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderTransportChart(overview) {
+    renderTransportChart(overview, onDrillDown) {
         const id = 'uni-transport-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
 
         this._destroy(id);
         const ctx = canvas.getContext('2d');
+        const barKeys = ['vehicles', 'routes', 'students'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'bar',
@@ -1240,18 +1241,22 @@ const UniversityCharts = {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.label}: ${ctx.parsed.y}`
+                            label: (ctx) => `${ctx.parsed.y}${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e2e8f0' },
-                        ticks: { stepSize: 1 }
-                    },
+                    y: { beginAtZero: true, grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } },
                     x: { grid: { display: false } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(barKeys[elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1379,7 +1384,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD, onTransportDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1440,7 +1445,7 @@ const UniversityCharts = {
 
         // Transport bar
         if (state.overview) {
-            this.renderTransportChart(state.overview);
+            this.renderTransportChart(state.overview, onTransportDD);
         }
 
         // Asset charts
@@ -1453,7 +1458,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD, onAssetCatDD, onAssetStateDD, onHostelOccDD, onHostelRoomsDD, onComplaintDD, onLibActivityDD, onLibStatusDD, onPlacementDeptDD, onPlacementSumDD, onPlacementStackDD, onTransportDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1517,7 +1522,7 @@ const UniversityCharts = {
 
                 case 'transport':
                     if (state.overview)
-                        this.renderTransportChart(state.overview);
+                        this.renderTransportChart(state.overview, onTransportDD);
                     break;
 
                 case 'assets':

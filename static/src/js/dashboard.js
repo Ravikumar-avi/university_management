@@ -155,7 +155,8 @@ class UniversityDashboard extends Component {
                 (k) => this.drillDownLibrary(k),
                 (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
                 (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
-                (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (k) => this.drillDownTransport(k)
             );
         }, 100);
 
@@ -228,7 +229,8 @@ class UniversityDashboard extends Component {
                     (k) => this.drillDownLibrary(k),
                     (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
                     (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
-                    (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
+                    (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                    (k) => this.drillDownTransport(k)
                 );
             }, 100);
         }
@@ -289,7 +291,8 @@ class UniversityDashboard extends Component {
                 (k) => this.drillDownLibrary(k),
                 (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
                 (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
-                (dId, dN, t) => this.drillDownPlacement(dId, dN, t)
+                (dId, dN, t) => this.drillDownPlacement(dId, dN, t),
+                (k) => this.drillDownTransport(k)
             );
         }, 150);
     }
@@ -344,6 +347,38 @@ class UniversityDashboard extends Component {
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
         }
+    }
+
+    drillDownTransport(key) {
+        const config = {
+            vehicles: {
+                name: 'Transport — All Vehicles',
+                model: 'transport.vehicle',
+                domain: [['active', '=', true]],
+            },
+            routes: {
+                name: 'Transport — Active Routes',
+                model: 'transport.route',
+                domain: [['active', '=', true]],
+            },
+            students: {
+                name: 'Transport — Students Using Transport',
+                model: 'transport.allocation',
+                domain: [['state', '=', 'active']],
+            },
+        };
+        const c = config[key];
+        if (!c) return;
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: c.name,
+                res_model: c.model,
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: c.domain,
+            });
+        } catch (e) { console.warn('drillDownTransport failed:', e); }
     }
 
     drillDownPlacement(deptId, deptName, type) {
