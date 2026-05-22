@@ -141,7 +141,10 @@ class UniversityDashboard extends Component {
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                 (progId, progName, count) => this.drillDownProgram(progId, progName, count),
                 (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
-                (semId, semName, count) => this.drillDownSemester(semId, semName, count)
+                (semId, semName, count) => this.drillDownSemester(semId, semName, count),
+                (s, l) => this.drillDownFacultyStatus(s, l),
+                (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
+                (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
             );
         }, 100);
 
@@ -200,7 +203,10 @@ class UniversityDashboard extends Component {
                     (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                     (progId, progName, count) => this.drillDownProgram(progId, progName, count),
                     (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
-                    (semId, semName, count) => this.drillDownSemester(semId, semName, count)
+                    (semId, semName, count) => this.drillDownSemester(semId, semName, count),
+                    (s, l) => this.drillDownFacultyStatus(s, l),
+                    (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
+                    (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
                 );
             }, 100);
         }
@@ -247,7 +253,10 @@ class UniversityDashboard extends Component {
                 (deptId, deptName, count) => this.drillDownDepartment(deptId, deptName, count),
                 (progId, progName, count) => this.drillDownProgram(progId, progName, count),
                 (label, ds, de) => this.drillDownFeeTrend(label, ds, de),
-                (semId, semName, count) => this.drillDownSemester(semId, semName, count)
+                (semId, semName, count) => this.drillDownSemester(semId, semName, count),
+                (s, l) => this.drillDownFacultyStatus(s, l),
+                (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
+                (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
             );
         }, 150);
     }
@@ -301,6 +310,84 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownFacultyStatus(status, label) {
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            if (status === 'present') {
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: `Faculty — Present Today`,
+                    res_model: 'faculty.attendance',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain: [['date', '=', today], ['state', '=', 'present']],
+                });
+            } else if (status === 'on_leave') {
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: `Faculty — On Leave Today`,
+                    res_model: 'faculty.leave',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain: [
+                        ['date_from', '<=', today],
+                        ['date_to', '>=', today],
+                        ['state', '=', 'approved'],
+                    ],
+                });
+            } else {
+                // Absent — open attendance with no record today (show all today's attendance to cross-check)
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    name: `Faculty — Attendance Today`,
+                    res_model: 'faculty.attendance',
+                    view_mode: 'list,form',
+                    views: [[false, 'list'], [false, 'form']],
+                    domain: [['date', '=', today]],
+                });
+            }
+        } catch (e) {
+            console.warn('drillDownFacultyStatus failed:', e);
+        }
+    }
+
+    drillDownDeptCgpa(deptId, deptName, avgCgpa) {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `${deptName} — Students (Avg CGPA: ${avgCgpa})`,
+                res_model: 'student.student',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['department_id', '=', deptId],
+                    ['state', 'in', ['active', 'enrolled', 'admitted']],
+                ],
+                context: { search_default_department_id: deptId },
+            });
+        } catch (e) {
+            console.warn('drillDownDeptCgpa failed:', e);
+        }
+    }
+
+    drillDownDesignation(designationId, designationName) {
+        try {
+            const domain = designationId
+                ? [['designation_id', '=', designationId], ['active', '=', true]]
+                : [['designation_id', '=', false], ['active', '=', true]];
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Faculty — ${designationName}`,
+                res_model: 'faculty.faculty',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain,
+            });
+        } catch (e) {
+            console.warn('drillDownDesignation failed:', e);
         }
     }
 

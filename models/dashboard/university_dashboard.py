@@ -403,11 +403,17 @@ class UniversityDashboard(models.TransientModel):
         designation_breakdown = []
         try:
             all_faculty = env['faculty.faculty'].search([('active', '=', True)])
-            desig_map = {}
+            desig_map = {}  # {(id, name): count}
             for f in all_faculty:
-                label = f.designation or 'Other'
-                desig_map[label] = desig_map.get(label, 0) + 1
-            designation_breakdown = [{'label': k, 'value': v} for k, v in sorted(desig_map.items(), key=lambda x: -x[1])]
+                if f.designation_id:
+                    key = (f.designation_id.id, f.designation_id.name)
+                else:
+                    key = (False, 'Other')
+                desig_map[key] = desig_map.get(key, 0) + 1
+            designation_breakdown = [
+                {'id': k[0], 'label': k[1], 'value': v}
+                for k, v in sorted(desig_map.items(), key=lambda x: -x[1])
+            ]
         except Exception:
             pass
 

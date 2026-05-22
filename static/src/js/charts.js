@@ -488,7 +488,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 6. FACULTY STATUS (Doughnut)
     // ─────────────────────────────────────────────────────────────
-    renderFacultyStatus(faculty) {
+    renderFacultyStatus(faculty, onDrillDown) {
         const id = 'uni-faculty-status-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -500,6 +500,7 @@ const UniversityCharts = {
         const onLeave = faculty.on_leave || 0;
         const total   = faculty.total || 0;
         const absent  = Math.max(0, total - present - onLeave);
+        const statuses = ['present', 'on_leave', 'absent'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -529,14 +530,26 @@ const UniversityCharts = {
                             padding: 16,
                             usePointStyle: true,
                             pointStyle: 'circle',
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            if (onDrillDown) onDrillDown(statuses[legendItem.index], legendItem.text);
                         }
                     },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.label}: ${ctx.parsed} faculty`
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed} faculty${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        onDrillDown(statuses[index], ['Present', 'On Leave', 'Absent'][index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -656,7 +669,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // FA-2. DEPARTMENT-WISE AVG CGPA (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderFacultyCgpaChart(deptStats) {
+    renderFacultyCgpaChart(deptStats, onDrillDown) {
         const id = 'uni-faculty-cgpa-chart';
         const canvas = this._canvas(id);
         if (!canvas || !deptStats || !deptStats.length) return;
@@ -688,7 +701,7 @@ const UniversityCharts = {
                 animation: { duration: 2000, easing: 'easeInOutQuart' },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => `Avg CGPA: ${c.parsed.y.toFixed(1)}` } }
+                    tooltip: { callbacks: { label: (c) => `Avg CGPA: ${c.parsed.y.toFixed(1)}${onDrillDown ? ' — click to view students' : ''}` } }
                 },
                 scales: {
                     y: {
@@ -698,7 +711,17 @@ const UniversityCharts = {
                         ticks: { stepSize: 2 }
                     },
                     x: { grid: { display: false }, ticks: { font: { weight: '600' } } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        const dept = deptStats[index];
+                        if (dept) onDrillDown(dept.id, dept.name, dept.avg_cgpa);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -706,7 +729,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // FA-3. FACULTY DESIGNATION BREAKDOWN (Doughnut)
     // ─────────────────────────────────────────────────────────────
-    renderFacultyDesignationChart(faculty) {
+    renderFacultyDesignationChart(faculty, onDrillDown) {
         const id = 'uni-faculty-designation-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
@@ -714,14 +737,11 @@ const UniversityCharts = {
         this._destroy(id);
         const ctx = canvas.getContext('2d');
 
-        const data = faculty.designation_breakdown || [];
-        // Fallback: use present/onleave/absent if no designation data
-        const labels = data.length ? data.map(d => d.label) : ['Present', 'On Leave', 'Absent'];
-        const values = data.length ? data.map(d => d.value) : [
-            faculty.present_today || 0,
-            faculty.on_leave || 0,
-            Math.max(0, (faculty.total || 0) - (faculty.present_today || 0) - (faculty.on_leave || 0))
-        ];
+        const data = (faculty.designation_breakdown || []).filter(d => d.value > 0);
+        if (!data.length) return;
+
+        const labels = data.map(d => d.label);
+        const values = data.map(d => d.value);
 
         this.instances[id] = new Chart(ctx, {
             type: 'doughnut',
@@ -743,10 +763,41 @@ const UniversityCharts = {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { padding: 14, usePointStyle: true, pointStyle: 'circle' }
+                        labels: {
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            generateLabels(chart) {
+                                return chart.data.labels.map((label, i) => ({
+                                    text: `${label} (${chart.data.datasets[0].data[i]})`,
+                                    fillStyle: chart.data.datasets[0].backgroundColor[i],
+                                    strokeStyle: '#fff',
+                                    lineWidth: 2,
+                                    hidden: false,
+                                    index: i,
+                                    pointStyle: 'circle',
+                                }));
+                            }
+                        },
+                        onClick: (e, legendItem) => {
+                            if (onDrillDown) onDrillDown(data[legendItem.index].id, data[legendItem.index].label);
+                        }
                     },
-                    tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} faculty` } }
-                }
+                    tooltip: {
+                        callbacks: {
+                            label: (c) => ` ${c.label}: ${c.parsed} faculty${onDrillDown ? ' — click to view' : ''}`
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        const index = elements[0].index;
+                        onDrillDown(data[index].id, data[index].label);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1213,7 +1264,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1238,11 +1289,11 @@ const UniversityCharts = {
 
         // Faculty doughnut
         if (state.faculty && state.faculty.total) {
-            this.renderFacultyStatus(state.faculty);
-            this.renderFacultyDesignationChart(state.faculty);
+            this.renderFacultyStatus(state.faculty, onFacultyStatusDD);
+            this.renderFacultyDesignationChart(state.faculty, onDesignationDD);
         }
         if (state.departmentStats && state.departmentStats.length) {
-            this.renderFacultyCgpaChart(state.departmentStats);
+            this.renderFacultyCgpaChart(state.departmentStats, onCgpaDD);
         }
 
         // Hostel doughnut
@@ -1287,7 +1338,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1308,11 +1359,11 @@ const UniversityCharts = {
 
                 case 'faculty':
                     if (state.faculty?.total) {
-                        this.renderFacultyStatus(state.faculty);
-                        this.renderFacultyDesignationChart(state.faculty);
+                        this.renderFacultyStatus(state.faculty, onFacultyStatusDD);
+                        this.renderFacultyDesignationChart(state.faculty, onDesignationDD);
                     }
                     if (state.departmentStats?.length)
-                        this.renderFacultyCgpaChart(state.departmentStats);
+                        this.renderFacultyCgpaChart(state.departmentStats, onCgpaDD);
                     break;
 
                 case 'fees':
