@@ -144,7 +144,8 @@ class UniversityDashboard extends Component {
                 (semId, semName, count) => this.drillDownSemester(semId, semName, count),
                 (s, l) => this.drillDownFacultyStatus(s, l),
                 (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
-                (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
+                (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
+                (key) => this.drillDownExam(key)
             );
         }, 100);
 
@@ -206,7 +207,8 @@ class UniversityDashboard extends Component {
                     (semId, semName, count) => this.drillDownSemester(semId, semName, count),
                     (s, l) => this.drillDownFacultyStatus(s, l),
                     (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
-                    (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
+                    (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
+                    (key) => this.drillDownExam(key)
                 );
             }, 100);
         }
@@ -256,7 +258,8 @@ class UniversityDashboard extends Component {
                 (semId, semName, count) => this.drillDownSemester(semId, semName, count),
                 (s, l) => this.drillDownFacultyStatus(s, l),
                 (dId, dN, cgpa) => this.drillDownDeptCgpa(dId, dN, cgpa),
-                (desigId, desigName) => this.drillDownDesignation(desigId, desigName)
+                (desigId, desigName) => this.drillDownDesignation(desigId, desigName),
+                (key) => this.drillDownExam(key)
             );
         }, 150);
     }
@@ -310,6 +313,45 @@ class UniversityDashboard extends Component {
             this.action.doAction(actionXmlId);
         } catch (e) {
             console.warn("Navigation not available:", actionXmlId, e);
+        }
+    }
+
+    drillDownExam(key) {
+        const config = {
+            active_exams: {
+                name: 'Active Examinations',
+                model: 'examination.examination',
+                domain: [],
+            },
+            hall_tickets: {
+                name: 'Hall Tickets Issued',
+                model: 'examination.hall.ticket',
+                domain: [['state', 'in', ['generated', 'issued', 'printed']]],
+            },
+            results_published: {
+                name: 'Results Published',
+                model: 'examination.result',
+                domain: [['state', '=', 'published']],
+            },
+            revaluations: {
+                name: 'Revaluation Requests',
+                model: 'examination.revaluation',
+                domain: [['state', 'in', ['submitted', 'under_review', 'revaluation_in_progress', 'completed']]],
+            },
+        };
+        const c = config[key];
+        if (!c) return;
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: c.name,
+                res_model: c.model,
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: c.domain,
+            });
+        } catch (e) {
+            console.warn('drillDownExam failed:', e);
         }
     }
 

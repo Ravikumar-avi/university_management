@@ -1071,13 +1071,15 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // 9. EXAMINATION STATUS (Bar)
     // ─────────────────────────────────────────────────────────────
-    renderExamsChart(exams) {
+    renderExamsChart(exams, onDrillDown) {
         const id = 'uni-exams-chart';
         const canvas = this._canvas(id);
         if (!canvas) return;
 
         this._destroy(id);
         const ctx = canvas.getContext('2d');
+
+        const examKeys = ['active_exams', 'hall_tickets', 'results_published', 'revaluations'];
 
         this.instances[id] = new Chart(ctx, {
             type: 'bar',
@@ -1110,7 +1112,7 @@ const UniversityCharts = {
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: (ctx) => `${ctx.label}: ${ctx.parsed.y}`
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed.y}${onDrillDown ? ' — click to view' : ''}`
                         }
                     }
                 },
@@ -1121,7 +1123,15 @@ const UniversityCharts = {
                         ticks: { stepSize: 1 }
                     },
                     x: { grid: { display: false } }
-                }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0 && onDrillDown) {
+                        onDrillDown(examKeys[elements[0].index]);
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                },
             }
         });
     },
@@ -1264,7 +1274,7 @@ const UniversityCharts = {
         });
     },
 
-    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD) {
+    renderAll(state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD) {
         if (!this._initDefaults()) return;
 
         // Fee trend
@@ -1320,7 +1330,7 @@ const UniversityCharts = {
 
         // Exams bar
         if (state.exams) {
-            this.renderExamsChart(state.exams);
+            this.renderExamsChart(state.exams, onExamDD);
         }
 
         // Transport bar
@@ -1338,7 +1348,7 @@ const UniversityCharts = {
     // ─────────────────────────────────────────────────────────────
     // Re-render only charts visible in the active module
     // ─────────────────────────────────────────────────────────────
-    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD) {
+    renderForModule(module, state, onDeptDrillDown, onProgramDrillDown, onFeeDrillDown, onSemDrillDown, onFacultyStatusDD, onCgpaDD, onDesignationDD, onExamDD) {
         if (!this._initDefaults()) return;
 
         setTimeout(() => {
@@ -1373,7 +1383,7 @@ const UniversityCharts = {
 
                 case 'exams':
                     if (state.exams)
-                        this.renderExamsChart(state.exams);
+                        this.renderExamsChart(state.exams, onExamDD);
                     break;
 
                 case 'hostel':
