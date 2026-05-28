@@ -169,7 +169,7 @@
                         <div class="uni-kpi-value" t-esc="(state.hostel.occupancy_rate || 0) + '%'"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openLibrary">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openLibraryIssues">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-book"/>
                     </div>
