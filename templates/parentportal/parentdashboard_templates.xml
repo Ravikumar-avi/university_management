@@ -2172,13 +2172,13 @@
                                                             <div class="col-6">
                                                                 <small class="text-muted">
                                                                     <i class="fa fa-calendar me-1"></i>
-                                                                    <t t-esc="registration.event_id.start_date"/>
+                                                                    <t t-esc="registration.event_id.start.strftime('%d %b %Y') if registration.event_id.start else 'TBD'"/>
                                                                 </small>
                                                             </div>
                                                             <div class="col-6">
                                                                 <small class="text-muted">
                                                                     <i class="fa fa-clock-o me-1"></i>
-                                                                    <t t-esc="registration.event_id.start_time or 'All Day'"/>
+                                                                    <t t-esc="registration.event_id.start.strftime('%I:%M %p') if registration.event_id.start else 'All Day'"/>
                                                                 </small>
                                                             </div>
                                                         </div>

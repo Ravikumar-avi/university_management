@@ -76,6 +76,7 @@ access_alumni_event_student,alumni.event.student,model_alumni_event,group_studen
 access_event_registration_admin,university.event.registration.admin,model_university_event_registration,group_university_admin,1,1,1,1
 access_event_registration_coordinator,university.event.registration.coordinator,model_university_event_registration,group_academic_coordinator,1,1,1,0
 access_event_registration_student,university.event.registration.student,model_university_event_registration,group_student_portal,1,0,0,0
+access_event_registration_parent,university.event.registration.parent,model_university_event_registration,group_parent_portal,1,0,0,0
 
 access_event_sponsor_admin,event.sponsor.admin,model_event_sponsor,group_university_admin,1,1,1,1
 access_event_sponsor_coordinator,event.sponsor.coordinator,model_event_sponsor,group_academic_coordinator,1,1,1,0
@@ -97,6 +98,7 @@ access_hackathon_winner_coordinator,hackathon.winner.coordinator,model_hackathon
 access_university_event_admin,university.event.admin,model_university_event,group_university_admin,1,1,1,1
 access_university_event_coordinator,university.event.coordinator,model_university_event,group_academic_coordinator,1,1,1,0
 access_university_event_student,university.event.student,model_university_event,group_student_portal,1,0,0,0
+access_university_event_parent,university.event.parent,model_university_event,group_parent_portal,1,0,0,0
 
 access_fee_discount_admin,fee.discount.admin,model_fee_discount,group_university_admin,1,1,1,1
 access_fee_discount_accounts,fee.discount.accounts,model_fee_discount,group_accounts_manager,1,1,1,0

@@ -455,8 +455,9 @@ class ParentPortalController(CustomerPortal):
         if not student:
             return request.redirect('/my/parent/select-student')
 
-        # Get event registrations
-        event_registrations = request.env['university.event.registration'].search([
+        # Get event registrations (sudo so parent portal user can read
+        # university.event records accessed via the registration Many2one)
+        event_registrations = request.env['university.event.registration'].sudo().search([
             ('student_id', '=', student.id)
         ], order='create_date desc')
 
