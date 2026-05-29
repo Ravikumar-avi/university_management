@@ -870,7 +870,7 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <t t-esc="record.faculty_id.name or ''"/>
+                                                            <t t-esc="record.faculty_id.sudo().name or ''"/>
                                                         </td>
                                                     </tr>
                                                 </t>
@@ -1436,7 +1436,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>
@@ -1471,7 +1471,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>
@@ -1506,7 +1506,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>
@@ -1541,7 +1541,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>
@@ -1576,7 +1576,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>
@@ -1611,7 +1611,7 @@
                                                                         <br/>
                                                                         <small>
                                                                             <i class="fa fa-user"></i>
-                                                                            <t t-esc="class.faculty_id.name or ''"/>
+                                                                            <t t-esc="class.faculty_id.sudo().name or ''"/>
                                                                         </small>
                                                                         <br/>
                                                                         <small>

@@ -160,7 +160,7 @@ class ParentPortalController(CustomerPortal):
         if date_to:
             domain += [('date', '<=', date_to)]
 
-        attendance = request.env['student.attendance'].search(domain, order='date desc', limit=30)
+        attendance = request.env['student.attendance'].sudo().search(domain, order='date desc', limit=30)
 
         # Subject-wise attendance
         subject_attendance = {}
@@ -304,7 +304,7 @@ class ParentPortalController(CustomerPortal):
         if not student:
             return request.redirect('/my/parent/select-student')
 
-        timetable = request.env['university.timetable'].search([
+        timetable = request.env['university.timetable'].sudo().search([
             ('batch_id', '=', student.batch_id.id),
             ('semester_id', '=', student.current_semester),
             ('active', '=', True)
