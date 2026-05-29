@@ -472,7 +472,7 @@
                                                             <t t-else="">-</t>
                                                         </td>
                                                         <td><t t-esc="att.subject_id.name"/></td>
-                                                        <td><t t-esc="att.faculty_id.name"/></td>
+                                                        <td><t t-esc="att.faculty_id.sudo().name or ''"/></td>
                                                         <td>
                                                             <span t-if="att.state == 'present'" class="badge bg-success">Present</span>
                                                             <span t-elif="att.state == 'absent'" class="badge bg-danger">Absent</span>
@@ -584,7 +584,7 @@
                                                                          style="background-color: #e3f2fd; border-left: 4px solid #2196f3;">
                                                                         <strong><t t-esc="cls.subject_id.name"/></strong><br/>
                                                                         <small class="text-muted">
-                                                                            <i class="fa fa-user"></i> <t t-esc="cls.faculty_id.name"/><br/>
+                                                                            <i class="fa fa-user"></i> <t t-esc="cls.faculty_id.sudo().name or ''"/><br/>
                                                                             <i class="fa fa-door-closed"></i> <t t-esc="cls.room_number or 'TBA'"/><br/>
                                                                             <span class="badge bg-info"><t t-esc="cls.class_type"/></span>
                                                                         </small>
