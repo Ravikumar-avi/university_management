@@ -28,7 +28,7 @@
                                             <h1 class="card-title">Welcome, <t t-esc="student.name"/>!</h1>
                                             <p class="card-text">
                                                 <span class="badge bg-light text-dark mr-2">
-                                                    <i class="fa fa-id-card"></i> <t t-esc="student.registration_number"/>
+                                                    <i class="fa fa-id-card-o"></i> <t t-esc="student.registration_number"/>
                                                 </span>
                                                 <span class="badge bg-light text-dark mr-2">
                                                     <i class="fa fa-graduation-cap"></i> <t t-esc="student.program_id.name"/>
@@ -49,7 +49,7 @@
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h1 class="display-4 text-primary"><i class="fa fa-percentage"></i></h1>
+                                    <h1 class="display-4 text-primary"><i class="fa fa-percent"></i></h1>
                                     <h5 class="card-title">Attendance</h5>
                                     <p class="card-text h3"><t t-esc="'%.1f' % ((attendance_percentage or 0.0) if attendance_percentage is not None else 0.0)"/>%</p>
                                 </div>
@@ -90,7 +90,7 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
-                                        <i class="fa fa-calendar-check text-primary"></i> Recent Attendance
+                                        <i class="fa fa-calendar text-primary"></i> Recent Attendance
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -178,7 +178,7 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
-                                        <i class="fa fa-clipboard-list text-danger"></i> Upcoming Exams
+                                        <i class="fa fa-clipboard text-danger"></i> Upcoming Exams
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -255,7 +255,7 @@
                                     </t>
                                     <h4><t t-esc="student.name"/></h4>
                                     <p class="text-muted">
-                                        <i class="fa fa-id-card"></i> <t t-esc="student.registration_number"/>
+                                        <i class="fa fa-id-card-o"></i> <t t-esc="student.registration_number"/>
                                     </p>
                                     <div class="d-grid gap-2">
                                         <a href="/my/student/dashboard" class="btn btn-outline-primary">
@@ -409,7 +409,7 @@
                                 <div class="card-header">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0">
-                                            <i class="fa fa-calendar-check text-primary"></i> Attendance Records
+                                            <i class="fa fa-calendar text-primary"></i> Attendance Records
                                         </h5>
                                         <span class="badge bg-primary">
                                             Attendance: <t t-esc="'%.1f' % (student.attendance_percentage)"/>
@@ -538,7 +538,7 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
-                                        <i class="fa fa-calendar-alt text-primary"></i> Class Timetable
+                                        <i class="fa fa-calendar text-primary"></i> Class Timetable
                                     </h5>
                                 </div>
                                 <div class="card-body">
@@ -585,7 +585,7 @@
                                                                         <strong><t t-esc="cls.subject_id.name"/></strong><br/>
                                                                         <small class="text-muted">
                                                                             <i class="fa fa-user"></i> <t t-esc="cls.faculty_id.sudo().name or ''"/><br/>
-                                                                            <i class="fa fa-door-closed"></i> <t t-esc="cls.room_number or 'TBA'"/><br/>
+                                                                            <i class="fa fa-sign-in"></i> <t t-esc="cls.room_number or 'TBA'"/><br/>
                                                                             <span class="badge bg-info"><t t-esc="cls.class_type"/></span>
                                                                         </small>
                                                                     </div>
@@ -768,7 +768,7 @@
                                 <div class="card-header">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0">
-                                            <i class="fa fa-receipt text-success"></i> Fee Payment Details
+                                            <i class="fa fa-file-text-o text-success"></i> Fee Payment Details
                                         </h5>
                                         <a href="/my/fees" class="btn btn-sm btn-outline-secondary">
                                             <i class="fa fa-arrow-left"></i> Back
@@ -911,7 +911,7 @@
                                 <div class="card-header">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0">
-                                            <i class="fa fa-chart-line text-warning"></i> Examination Results
+                                            <i class="fa fa-line-chart text-warning"></i> Examination Results
                                         </h5>
                                         <span class="badge bg-warning">
                                             Current CGPA: <t t-esc="'%.2f' % student.cgpa"/>
