@@ -100,11 +100,11 @@
                                                         <div class="mt-3">
                                                             <a t-att-href="'/my/parent/student/%s/progress' % student.id"
                                                                class="btn btn-sm btn-primary me-2">
-                                                                <i class="fa fa-chart-line"></i> Progress
+                                                                <i class="fa fa-line-chart"></i> Progress
                                                             </a>
                                                             <a t-att-href="'/my/parent/student/%s/attendance' % student.id"
                                                                class="btn btn-sm btn-info me-2">
-                                                                <i class="fa fa-calendar-check"></i> Attendance
+                                                                <i class="fa fa-calendar"></i> Attendance
                                                             </a>
                                                             <a t-att-href="'/my/parent/student/%s/fees' % student.id"
                                                                class="btn btn-sm btn-success">
@@ -183,7 +183,7 @@
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0">
-                            <i class="fa fa-user-graduate me-2"></i>Select Student to View Details
+                            <i class="fa fa-graduation-cap me-2"></i>Select Student to View Details
                         </h4>
                     </div>
                     <div class="card-body">
@@ -194,7 +194,7 @@
                                         <div class="card h-100">
                                             <div class="card-body text-center">
                                                 <div class="mb-3">
-                                                    <i class="fa fa-user-circle fa-5x text-primary"></i>
+                                                    <i class="fa fa-user-circle-o fa-5x text-primary"></i>
                                                 </div>
                                                 <h4 class="card-title">
                                                     <t t-esc="student.name"/>
@@ -228,13 +228,13 @@
                                                             <li>
                                                                 <a class="dropdown-item"
                                                                    t-att-href="'/my/parent/student/%s/progress' % student.id">
-                                                                    <i class="fa fa-chart-line me-2"></i>Academic Progress
+                                                                    <i class="fa fa-line-chart me-2"></i>Academic Progress
                                                                 </a>
                                                             </li>
                                                             <li>
                                                                 <a class="dropdown-item"
                                                                    t-att-href="'/my/parent/student/%s/attendance' % student.id">
-                                                                    <i class="fa fa-calendar-check me-2"></i>Attendance
+                                                                    <i class="fa fa-calendar me-2"></i>Attendance
                                                                 </a>
                                                             </li>
                                                             <li>
@@ -265,7 +265,7 @@
                                                             <li>
                                                                 <a class="dropdown-item"
                                                                    t-att-href="'/my/parent/student/%s/leave/request' % student.id">
-                                                                    <i class="fa fa-calendar-plus me-2"></i>Apply Leave
+                                                                    <i class="fa fa-calendar-plus-o me-2"></i>Apply Leave
                                                                 </a>
                                                             </li>
                                                             <li>
@@ -309,11 +309,11 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <h3 class="mb-1">
-                                    <i class="fa fa-user-graduate text-primary me-2"></i>
+                                    <i class="fa fa-graduation-cap text-primary me-2"></i>
                                     <t t-esc="student.name"/>
                                 </h3>
                                 <p class="text-muted mb-0">
-                                    <i class="fa fa-id-card me-1"></i>
+                                    <i class="fa fa-id-card-o me-1"></i>
                                     Registration: <t t-esc="student.registration_number"/>
                                     <span class="mx-2">|</span>
                                     <i class="fa fa-graduation-cap me-1"></i>
@@ -346,7 +346,7 @@
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
                                 <h6 class="mb-0">
-                                    <i class="fa fa-chart-line me-2"></i>Overall Performance
+                                    <i class="fa fa-line-chart me-2"></i>Overall Performance
                                 </h6>
                             </div>
                             <div class="card-body text-center">
@@ -374,7 +374,7 @@
                         <div class="card mb-4">
                             <div class="card-header bg-info text-white">
                                 <h6 class="mb-0">
-                                    <i class="fa fa-calendar-check me-2"></i>Attendance Summary
+                                    <i class="fa fa-calendar me-2"></i>Attendance Summary
                                 </h6>
                             </div>
                             <div class="card-body">
@@ -426,7 +426,7 @@
                                 <div class="d-grid gap-2">
                                     <a t-att-href="'/my/parent/student/%s/attendance' % student.id"
                                        class="btn btn-outline-info btn-sm text-start">
-                                        <i class="fa fa-calendar-check me-2"></i>View Detailed Attendance
+                                        <i class="fa fa-calendar me-2"></i>View Detailed Attendance
                                     </a>
                                     <a t-att-href="'/my/parent/student/%s/results' % student.id"
                                        class="btn btn-outline-success btn-sm text-start">
@@ -528,7 +528,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="fa fa-chart-bar me-2"></i>Academic Progress
+                                    <i class="fa fa-bar-chart me-2"></i>Academic Progress
                                 </h6>
                             </div>
                             <div class="card-body">
@@ -593,7 +593,7 @@
                         <a t-att-href="'/my/parent/student/%s/attendance' % student.id"
                            class="card text-decoration-none h-100">
                             <div class="card-body text-center">
-                                <i class="fa fa-calendar-check fa-3x text-info mb-3"></i>
+                                <i class="fa fa-calendar fa-3x text-info mb-3"></i>
                                 <h5>Attendance</h5>
                                 <p class="text-muted">View detailed attendance records</p>
                             </div>
@@ -665,7 +665,7 @@
                                     </ol>
                                 </nav>
                                 <h3 class="mb-0">
-                                    <i class="fa fa-calendar-check text-info me-2"></i>
+                                    <i class="fa fa-calendar text-info me-2"></i>
                                     Attendance Records
                                 </h3>
                             </div>
@@ -689,7 +689,7 @@
                         <div class="card text-center border-success">
                             <div class="card-body">
                                 <h1 class="display-6 text-success">
-                                    <i class="fa fa-check-circle"></i>
+                                    <i class="fa fa-check-circle-o"></i>
                                 </h1>
                                 <h5 class="card-title">Present</h5>
                                 <p class="card-text fs-4">
@@ -703,7 +703,7 @@
                         <div class="card text-center border-danger">
                             <div class="card-body">
                                 <h1 class="display-6 text-danger">
-                                    <i class="fa fa-times-circle"></i>
+                                    <i class="fa fa-times-circle-o"></i>
                                 </h1>
                                 <h5 class="card-title">Absent</h5>
                                 <p class="card-text fs-4">
@@ -717,7 +717,7 @@
                         <div class="card text-center border-warning">
                             <div class="card-body">
                                 <h1 class="display-6 text-warning">
-                                    <i class="fa fa-clock"></i>
+                                    <i class="fa fa-clock-o"></i>
                                 </h1>
                                 <h5 class="card-title">Total Classes</h5>
                                 <p class="card-text fs-4">
@@ -733,7 +733,7 @@
                             <div class="card-body">
                                 <h1 class="display-6"
                                     t-attf-class="text-#{'success' if attendance_summary.overall >= 75 else 'warning' if attendance_summary.overall >= 65 else 'danger'}">
-                                    <i class="fa fa-chart-line"></i>
+                                    <i class="fa fa-line-chart"></i>
                                 </h1>
                                 <h5 class="card-title">Overall %</h5>
                                 <p class="card-text fs-4">
@@ -973,7 +973,7 @@
                         <div class="card text-center border-primary">
                             <div class="card-body">
                                 <h1 class="display-6 text-primary">
-                                    <i class="fa fa-rupee-sign"></i>
+                                    <i class="fa fa-inr"></i>
                                 </h1>
                                 <h5 class="card-title">Total Fee</h5>
                                 <p class="card-text fs-4">
@@ -987,7 +987,7 @@
                         <div class="card text-center border-success">
                             <div class="card-body">
                                 <h1 class="display-6 text-success">
-                                    <i class="fa fa-check-circle"></i>
+                                    <i class="fa fa-check-circle-o"></i>
                                 </h1>
                                 <h5 class="card-title">Paid Amount</h5>
                                 <p class="card-text fs-4">
@@ -1017,7 +1017,7 @@
                             <div class="card-body">
                                 <h1 class="display-6"
                                     t-attf-class="text-#{'success' if fee_summary.percentage_paid >= 90 else 'warning' if fee_summary.percentage_paid >= 50 else 'danger'}">
-                                    <i class="fa fa-percentage"></i>
+                                    <i class="fa fa-percent"></i>
                                 </h1>
                                 <h5 class="card-title">Paid %</h5>
                                 <p class="card-text fs-4">
@@ -1034,7 +1034,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="fa fa-chart-bar me-2"></i>Payment Progress
+                                    <i class="fa fa-bar-chart me-2"></i>Payment Progress
                                 </h6>
                             </div>
                             <div class="card-body">
@@ -1218,7 +1218,7 @@
                         <div class="card text-center border-info">
                             <div class="card-body">
                                 <h1 class="display-6 text-info">
-                                    <i class="fa fa-percentage"></i>
+                                    <i class="fa fa-percent"></i>
                                 </h1>
                                 <h5 class="card-title">Percentage</h5>
                                 <p class="card-text fs-4">
@@ -1455,7 +1455,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1490,7 +1490,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1525,7 +1525,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1560,7 +1560,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1595,7 +1595,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1630,7 +1630,7 @@
                                                             </t>
                                                             <t t-if="not found_class">
                                                                 <div class="text-center text-muted py-4">
-                                                                    <i class="fa fa-clock"></i><br/>
+                                                                    <i class="fa fa-clock-o"></i><br/>
                                                                     Free
                                                                 </div>
                                                             </t>
@@ -1715,7 +1715,7 @@
                                     </ol>
                                 </nav>
                                 <h3 class="mb-0">
-                                    <i class="fa fa-calendar-plus text-warning me-2"></i>
+                                    <i class="fa fa-calendar-plus-o text-warning me-2"></i>
                                     Apply for Leave
                                 </h3>
                             </div>
@@ -1733,7 +1733,7 @@
                 <!-- Success/Error Messages -->
                 <t t-if="request.params.get('success')">
                     <div class="alert alert-success alert-dismissible fade show">
-                        <i class="fa fa-check-circle me-2"></i>
+                        <i class="fa fa-check-circle-o me-2"></i>
                         Leave request submitted successfully!
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -1802,7 +1802,7 @@
 
                                     <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fa fa-paper-plane me-2"></i>Submit Leave Request
+                                            <i class="fa fa-paper-plane-o me-2"></i>Submit Leave Request
                                         </button>
                                     </div>
                                 </form>
@@ -1943,13 +1943,13 @@
                                                     <div class="d-flex justify-content-between mb-2">
                                                         <div>
                                                             <strong>
-                                                                <i class="fa fa-user-circle me-2"></i>
+                                                                <i class="fa fa-user-circle-o me-2"></i>
                                                                 <t t-esc="message.author_id.name or 'System'"/>
                                                             </strong>
                                                         </div>
                                                         <div class="text-muted">
                                                             <small>
-                                                                <i class="fa fa-clock me-1"></i>
+                                                                <i class="fa fa-clock-o me-1"></i>
                                                                 <t t-esc="message.date"/>
                                                             </small>
                                                         </div>
@@ -2025,7 +2025,7 @@
                 <!-- Success/Error Messages -->
                 <t t-if="request.params.get('success')">
                     <div class="alert alert-success alert-dismissible fade show">
-                        <i class="fa fa-check-circle me-2"></i>
+                        <i class="fa fa-check-circle-o me-2"></i>
                         Message sent successfully!
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -2084,7 +2084,7 @@
 
                                     <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fa fa-paper-plane me-2"></i>Send Message
+                                            <i class="fa fa-paper-plane-o me-2"></i>Send Message
                                         </button>
                                     </div>
                                 </form>
@@ -2124,7 +2124,7 @@
                                     </ol>
                                 </nav>
                                 <h3 class="mb-0">
-                                    <i class="fa fa-calendar-alt text-success me-2"></i>
+                                    <i class="fa fa-calendar text-success me-2"></i>
                                     Events &amp; Activities
                                 </h3>
                             </div>
@@ -2145,7 +2145,7 @@
                         <div class="card">
                             <div class="card-header bg-primary text-white">
                                 <h6 class="mb-0">
-                                    <i class="fa fa-calendar-check me-2"></i>Event Registrations
+                                    <i class="fa fa-calendar me-2"></i>Event Registrations
                                 </h6>
                             </div>
                             <div class="card-body">
@@ -2155,9 +2155,9 @@
                                             <div class="col-md-6 mb-4">
                                                 <div class="card h-100">
                                                     <div class="card-header"
-                                                         t-attf-class="bg-#{registration.event_id.event_type == 'academic' ? 'primary' : registration.event_id.event_type == 'cultural' ? 'success' : registration.event_id.event_type == 'sports' ? 'warning' : 'info'} text-white">
+                                                         t-attf-class="bg-#{'primary' if registration.event_id.event_type == 'academic' else 'success' if registration.event_id.event_type == 'cultural' else 'warning' if registration.event_id.event_type == 'sports' else 'info'} text-white">
                                                         <h6 class="mb-0">
-                                                            <i t-attf-class="fa #{registration.event_id.event_type == 'academic' ? 'fa-graduation-cap' : registration.event_id.event_type == 'cultural' ? 'fa-music' : registration.event_id.event_type == 'sports' ? 'fa-futbol' : 'fa-calendar'} me-2"></i>
+                                                            <i t-attf-class="fa #{'fa-graduation-cap' if registration.event_id.event_type == 'academic' else 'fa-music' if registration.event_id.event_type == 'cultural' else 'fa-soccer-ball-o' if registration.event_id.event_type == 'sports' else 'fa-calendar'} me-2"></i>
                                                             <t t-esc="registration.event_id.name"/>
                                                         </h6>
                                                     </div>
@@ -2177,7 +2177,7 @@
                                                             </div>
                                                             <div class="col-6">
                                                                 <small class="text-muted">
-                                                                    <i class="fa fa-clock me-1"></i>
+                                                                    <i class="fa fa-clock-o me-1"></i>
                                                                     <t t-esc="registration.event_id.start_time or 'All Day'"/>
                                                                 </small>
                                                             </div>
@@ -2192,7 +2192,7 @@
                                                             </div>
                                                             <div class="col-6">
                                                                 <small class="text-muted">
-                                                                    <i class="fa fa-rupee-sign me-1"></i>
+                                                                    <i class="fa fa-inr me-1"></i>
                                                                     Fee: <t t-esc="registration.event_id.registration_fee or '0'"/>
                                                                 </small>
                                                             </div>
@@ -2201,13 +2201,13 @@
                                                         <div class="row">
                                                             <div class="col-6">
                                                                 <span class="badge"
-                                                                      t-attf-class="bg-#{registration.state == 'registered' ? 'success' : registration.state == 'attended' ? 'primary' : 'secondary'}">
+                                                                      t-attf-class="bg-#{'success' if registration.state == 'registered' else 'primary' if registration.state == 'attended' else 'secondary'}">
                                                                     <t t-esc="registration.state.title()"/>
                                                                 </span>
                                                             </div>
                                                             <div class="col-6 text-end">
                                                                 <span class="badge"
-                                                                      t-attf-class="bg-#{registration.fee_paid ? 'success' : 'warning'}">
+                                                                      t-attf-class="bg-#{'success' if registration.fee_paid else 'warning'}">
                                                                     <t t-esc="'Paid' if registration.fee_paid else 'Payment Pending'"/>
                                                                 </span>
                                                             </div>
@@ -2322,12 +2322,12 @@
                                                             <t t-esc="doc.expiry_date or '-'"/>
                                                         </td>
                                                         <td>
-                                                            <span t-attf-class="badge bg-#{doc.is_verified ? 'success' : 'warning'}">
+                                                            <span t-attf-class="badge bg-#{'success' if doc.is_verified else 'warning'}">
                                                                 <t t-esc="'Verified' if doc.is_verified else 'Pending'"/>
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <span t-attf-class="badge bg-#{doc.state == 'verified' ? 'success' : doc.state == 'rejected' ? 'danger' : doc.state == 'submitted' ? 'info' : 'secondary'}">
+                                                            <span t-attf-class="badge bg-#{'success' if doc.state == 'verified' else 'danger' if doc.state == 'rejected' else 'info' if doc.state == 'submitted' else 'secondary'}">
                                                                 <t t-esc="doc.state.title()"/>
                                                             </span>
                                                         </td>
