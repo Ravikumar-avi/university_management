@@ -27,7 +27,7 @@ class ParentPortalController(CustomerPortal):
 
     def _calculate_attendance_summary(self, student_id):
         """Calculate attendance statistics"""
-        attendance_records = request.env['student.attendance'].search([
+        attendance_records = request.env['student.attendance'].sudo().search([
             ('student_id', '=', student_id),
         ])
 
@@ -95,7 +95,7 @@ class ParentPortalController(CustomerPortal):
             return request.redirect('/my/parent/select-student')
 
         # Get academic data
-        results = request.env['examination.result'].search([
+        results = request.env['examination.result'].sudo().search([
             ('student_id', '=', student.id),
             ('state', '=', 'published')
         ], order='examination_id desc', limit=5)
@@ -105,7 +105,7 @@ class ParentPortalController(CustomerPortal):
 
         # Calculate performance metrics for progress page
         # Get all published results for the student
-        all_results = request.env['examination.result'].search([
+        all_results = request.env['examination.result'].sudo().search([
             ('student_id', '=', student.id),
             ('state', '=', 'published')
         ])
@@ -131,7 +131,7 @@ class ParentPortalController(CustomerPortal):
         )
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'results': results,
             'attendance_summary': attendance_summary,
@@ -181,7 +181,7 @@ class ParentPortalController(CustomerPortal):
                 subject_attendance[subject]['percentage'] = (subject_attendance[subject]['present'] / total) * 100
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'attendance': attendance,
             'attendance_summary': attendance_summary,
@@ -204,7 +204,7 @@ class ParentPortalController(CustomerPortal):
             return request.redirect('/my/parent/select-student')
 
         # Get all fee payments for this student
-        fee_payments = request.env['fee.payment'].search([
+        fee_payments = request.env['fee.payment'].sudo().search([
             ('student_id', '=', student.id)
         ], order='payment_date desc')
 
@@ -212,7 +212,7 @@ class ParentPortalController(CustomerPortal):
         total_paid = sum(fee_payments.filtered(lambda p: p.state == 'paid').mapped('total_amount'))
 
         # Get all fee structures for the student's program
-        fee_structures = request.env['fee.structure'].search([
+        fee_structures = request.env['fee.structure'].sudo().search([
             ('program_id', '=', student.program_id.id)
         ])
 
@@ -228,7 +228,7 @@ class ParentPortalController(CustomerPortal):
         )
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'fee_payments': fee_payments,
             'fee_summary': fee_summary,
@@ -247,14 +247,14 @@ class ParentPortalController(CustomerPortal):
         if not student:
             return request.redirect('/my/parent/select-student')
 
-        results = request.env['examination.result'].search([
+        results = request.env['examination.result'].sudo().search([
             ('student_id', '=', student.id),
             ('state', '=', 'published')
         ], order='examination_id desc')
 
         # Calculate performance metrics
         # Get all published results for the student
-        all_results = request.env['examination.result'].search([
+        all_results = request.env['examination.result'].sudo().search([
             ('student_id', '=', student.id),
             ('state', '=', 'published')
         ])
@@ -285,7 +285,7 @@ class ParentPortalController(CustomerPortal):
         )
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'results': results,
             'performance': performance,
@@ -318,7 +318,7 @@ class ParentPortalController(CustomerPortal):
             timetable_by_day[tt.day_of_week].append(tt)
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'timetable_by_day': timetable_by_day,
             'page_name': 'student_timetable',
@@ -337,12 +337,12 @@ class ParentPortalController(CustomerPortal):
             return request.redirect('/my/parent/select-student')
 
         # Get existing leave requests
-        leave_requests = request.env['student.leave'].search([
+        leave_requests = request.env['student.leave'].sudo().search([
             ('student_id', '=', student.id)
         ], order='date_from desc')
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'leave_requests': leave_requests,
             'page_name': 'leave_request',
@@ -388,13 +388,13 @@ class ParentPortalController(CustomerPortal):
             return request.redirect('/my/parent/select-student')
 
         # Get messages/notifications
-        messages = request.env['mail.message'].search([
+        messages = request.env['mail.message'].sudo().search([
             ('model', '=', 'student.student'),
             ('res_id', '=', student.id),
         ], order='date desc', limit=20)
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'messages': messages,
             'page_name': 'student_messages',
@@ -416,7 +416,7 @@ class ParentPortalController(CustomerPortal):
             student = students.filtered(lambda s: s.id == int(student_id))
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'students': students,
             'student': student,
             'page_name': 'contact_teacher',
@@ -431,7 +431,7 @@ class ParentPortalController(CustomerPortal):
         try:
             # Create communication record or send message
             vals = {
-                'parent_id': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1).id,
+                'parent_id': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1).id,
                 'student_id': int(post.get('student_id')),
                 'subject': post.get('subject'),
                 'message': post.get('message'),
@@ -462,7 +462,7 @@ class ParentPortalController(CustomerPortal):
         ], order='create_date desc')
 
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'event_registrations': event_registrations,
             'page_name': 'student_events',
@@ -480,15 +480,32 @@ class ParentPortalController(CustomerPortal):
         if not student:
             return request.redirect('/my/parent/select-student')
 
-        # Get documents
-        documents = request.env['student.document'].search([
+        # Get documents with sudo so portal user can read student.document
+        # and pre-compute attachment URLs to avoid ir.attachment access error in template
+        documents = request.env['student.document'].sudo().search([
             ('student_id', '=', student.id)
         ], order='create_date desc')
 
+        # Build a dict of doc.id -> download URL using access tokens so that
+        # portal users (who cannot read ir.attachment directly) can still download.
+        # generate_access_token() is called in sudo context and returns a
+        # time-limited token that authorises the /web/content route for any user.
+        doc_download_urls = {}
+        for doc in documents:
+            if doc.attachment_id:
+                attachment = doc.attachment_id.sudo()
+                tokens = attachment.generate_access_token()
+                token = tokens[0] if tokens else ''
+                doc_download_urls[doc.id] = (
+                    '/web/content/%s/%s?access_token=%s&download=true'
+                    % (attachment.id, attachment.name, token)
+                )
+
         values = {
-            'parent': request.env['student.parent'].search([('user_id', '=', request.env.uid)], limit=1),
+            'parent': request.env['student.parent'].sudo().search([('user_id', '=', request.env.uid)], limit=1),
             'student': student,
             'documents': documents,
+            'doc_download_urls': doc_download_urls,
             'page_name': 'student_documents',
         }
 

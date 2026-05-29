@@ -1963,12 +1963,7 @@
                                                         <div class="mt-2">
                                                             <small class="text-muted">
                                                                 <i class="fa fa-paperclip me-1"></i>
-                                                                Attachments:
-                                                                <t t-foreach="message.attachment_ids" t-as="attachment">
-                                                                    <a href="#" class="ms-2">
-                                                                        <t t-esc="attachment.name"/>
-                                                                    </a>
-                                                                </t>
+                                                                <t t-esc="len(message.attachment_ids)"/> attachment(s)
                                                             </small>
                                                         </div>
                                                     </t>
@@ -2332,8 +2327,8 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <t t-if="doc.attachment_id">
-                                                                <a t-att-href="'/web/content/%s/%s' % (doc.attachment_id.id, doc.attachment_id.name)"
+                                                            <t t-if="doc_download_urls.get(doc.id)">
+                                                                <a t-att-href="doc_download_urls.get(doc.id)"
                                                                    class="btn btn-sm btn-outline-primary"
                                                                    target="_blank">
                                                                     <i class="fa fa-download"></i> Download
