@@ -159,10 +159,10 @@
                                         <t t-foreach="examination.timetable_ids" t-as="timetable">
                                             <tr>
                                                 <td><t t-esc="timetable.exam_date"/></td>
-                                                <td><t t-esc="timetable.day_of_week"/></td>
+                                                <td><t t-esc="timetable.exam_date.strftime('%A') if timetable.exam_date else ''"/></td>
                                                 <td>
-                                                    <t t-esc="timetable.start_time"/> -
-                                                    <t t-esc="timetable.end_time"/>
+                                                    <t t-esc="'{:02.0f}:{:02.0f}'.format(*divmod(timetable.start_time * 60, 60))"/> -
+                                                    <t t-esc="'{:02.0f}:{:02.0f}'.format(*divmod(timetable.end_time * 60, 60))"/>
                                                 </td>
                                                 <td><t t-esc="timetable.subject_id.code"/></td>
                                                 <td><t t-esc="timetable.subject_id.name"/></td>
