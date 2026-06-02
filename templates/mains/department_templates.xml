@@ -127,9 +127,9 @@
                                             <div t-if="dept.building_name_id" class="mb-2">
                                                 <small class="text-muted">
                                                     <i class="fa fa-map-marker text-secondary me-1"/>
-                                                    <t t-esc="dept.building_name_id"/>
-                                                    <t t-if="dept.floor_id">, <t t-esc="dept.floor_id"/></t>
-                                                    <t t-if="dept.room_number_id">, <t t-esc="dept.room_number_id"/></t>
+                                                    <t t-esc="dept.building_name_id.name"/>
+                                                    <t t-if="dept.floor_id">, <t t-esc="dept.floor_id.name"/></t>
+                                                    <t t-if="dept.room_number_id">, <t t-esc="dept.room_number_id.name"/></t>
                                                 </small>
                                             </div>
 
@@ -398,19 +398,19 @@
                                                     <div t-if="department.building_name_id">
                                                         <p class="mb-1">
                                                             <strong>Building:</strong>
-                                                            <t t-esc="department.building_name_id"/>
+                                                            <t t-esc="department.building_name_id.name"/>
                                                         </p>
                                                     </div>
                                                     <div t-if="department.floor_id">
                                                         <p class="mb-1">
                                                             <strong>Floor:</strong>
-                                                            <t t-esc="department.floor_id"/>
+                                                            <t t-esc="department.floor_id.name"/>
                                                         </p>
                                                     </div>
                                                     <div t-if="department.room_number_id">
                                                         <p class="mb-0">
                                                             <strong>Room:</strong>
-                                                            <t t-esc="department.room_number_id"/>
+                                                            <t t-esc="department.room_number_id.name"/>
                                                         </p>
                                                     </div>
                                                     <div t-if="not department.building_name_id and not department.floor_id and not department.room_number_id">
