@@ -129,7 +129,7 @@
                         <!-- Fee Details Card -->
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header bg-light fw-semibold">
-                                <i class="fa fa-file-invoice-dollar me-2"/>Fee Details
+                                <i class="fa fa-file-text-o me-2"/>Fee Details
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
@@ -205,7 +205,7 @@
                         <!-- Payment Summary -->
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-header bg-light fw-semibold">
-                                <i class="fa fa-wallet me-2"/>Payment Summary
+                                <i class="fa fa-money me-2"/>Payment Summary
                             </div>
                             <div class="card-body">
                                 <div class="d-flex justify-content-between mb-2">
