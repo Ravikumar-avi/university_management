@@ -55,22 +55,28 @@ class HallTicketController(http.Controller):
     @http.route(['/my/hall-ticket/<int:hall_ticket_id>/download'], type='http', auth="user")
     def hall_ticket_download(self, hall_ticket_id, **kw):
         """Download hall ticket as PDF"""
-        student = request.env['student.student'].search([('user_id', '=', request.env.uid)], limit=1)
+        # Use sudo() for both so cross-env comparison works correctly
+        student = request.env['student.student'].sudo().search(
+            [('user_id', '=', request.env.uid)], limit=1)
         hall_ticket = request.env['examination.hall.ticket'].sudo().browse(hall_ticket_id)
 
-        # Security check
-        if not student or hall_ticket.student_id != student:
+        # Security check: compare IDs to avoid cross-env recordset mismatch
+        if not student or hall_ticket.student_id.id != student.id:
             return request.redirect('/my/hall-tickets')
 
-        # Check if hall ticket is generated
-        if hall_ticket.state != 'generated':
+        # Check if hall ticket is in a downloadable state
+        if hall_ticket.state not in ['issued', 'downloaded', 'printed']:
             return request.render("university_management.hall_ticket_not_ready", {
-                'message': _('Hall ticket is not yet generated. Please check back later.')
+                'message': _('Hall ticket is not yet available for download. Please check back later.')
             })
 
-        # Generate PDF report
-        report = request.env.ref('university_management.action_report_hall_ticket')
-        pdf, _ = report.sudo()._render_qweb_pdf([hall_ticket_id])
+        # Generate PDF report using sudo to ensure report template has full access
+        report = request.env.ref('university_management.action_report_hall_ticket').sudo()
+        pdf, _ = report.sudo()._render_qweb_pdf(report.report_name, [hall_ticket_id])
+
+        # Track download (mark as downloaded and increment counter)
+        if hall_ticket.state == 'issued':
+            hall_ticket.action_download()
 
         pdfhttpheaders = [
             ('Content-Type', 'application/pdf'),
@@ -146,7 +152,7 @@ class HallTicketController(http.Controller):
 
         # Generate PDF report for all hall tickets
         report = request.env.ref('university_management.action_report_hall_ticket')
-        pdf, _ = report.sudo()._render_qweb_pdf(hall_tickets.ids)
+        pdf, _ = report.sudo()._render_qweb_pdf(report.report_name, hall_tickets.ids)
 
         pdfhttpheaders = [
             ('Content-Type', 'application/pdf'),

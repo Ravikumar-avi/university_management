@@ -41,7 +41,7 @@
                                                     <t t-esc="ticket.examination_id.start_date"/>
                                                 </td>
                                                 <td>
-                                                    <span t-attf-class="badge badge-{{ 'success' if ticket.state == 'generated' else 'warning' }}">
+                                                    <span t-attf-class="badge badge-{{ 'success' if ticket.state in ['issued','downloaded','printed'] else 'warning' }}">
                                                         <t t-esc="ticket.state"/>
                                                     </span>
                                                 </td>
@@ -50,7 +50,7 @@
                                                        class="btn btn-sm btn-outline-primary">
                                                         View Details
                                                     </a>
-                                                    <a t-if="ticket.state == 'generated'"
+                                                    <a t-if="ticket.state in ['issued', 'downloaded', 'printed']"
                                                        t-attf-href="/my/hall-ticket/{{ ticket.id }}/download"
                                                        class="btn btn-sm btn-success ms-2">
                                                         <i class="fa fa-download"></i> Download
@@ -182,18 +182,12 @@
                         </div>
 
                         <div class="mt-4 text-center">
-                            <t t-if="hall_ticket.state == 'generated'">
+                            <t t-if="hall_ticket.state in ['issued', 'downloaded', 'printed']">
                                 <a t-attf-href="/my/hall-ticket/{{ hall_ticket.id }}/download"
                                    class="btn btn-success btn-lg">
                                     <i class="fa fa-download"></i> Download Hall Ticket (PDF)
                                 </a>
-                                <form t-attf-action="/my/hall-ticket/{{ hall_ticket.id }}/send-email"
-                                      method="POST" class="d-inline ms-3">
-                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fa fa-envelope"></i> Send to Email
-                                    </button>
-                                </form>
+
                             </t>
                             <t t-else="">
                                 <div class="alert alert-info">
