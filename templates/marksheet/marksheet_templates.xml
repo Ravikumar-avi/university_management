@@ -76,7 +76,7 @@
                                                           t-attf-class="badge bg-{{ 'success' if marksheet.cgpa >= 7.0 else 'warning' if marksheet.cgpa >= 5.0 else 'danger' }}"/>
                                                 </td>
                                                 <td>
-                                                    <span t-if="marksheet.result == 'pass'"
+                                                    <span t-if="marksheet.overall_result == 'pass'"
                                                           class="badge bg-success">
                                                         PASS
                                                     </span>
@@ -86,13 +86,21 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span t-if="marksheet.state == 'final'"
+                                                    <span t-if="marksheet.state == 'downloaded'"
                                                           class="badge bg-success">
-                                                        Final
+                                                        Downloaded
                                                     </span>
-                                                    <span t-elif="marksheet.state == 'provisional'"
+                                                    <span t-elif="marksheet.state == 'issued'"
+                                                          class="badge bg-primary">
+                                                        Issued
+                                                    </span>
+                                                    <span t-elif="marksheet.state == 'verified'"
                                                           class="badge bg-warning">
-                                                        Provisional
+                                                        Verified
+                                                    </span>
+                                                    <span t-elif="marksheet.state == 'cancelled'"
+                                                          class="badge bg-danger">
+                                                        Cancelled
                                                     </span>
                                                     <span t-else=""
                                                           class="badge bg-secondary">
@@ -105,17 +113,10 @@
                                                            class="btn btn-outline-primary">
                                                             <i class="fa fa-eye"></i>
                                                         </a>
-                                                        <a t-if="marksheet.state in ['provisional', 'final']"
+                                                        <a t-if="marksheet.state in ['verified', 'issued', 'downloaded']"
                                                            t-att-href="'/my/marksheet/' + str(marksheet.id) + '/download'"
                                                            class="btn btn-outline-success">
                                                             <i class="fa fa-download"></i>
-                                                        </a>
-                                                        <a t-if="marksheet.state in ['provisional', 'final']"
-                                                           t-att-href="'/my/marksheet/' + str(marksheet.id) + '/send-email'"
-                                                           class="btn btn-outline-info"
-                                                           data-method="post"
-                                                           data-confirm="Send marksheet to your email?">
-                                                            <i class="fa fa-envelope"></i>
                                                         </a>
                                                     </div>
                                                 </td>
@@ -175,7 +176,8 @@
                     </div>
                     <div class="card-body">
                         <p>
-                            Employers or institutions can verify your marksheet authenticity using our public verification portal.
+                            Employers or institutions can verify your marksheet authenticity using our public
+                            verification portal.
                         </p>
                         <a href="/marksheet/verify"
                            target="_blank"
@@ -219,7 +221,8 @@
                                     Marksheet Details
                                 </h1>
                                 <p class="text-muted">
-                                    Marksheet Number: <strong t-esc="marksheet.name"/>
+                                    Marksheet Number:
+                                    <strong t-esc="marksheet.name"/>
                                 </p>
                             </div>
                             <div>
@@ -246,7 +249,7 @@
                             <div class="col-md-2">
                                 <div class="text-center">
                                     <t t-if="student.student_photo">
-                                        <img t-att-src="'data:image/png;base64,' + student.student_photo"
+                                        <img t-att-src="image_data_uri(student.student_photo)"
                                              class="img-thumbnail mb-2"
                                              style="width: 120px; height: 150px; object-fit: cover;"/>
                                     </t>
@@ -261,23 +264,53 @@
                             <div class="col-md-10">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Name:</strong> <span t-esc="student.name"/></p>
-                                        <p><strong>Registration Number:</strong> <span t-esc="student.registration_number"/></p>
-                                        <p><strong>Program:</strong> <span t-esc="student.program_id.name or ''"/></p>
-                                        <p><strong>Department:</strong> <span t-esc="student.department_id.name or ''"/></p>
+                                        <p>
+                                            <strong>Name:</strong>
+                                            <span t-esc="student.name"/>
+                                        </p>
+                                        <p>
+                                            <strong>Registration Number:</strong>
+                                            <span t-esc="student.registration_number"/>
+                                        </p>
+                                        <p>
+                                            <strong>Program:</strong>
+                                            <span t-esc="student.program_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Department:</strong>
+                                            <span t-esc="student.department_id.name or ''"/>
+                                        </p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Semester:</strong> <span t-esc="marksheet.semester_id.name or ''"/></p>
-                                        <p><strong>Academic Year:</strong> <span t-esc="marksheet.academic_year_id.name or ''"/></p>
-                                        <p><strong>Issue Date:</strong> <span t-esc="marksheet.issue_date or ''"/></p>
+                                        <p>
+                                            <strong>Semester:</strong>
+                                            <span t-esc="marksheet.semester_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Academic Year:</strong>
+                                            <span t-esc="marksheet.academic_year_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Issue Date:</strong>
+                                            <span t-esc="marksheet.issue_date or ''"/>
+                                        </p>
                                         <p>
                                             <strong>Status:</strong>
-                                            <span t-if="marksheet.state == 'final'"
-                                                  class="badge bg-success ms-2">Final</span>
-                                            <span t-elif="marksheet.state == 'provisional'"
-                                                  class="badge bg-warning ms-2">Provisional</span>
+                                            <span t-if="marksheet.state == 'downloaded'"
+                                                  class="badge bg-success ms-2">Downloaded
+                                            </span>
+                                            <span t-elif="marksheet.state == 'issued'"
+                                                  class="badge bg-primary ms-2">Issued
+                                            </span>
+                                            <span t-elif="marksheet.state == 'verified'"
+                                                  class="badge bg-warning ms-2">Verified
+                                            </span>
+                                            <span t-elif="marksheet.state == 'cancelled'"
+                                                  class="badge bg-danger ms-2">Cancelled
+                                            </span>
                                             <span t-else=""
-                                                  class="badge bg-secondary ms-2">Draft</span>
+                                                  class="badge bg-secondary ms-2">Draft
+                                            </span>
                                         </p>
                                     </div>
                                 </div>
@@ -330,18 +363,11 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div class="d-flex justify-content-center">
-                            <t t-if="marksheet.state in ['provisional', 'final']">
+                            <t t-if="marksheet.state in ['verified', 'issued', 'downloaded']">
                                 <a t-att-href="'/my/marksheet/' + str(marksheet.id) + '/download'"
                                    class="btn btn-primary btn-lg mx-2">
                                     <i class="fa fa-download me-2"></i>
                                     Download PDF
-                                </a>
-                                <a t-att-href="'/my/marksheet/' + str(marksheet.id) + '/send-email'"
-                                   class="btn btn-info btn-lg mx-2"
-                                   data-method="post"
-                                   data-confirm="Send this marksheet to your registered email?">
-                                    <i class="fa fa-envelope me-2"></i>
-                                    Send to Email
                                 </a>
                             </t>
                             <t t-else="">
@@ -379,10 +405,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-if="marksheet.result_line_ids">
-                                        <t t-foreach="marksheet.result_line_ids" t-as="line" t-as-index="index">
+                                    <t t-if="marksheet.result_ids">
+                                        <t t-foreach="marksheet.result_ids" t-as="line">
                                             <tr>
-                                                <td t-esc="index + 1"/>
+                                                <td t-esc="line_index + 1"/>
                                                 <td>
                                                     <code t-esc="line.subject_id.code or ''"/>
                                                 </td>
@@ -390,10 +416,10 @@
                                                 <td class="text-center" t-esc="line.credits"/>
                                                 <td class="text-center" t-esc="line.max_marks"/>
                                                 <td class="text-center">
-                                                    <strong t-esc="line.marks_obtained"/>
+                                                    <strong t-esc="line.total_marks"/>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span t-esc="line.grade"
+                                                    <span t-esc="line.grade_letter"
                                                           t-attf-class="badge bg-{{ 'success' if line.is_pass else 'danger' }}"/>
                                                 </td>
                                                 <td class="text-center" t-esc="line.grade_point"/>
@@ -416,11 +442,13 @@
                                         </tr>
                                     </t>
                                 </tbody>
-                                <tfoot t-if="marksheet.result_line_ids">
+                                <tfoot t-if="marksheet.result_ids">
                                     <tr class="table-active">
-                                        <td colspan="3" class="text-end"><strong>Total</strong></td>
+                                        <td colspan="3" class="text-end">
+                                            <strong>Total</strong>
+                                        </td>
                                         <td class="text-center">
-                                            <strong t-esc="sum(line.credits for line in marksheet.result_line_ids)"/>
+                                            <strong t-esc="sum(line.credits for line in marksheet.result_ids)"/>
                                         </td>
                                         <td colspan="5"></td>
                                     </tr>
@@ -443,30 +471,32 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <h6>Overall Result</h6>
-                                    <t t-if="marksheet.result == 'pass'">
+                                    <t t-if="marksheet.overall_result == 'pass'">
                                         <div class="alert alert-success">
                                             <i class="fa fa-check-circle me-2"></i>
-                                            <strong>PASSED</strong> - Congratulations!
+                                            <strong>PASSED</strong>
+                                            - Congratulations!
                                         </div>
                                     </t>
                                     <t t-else="">
                                         <div class="alert alert-danger">
                                             <i class="fa fa-times-circle me-2"></i>
-                                            <strong>FAILED</strong> - Please contact examination department
+                                            <strong>FAILED</strong>
+                                            - Please contact examination department
                                         </div>
                                     </t>
                                 </div>
 
                                 <div>
                                     <h6>Backlogs</h6>
-                                    <p class="h4" t-esc="marksheet.backlogs or 0"/>
+                                    <p class="h4" t-esc="marksheet.subjects_failed"/>
                                     <p class="text-muted">Number of subjects to clear</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <h6>Overall Grade</h6>
-                                    <p class="h3 text-primary" t-esc="marksheet.overall_grade or 'N/A'"/>
+                                    <p class="h3 text-primary" t-esc="dict(marksheet._fields['classification'].selection).get(marksheet.classification, 'N/A')"/>
                                 </div>
 
                                 <div>
@@ -524,7 +554,8 @@
                             </div>
                             <h1 class="h2 mb-3">Marksheet Verification</h1>
                             <p class="text-muted">
-                                Verify the authenticity of university marksheets using the marksheet number and registration number
+                                Verify the authenticity of university marksheets using the marksheet number and
+                                registration number
                             </p>
                         </div>
 
@@ -661,17 +692,41 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h6>Student Information</h6>
-                                        <p><strong>Name:</strong> <span t-esc="student.name"/></p>
-                                        <p><strong>Registration Number:</strong> <span t-esc="student.registration_number"/></p>
-                                        <p><strong>Program:</strong> <span t-esc="marksheet.program_id.name or ''"/></p>
-                                        <p><strong>Department:</strong> <span t-esc="marksheet.department_id.name or ''"/></p>
+                                        <p>
+                                            <strong>Name:</strong>
+                                            <span t-esc="student.name"/>
+                                        </p>
+                                        <p>
+                                            <strong>Registration Number:</strong>
+                                            <span t-esc="student.registration_number"/>
+                                        </p>
+                                        <p>
+                                            <strong>Program:</strong>
+                                            <span t-esc="marksheet.program_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Department:</strong>
+                                            <span t-esc="marksheet.department_id.name or ''"/>
+                                        </p>
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Marksheet Information</h6>
-                                        <p><strong>Marksheet Number:</strong> <span t-esc="marksheet.name"/></p>
-                                        <p><strong>Semester:</strong> <span t-esc="marksheet.semester_id.name or ''"/></p>
-                                        <p><strong>Academic Year:</strong> <span t-esc="marksheet.academic_year_id.name or ''"/></p>
-                                        <p><strong>Issue Date:</strong> <span t-esc="marksheet.issue_date"/></p>
+                                        <p>
+                                            <strong>Marksheet Number:</strong>
+                                            <span t-esc="marksheet.name"/>
+                                        </p>
+                                        <p>
+                                            <strong>Semester:</strong>
+                                            <span t-esc="marksheet.semester_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Academic Year:</strong>
+                                            <span t-esc="marksheet.academic_year_id.name or ''"/>
+                                        </p>
+                                        <p>
+                                            <strong>Issue Date:</strong>
+                                            <span t-esc="marksheet.issue_date"/>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -704,7 +759,7 @@
                                 <!-- Result -->
                                 <div class="text-center">
                                     <h6>Overall Result</h6>
-                                    <t t-if="marksheet.result == 'pass'">
+                                    <t t-if="marksheet.overall_result == 'pass'">
                                         <div class="alert alert-success d-inline-block">
                                             <i class="fa fa-check-circle me-2"></i>
                                             <strong>PASSED</strong>
@@ -870,8 +925,10 @@
                                     <option value="">-- Select Marksheet --</option>
                                     <t t-foreach="marksheets" t-as="ms">
                                         <option t-att-value="ms.id">
-                                            <t t-esc="ms.name"/> -
-                                            <t t-esc="ms.semester_id.name or ''"/> -
+                                            <t t-esc="ms.name"/>
+                                            -
+                                            <t t-esc="ms.semester_id.name or ''"/>
+                                            -
                                             <t t-esc="ms.academic_year_id.name or ''"/>
                                         </option>
                                     </t>
@@ -945,13 +1002,15 @@
                                     <t t-if="marksheets">
                                         <t t-foreach="marksheets" t-as="ms">
                                             <tr>
-                                                <td><strong t-esc="ms.name"/></td>
+                                                <td>
+                                                    <strong t-esc="ms.name"/>
+                                                </td>
                                                 <td t-esc="ms.semester_id.name or ''"/>
                                                 <td t-esc="ms.academic_year_id.name or ''"/>
                                                 <td t-esc="ms.issue_date"/>
                                                 <td t-esc="'{:.2f}'.format(ms.sgpa)"/>
                                                 <td>
-                                                    <t t-if="ms.result == 'pass'">
+                                                    <t t-if="ms.overall_result == 'pass'">
                                                         <span class="badge bg-success">Pass</span>
                                                     </t>
                                                     <t t-else="">

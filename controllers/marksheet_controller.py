@@ -70,7 +70,7 @@ class MarksheetController(http.Controller):
             return request.redirect('/my/marksheets')
 
         # Check if marksheet is published
-        if marksheet.state not in ['provisional', 'final']:
+        if marksheet.state not in ['verified', 'issued', 'downloaded']:
             website = request.env['website'].get_current_website()
             return request.render("university_management.marksheet_not_ready", {
                 'message': _('Marksheet is not yet published. Please check back later.'),
@@ -78,8 +78,8 @@ class MarksheetController(http.Controller):
             })
 
         # Generate PDF report
-        report = request.env.ref('university_management.action_report_marksheet')
-        pdf, pdf_data = report.sudo()._render_qweb_pdf([marksheet_id])
+        report = request.env(su=True).ref('university_management.action_report_marksheet')
+        pdf, pdf_data = report._render_qweb_pdf(report.report_name, [marksheet_id])
 
         pdfhttpheaders = [
             ('Content-Type', 'application/pdf'),
@@ -118,7 +118,7 @@ class MarksheetController(http.Controller):
         marksheet = request.env['examination.marksheet'].sudo().search([
             ('name', '=', marksheet_number),
             ('student_id.registration_number', '=', registration_number),
-            ('state', 'in', ['provisional', 'final'])
+            ('state', 'in', ['verified', 'issued', 'downloaded'])
         ], limit=1)
 
         if not marksheet:
@@ -148,7 +148,7 @@ class MarksheetController(http.Controller):
         # Get all published marksheets
         marksheets = request.env['examination.marksheet'].search([
             ('student_id', '=', student.id),
-            ('state', 'in', ['provisional', 'final'])
+            ('state', 'in', ['verified', 'issued', 'downloaded'])
         ])
 
         if not marksheets:
@@ -159,8 +159,8 @@ class MarksheetController(http.Controller):
             })
 
         # Generate PDF report for all marksheets
-        report = request.env.ref('university_management.action_report_marksheet')
-        pdf, pdf_data = report.sudo()._render_qweb_pdf(marksheets.ids)
+        report = request.env(su=True).ref('university_management.action_report_marksheet')
+        pdf, pdf_data = report._render_qweb_pdf(report.report_name, marksheets.ids)
 
         pdfhttpheaders = [
             ('Content-Type', 'application/pdf'),
@@ -216,7 +216,7 @@ class MarksheetController(http.Controller):
                 'percentage': marksheet.percentage,
                 'result': marksheet.result,
                 'state': marksheet.state,
-                'can_download': marksheet.state in ['provisional', 'final'],
+                'can_download': marksheet.state in ['verified', 'issued', 'downloaded'],
                 'issue_date': marksheet.issue_date,
             })
 
@@ -236,7 +236,7 @@ class MarksheetController(http.Controller):
 
         marksheets = request.env['examination.marksheet'].search([
             ('student_id', '=', student.id),
-            ('state', '=', 'final')
+            ('state', 'in', ['verified', 'issued', 'downloaded'])
         ])
 
         website = request.env['website'].get_current_website()
