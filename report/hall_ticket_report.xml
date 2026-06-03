@@ -183,7 +183,7 @@
                         <div class="text-center" style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10pt; color: #666;">
                             <p style="margin: 0;">
                                 <strong>Note:</strong> This is a computer-generated document and does not require a physical signature.
-                                Generated on <t t-esc="datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')"/>
+                                Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/>
                             </p>
                         </div>
 
