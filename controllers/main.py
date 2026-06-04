@@ -235,11 +235,12 @@ class UniversityWebsiteController(http.Controller):
         }
         return request.render("university_management.events_page", values)
 
-    @http.route(['/event/<model("university.event"):event>'], type='http', auth="public", website=True)
-    def event_detail(self, event, **kw):
+    @http.route(['/event/<int:event_id>'], type='http', auth="public", website=True)
+    def event_detail(self, event_id, **kw):
         """Event detail page"""
-        # Check if event is published on website
-        if not event.website_published or event.state not in ['published', 'registration_open', 'ongoing']:
+        event = request.env['university.event'].sudo().browse(event_id)
+        # Check if event exists and is published on website
+        if not event.exists() or not event.website_published or event.state not in ['published', 'registration_open', 'ongoing']:
             return request.not_found()
 
         values = {
