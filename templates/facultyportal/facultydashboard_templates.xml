@@ -786,7 +786,7 @@
                                         <div class="col-md-6">
                                             <p><strong>Attendance Percentage:</strong>
                                                 <t t-set="attendance_badge" t-value="'badge-warning'"/>
-                                                <t t-if="student.attendance_percentage &amp; student.attendance_percentage &gt;= 75">
+                                                <t t-if="student.attendance_percentage and student.attendance_percentage &gt;= 75">
                                                     <t t-set="attendance_badge" t-value="'badge-success'"/>
                                                 </t>
                                                 <span t-att-class="attendance_badge">
@@ -1148,7 +1148,7 @@
                                         <div class="col-md-6">
                                             <p><strong>Attendance Percentage:</strong>
                                                 <t t-set="attendance_badge" t-value="'badge-warning'"/>
-                                                <t t-if="faculty.attendance_percentage &amp; faculty.attendance_percentage &gt;= 90">
+                                                <t t-if="faculty.attendance_percentage and faculty.attendance_percentage &gt;= 90">
                                                     <t t-set="attendance_badge" t-value="'badge-success'"/>
                                                 </t>
                                                 <span t-att-class="attendance_badge">
