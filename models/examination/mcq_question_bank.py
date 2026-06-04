@@ -38,7 +38,7 @@ class McqQuestionBank(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Questions',
             'res_model': 'mcq.question',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('bank_id', '=', self.id)],
             'context': {
                 'default_bank_id': self.id,
