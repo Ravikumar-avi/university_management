@@ -80,6 +80,9 @@ class OnlineExamAttempt(models.Model):
                 rec.total_score = score
                 rec.percentage = (score / rec.max_score * 100) if rec.max_score else 0.0
                 passing = rec.online_exam_id.passing_marks if rec.online_exam_id else 0
+                # FIX: If passing_marks is 0 or not set, use 35% of total marks as default pass threshold
+                if passing <= 0 and rec.max_score > 0:
+                    passing = rec.max_score * 0.35
                 has_pending = rec.response_ids.filtered(
                     lambda r: not r.is_evaluated and r.question_id.question_type == 'short_answer'
                 )
