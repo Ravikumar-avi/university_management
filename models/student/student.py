@@ -563,15 +563,42 @@ class Student(models.Model):
         self.write({'state': 'draft'})
 
     def action_create_portal_user(self):
-        """Create portal user for student"""
+        """Create portal user for student
+
+            NOTE: Direct SQL is used intentionally for group assignment because
+            Odoo's _check_one_user_type() constraint auto-assigns all groups in
+            the same category when using ORM. Since group_parent_portal and
+            group_student_portal are in module_category_university, the ORM
+            always assigns both. Direct SQL bypasses this constraint safely
+            since res_groups_users_rel is a stable core Odoo table.
+
+        """
         if not self.user_id and self.email:
+            group_portal = self.env.ref('base.group_portal')
+            group_student = self.env.ref('university_management.group_student_portal')
+            group_parent = self.env.ref('university_management.group_parent_portal')
+
+            # Create user with base portal only
             user = self.env['res.users'].create({
                 'name': self.name,
                 'login': self.email,
                 'email': self.email,
                 'partner_id': self.partner_id.id,
-                'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])],
+                'groups_id': [(6, 0, [group_portal.id])],
             })
+
+            # Use direct SQL to bypass Odoo ORM group constraints
+            self.env.cr.execute(
+                "DELETE FROM res_groups_users_rel WHERE uid = %s AND gid = %s",
+                (user.id, group_parent.id)
+            )
+            self.env.cr.execute(
+                "INSERT INTO res_groups_users_rel (gid, uid) VALUES (%s, %s) "
+                "ON CONFLICT DO NOTHING",
+                (group_student.id, user.id)
+            )
+            user.invalidate_recordset(['groups_id'])
+            self.env['ir.rule'].clear_caches()
             self.user_id = user.id
 
     def action_student_attendance(self):
