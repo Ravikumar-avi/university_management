@@ -465,12 +465,6 @@
                                 </h5>
                                 <ul class="list-unstyled">
                                     <li class="mb-2">
-                                        <a href="/events" class="text-white-50 text-decoration-none">
-                                            <i class="fa fa-chevron-right me-1"></i>
-                                            Events
-                                        </a>
-                                    </li>
-                                    <li class="mb-2">
                                         <a href="/clubs" class="text-white-50 text-decoration-none">
                                             <i class="fa fa-chevron-right me-1"></i>
                                             Clubs
