@@ -335,8 +335,7 @@
                                             <select id="subject" name="subject" class="form-control">
                                                 <option value="">All Subjects</option>
                                                 <t t-foreach="subjects" t-as="subject">
-                                                    <option t-att-value="subject.id">
-                                                        <t t-if="selected_subject == subject.id">selected="selected"</t>
+                                                    <option t-att-value="subject.id" t-att-selected="'selected' if selected_subject == subject.id else False">
                                                         <t t-esc="subject.name"/> (<t t-esc="subject.code"/>)
                                                     </option>
                                                 </t>
@@ -347,8 +346,7 @@
                                             <select id="batch" name="batch" class="form-control">
                                                 <option value="">All Batches</option>
                                                 <t t-foreach="batches" t-as="batch">
-                                                    <option t-att-value="batch.id">
-                                                        <t t-if="selected_batch == batch.id">selected="selected"</t>
+                                                    <option t-att-value="batch.id" t-att-selected="'selected' if selected_batch == batch.id else False">
                                                         <t t-esc="batch.name"/>
                                                     </option>
                                                 </t>
@@ -372,8 +370,8 @@
                                 <div class="card-header">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">Attendance Records</h5>
-                                        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#markAttendanceModal">
-                                            <i class="fa fa-plus mr-1"></i>Mark New Attendance
+                                        <button type="button" class="btn btn-success" style="padding: 8px 20px; font-size:14px;" data-bs-toggle="modal" data-bs-target="#markAttendanceModal">
+                                            <i class="fa fa-plus me-2"></i>Mark New Attendance
                                         </button>
                                     </div>
                                 </div>
@@ -467,56 +465,132 @@
 
                 <!-- Mark Attendance Modal -->
                 <div class="modal fade" id="markAttendanceModal" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-dialog modal-xl" role="document" style="max-height:90vh;">
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Mark Attendance</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title"><i class="fa fa-check-square-o me-2"/>Mark New Attendance</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <form method="post" action="/my/faculty/attendance/mark" id="attendanceForm">
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label>Date *</label>
-                                            <input type="date" name="date" class="form-control" required="required"
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            </form>
+                                <div class="modal-body" style="height:65vh;overflow-y:scroll;">
+                                    <!-- Filter Row -->
+                                    <div class="row g-3 mb-4 p-3 bg-light rounded">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">Date *</label>
+                                            <input form="attendanceForm" type="date" name="date" class="form-control" required="required"
                                                    t-att-value="selected_date"/>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label>Subject *</label>
-                                            <select name="subject_id" class="form-control" required="required">
-                                                <option value="">Select Subject</option>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">Subject *</label>
+                                            <select form="attendanceForm" name="subject_id" class="form-select" required="required">
+                                                <option value="">-- Select Subject --</option>
                                                 <t t-foreach="subjects" t-as="subject">
-                                                    <option t-att-value="subject.id">
+                                                    <option t-att-value="subject.id" t-att-selected="'selected' if selected_subject == subject.id else False">
                                                         <t t-esc="subject.name"/> (<t t-esc="subject.code"/>)
                                                     </option>
                                                 </t>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label>Batch *</label>
-                                            <select name="batch_id" class="form-control" required="required">
-                                                <option value="">Select Batch</option>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold">Batch *</label>
+                                            <select form="attendanceForm" name="batch_id" class="form-select" required="required">
+                                                <option value="">-- Select Batch --</option>
                                                 <t t-foreach="batches" t-as="batch">
-                                                    <option t-att-value="batch.id">
+                                                    <option t-att-value="batch.id" t-att-selected="'selected' if selected_batch == batch.id else False">
                                                         <t t-esc="batch.name"/>
                                                     </option>
                                                 </t>
                                             </select>
                                         </div>
                                     </div>
-                                    <div id="studentList" class="mt-3">
-                                        <h6>Students will appear here after form submission</h6>
+                                    <!-- Student List -->
+                                    <div id="studentList">
+                                        <div id="studentListContent">
+                                            <div class="text-center text-muted py-4">
+                                                <i class="fa fa-users fa-2x mb-2 d-block"/>
+                                                <p>Select a subject and batch to load students.</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary">Save Attendance</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button form="attendanceForm" type="submit" class="btn btn-success px-4" id="saveAttendanceBtn" disabled="disabled">
+                                        <i class="fa fa-save me-1"/>Save Attendance
+                                    </button>
                                 </div>
-                            </form>
+                            <script>
+                            (function() {
+                                function loadStudents() {
+                                    var subjectId = document.querySelector('[name="subject_id"]').value;
+                                    var batchId = document.querySelector('[name="batch_id"]').value;
+                                    var content = document.getElementById('studentListContent');
+                                    var saveBtn = document.getElementById('saveAttendanceBtn');
+
+                                    if (!subjectId || !batchId) {
+                                        content.innerHTML = '<p class="text-muted">Select a subject and batch to load students.</p>';
+                                        saveBtn.disabled = true;
+                                        return;
+                                    }
+
+                                    content.innerHTML = '<p class="text-muted">Loading students...</p>';
+
+                                    fetch('/my/faculty/attendance/students?subject_id=' + subjectId + '&amp;batch_id=' + batchId)
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(data) {
+                                            if (!data.students || data.students.length === 0) {
+                                                content.innerHTML = '<p class="text-warning">No students found for this batch.</p>';
+                                                saveBtn.disabled = true;
+                                                return;
+                                            }
+                                            var table = document.createElement('table');
+                                            table.className = 'table table-hover table-bordered align-middle';
+                                            table.innerHTML = '<thead><tr><th>Student</th><th>Reg No</th><th>Status</th></tr></thead>';
+                                            var tbody = document.createElement('tbody');
+                                            data.students.forEach(function(s) {
+                                                var tr = document.createElement('tr');
+                                                var tdName = document.createElement('td');
+                                                tdName.textContent = s.name;
+                                                var tdReg = document.createElement('td');
+                                                tdReg.textContent = s.reg_no;
+                                                var tdStatus = document.createElement('td');
+                                                var sel = document.createElement('select');
+                                                sel.name = 'attendance_' + s.id;
+                                                sel.setAttribute('form', 'attendanceForm');
+                                                sel.className = 'form-select form-select-sm'; sel.style.minWidth = '110px';
+                                                ['present','absent','late'].forEach(function(val) {
+                                                    var opt = document.createElement('option');
+                                                    opt.value = val;
+                                                    opt.textContent = val.charAt(0).toUpperCase() + val.slice(1);
+                                                    sel.appendChild(opt);
+                                                });
+                                                tdStatus.appendChild(sel);
+                                                tr.appendChild(tdName);
+                                                tr.appendChild(tdReg);
+                                                tr.appendChild(tdStatus);
+                                                tbody.appendChild(tr);
+                                            });
+                                            table.appendChild(tbody);
+                                            content.innerHTML = '';
+                                            content.appendChild(table);
+                                            var html = '';
+                                            saveBtn.disabled = false;
+                                        })
+                                        .catch(function() {
+                                            content.innerHTML = '<p class="text-danger">Error loading students.</p>';
+                                            saveBtn.disabled = true;
+                                        });
+                                }
+
+                                document.querySelector('[name="subject_id"]').addEventListener('change', loadStudents);
+                                document.querySelector('[name="batch_id"]').addEventListener('change', loadStudents);
+
+                                // Auto-load if values already selected
+                                document.getElementById('markAttendanceModal').addEventListener('shown.bs.modal', loadStudents);
+                            })();
+                            </script>
                         </div>
                     </div>
                 </div>

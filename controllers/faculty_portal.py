@@ -33,13 +33,14 @@ class FacultyPortalController(CustomerPortal):
 
         # Get today's classes
         today = fields.Date.today()
-        today_classes = request.env['university.timetable'].search([
+        env = request.env(su=True)
+        today_classes = env['university.timetable'].search([
             ('faculty_id', '=', faculty.id),
             ('active', '=', True),
         ])
 
         # Get attendance summary
-        attendance_today = request.env['student.attendance'].search_count([
+        attendance_today = env['student.attendance'].search_count([
             ('faculty_id', '=', faculty.id),
             ('date', '=', today)
         ])
@@ -63,7 +64,8 @@ class FacultyPortalController(CustomerPortal):
             return request.redirect('/my')
 
         # Get timetable
-        timetable = request.env['university.timetable'].search([
+        env = request.env(su=True)
+        timetable = env['university.timetable'].search([
             ('faculty_id', '=', faculty.id),
             ('active', '=', True)
         ], order='day_of_week, start_time')
@@ -76,7 +78,7 @@ class FacultyPortalController(CustomerPortal):
             timetable_by_day[tt.day_of_week].append(tt)
 
         # Get subjects
-        subjects = request.env['university.subject'].search([
+        subjects = env['university.subject'].search([
             ('faculty_ids', 'in', [faculty.id])
         ])
 
@@ -101,26 +103,34 @@ class FacultyPortalController(CustomerPortal):
         if not date:
             date = fields.Date.today()
 
-        # Get subjects taught by faculty
-        subjects = request.env['university.subject'].search([
-            ('faculty_ids', 'in', [faculty.id])
+        env = request.env(su=True)
+
+        # Get subjects taught by faculty via courses
+        taught_courses = env['university.course'].search([
+            '|',
+            ('faculty_id', '=', faculty.id),
+            ('co_faculty_ids', 'in', [faculty.id])
         ])
+        subjects = taught_courses.mapped('subject_id')
 
         # Get batches
-        batches = request.env['university.batch'].search([
+        batches = env['university.batch'].search([
             ('active', '=', True)
         ])
 
         # Get attendance records
         domain = [('faculty_id', '=', faculty.id)]
         if date:
-            domain += [('date', '=', date)]
+            domain += [('date', '=', str(date))]
         if subject:
             domain += [('subject_id', '=', int(subject))]
         if batch:
-            domain += [('batch_id', '=', int(batch))]
+            # batch_id is a related field on student; filter via student_id instead
+            batch_students = env['student.student'].search([('batch_id', '=', int(batch))]).ids
+            if batch_students:
+                domain += [('student_id', 'in', batch_students)]
 
-        attendance_records = request.env['student.attendance'].search(domain, order='student_id')
+        attendance_records = env['student.attendance'].search(domain, order='id')
 
         values = {
             'faculty': faculty,
@@ -134,6 +144,32 @@ class FacultyPortalController(CustomerPortal):
         }
 
         return request.render("university_management.faculty_attendance", values)
+
+    @http.route(['/my/faculty/attendance/students'], type='http', auth="user", website=True)
+    def faculty_attendance_students(self, subject_id=None, batch_id=None, **kw):
+        """Return JSON list of students for attendance modal"""
+        import json
+        faculty = self._get_faculty()
+        if not faculty or not subject_id or not batch_id:
+            return request.make_response(json.dumps({'students': []}),
+                headers=[('Content-Type', 'application/json')])
+
+        env = request.env(su=True)
+        students = env['student.student'].search([
+            ('batch_id', '=', int(batch_id)),
+            ('state', 'not in', ['dropped', 'expelled'])
+        ], order='id')
+
+        result = []
+        for s in students:
+            result.append({
+                'id': s.id,
+                'name': s.partner_id.name or '',
+                'reg_no': s.registration_number or '',
+            })
+
+        return request.make_response(json.dumps({'students': result}),
+            headers=[('Content-Type', 'application/json')])
 
     @http.route(['/my/faculty/attendance/mark'], type='http', auth="user", methods=['POST'], website=True, csrf=True)
     def faculty_attendance_mark(self, **post):
@@ -149,19 +185,27 @@ class FacultyPortalController(CustomerPortal):
             batch_id = int(post.get('batch_id'))
 
             # Get students
-            students = request.env['student.student'].search([
+            env = request.env(su=True)
+            students = env['student.student'].search([
                 ('batch_id', '=', batch_id),
-                ('state', '=', 'enrolled')
+                ('state', 'not in', ['dropped', 'expelled'])
             ])
+
+            # Get the course_id for this subject + faculty combo
+            course = env['university.course'].search([
+                ('subject_id', '=', subject_id),
+                ('faculty_id', '=', faculty.id),
+                ('batch_id', '=', batch_id),
+            ], limit=1)
 
             # Mark attendance
             for student in students:
                 status = post.get(f'attendance_{student.id}', 'absent')
 
                 # Check if attendance already exists
-                existing = request.env['student.attendance'].search([
+                existing = env['student.attendance'].search([
                     ('student_id', '=', student.id),
-                    ('subject_id', '=', subject_id),
+                    ('course_id', '=', course.id),
                     ('date', '=', date),
                     ('faculty_id', '=', faculty.id)
                 ])
@@ -169,10 +213,9 @@ class FacultyPortalController(CustomerPortal):
                 if existing:
                     existing.write({'state': status})
                 else:
-                    request.env['student.attendance'].create({
+                    env['student.attendance'].create({
                         'student_id': student.id,
-                        'subject_id': subject_id,
-                        'batch_id': batch_id,
+                        'course_id': course.id,
                         'date': date,
                         'faculty_id': faculty.id,
                         'state': status,
@@ -270,7 +313,8 @@ class FacultyPortalController(CustomerPortal):
         if not faculty:
             return request.redirect('/my')
 
-        leave_requests = request.env['faculty.leave'].search([
+        env = request.env(su=True)
+        leave_requests = env['faculty.leave'].search([
             ('faculty_id', '=', faculty.id)
         ], order='date_from desc')
 
@@ -299,7 +343,7 @@ class FacultyPortalController(CustomerPortal):
                 'reason': post.get('reason'),
             }
 
-            request.env['faculty.leave'].create(leave_vals)
+            request.env(su=True)['faculty.leave'].create(leave_vals)
 
             return request.redirect('/my/faculty/leave?success=1')
         except Exception as e:
