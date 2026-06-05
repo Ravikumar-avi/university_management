@@ -547,8 +547,7 @@
                                             <select name="batch" class="form-control" onchange="this.form.submit()">
                                                 <option value="">All Batches</option>
                                                 <t t-foreach="batches" t-as="batch">
-                                                    <option t-att-value="batch.id">
-                                                        <t t-if="selected_batch == batch.id">selected="selected"</t>
+                                                    <option t-att-value="batch.id" t-att-selected="'selected' if selected_batch == batch.id else False">
                                                         <t t-esc="batch.name"/>
                                                     </option>
                                                 </t>
@@ -588,7 +587,7 @@
                                                         <tr>
                                                             <td>
                                                                 <t t-if="student.student_photo">
-                                                                    <img t-att-src="'/web/image?model=student.student&amp;id=' + str(student.id) + '&amp;field=student_photo&amp;width=50&amp;height=50'"
+                                                                    <img t-att-src="'/web/image/res.partner/' + str(student.partner_id.id) + '/image_1920/50x50'"
                                                                          class="rounded-circle" width="50" height="50"/>
                                                                 </t>
                                                                 <t t-else="">
@@ -600,7 +599,7 @@
                                                             </td>
                                                             <td><t t-esc="student.name"/></td>
                                                             <td><t t-esc="student.registration_number"/></td>
-                                                            <td><t t-esc="university.batch_id.name"/></td>
+                                                            <td><t t-esc="student.batch_id.name"/></td>
                                                             <td><t t-esc="student.program_id.name"/></td>
                                                             <td><t t-esc="student.department_id.name"/></td>
                                                             <td><t t-esc="student.current_semester"/></td>
@@ -659,7 +658,7 @@
                             <div class="card">
                                 <div class="card-body text-center">
                                     <t t-if="student.student_photo">
-                                        <img t-att-src="'/web/image?model=student.student&amp;id=' + str(student.id) + '&amp;field=student_photo&amp;width=200&amp;height=200'"
+                                        <img t-att-src="'/web/image/res.partner/' + str(student.partner_id.id) + '/image_1920/200x200'"
                                              class="rounded-circle mb-3" width="200" height="200"/>
                                     </t>
                                     <t t-else="">
@@ -676,7 +675,7 @@
                                 </div>
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item">
-                                        <strong>Batch:</strong> <t t-esc="university.batch_id.name"/>
+                                        <strong>Batch:</strong> <t t-esc="student.batch_id.name"/>
                                     </li>
                                     <li class="list-group-item">
                                         <strong>Semester:</strong> <t t-esc="student.current_semester"/>

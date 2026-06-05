@@ -14,7 +14,13 @@ class FacultyPortalController(CustomerPortal):
 
     def _get_faculty(self):
         """Get faculty record for current user"""
-        return request.env['faculty.faculty'].search([('user_id', '=', request.env.uid)], limit=1)
+        env = request.env(su=True)
+        faculty = env['faculty.faculty'].search([('user_id', '=', request.env.uid)], limit=1)
+        if not faculty:
+            employee = env['hr.employee'].search([('user_id', '=', request.env.uid)], limit=1)
+            if employee:
+                faculty = env['faculty.faculty'].search([('employee_id', '=', employee.id)], limit=1)
+        return faculty
 
     # ==================== FACULTY DASHBOARD ====================
     @http.route(['/my/faculty/dashboard'], type='http', auth="user", website=True)
@@ -187,13 +193,15 @@ class FacultyPortalController(CustomerPortal):
         if not faculty:
             return request.redirect('/my')
 
+        env = request.env(su=True)
+
         # Get batches assigned to faculty (as coordinator OR as course faculty/co-faculty)
-        coordinator_batches = request.env['university.batch'].search([
+        coordinator_batches = env['university.batch'].search([
             ('coordinator_id', '=', faculty.id)
         ])
 
         # Batches where faculty teaches a course (as primary or co-faculty)
-        taught_courses = request.env['university.course'].search([
+        taught_courses = env['university.course'].search([
             '|',
             ('faculty_id', '=', faculty.id),
             ('co_faculty_ids', 'in', [faculty.id])
@@ -202,16 +210,17 @@ class FacultyPortalController(CustomerPortal):
 
         # Combine both sources and remove duplicates
         all_batch_ids = list(set(coordinator_batches.ids + course_batch_ids))
-        batches = request.env['university.batch'].browse(all_batch_ids)
+        batches = env['university.batch'].browse(all_batch_ids)
 
-        # Get students
-        domain = [('state', '=', 'enrolled')]
+        # Get students only when a batch is selected
         if batch:
-            domain += [('batch_id', '=', int(batch))]
-        elif batches:
-            domain += [('batch_id', 'in', batches.ids)]
-
-        students = request.env['student.student'].search(domain, order='name')
+            domain = [
+                ('state', 'not in', ['dropped', 'expelled']),
+                ('batch_id', '=', int(batch))
+            ]
+            students = env['student.student'].search(domain, order='id')
+        else:
+            students = env['student.student'].browse()
 
         values = {
             'faculty': faculty,
@@ -227,13 +236,18 @@ class FacultyPortalController(CustomerPortal):
     def faculty_student_detail(self, student_id, **kw):
         """View student detail"""
         faculty = self._get_faculty()
-        student = request.env['student.student'].browse(student_id)
 
-        if not faculty or not student.exists():
+        if not faculty:
+            return request.redirect('/my/faculty/students')
+
+        env = request.env(su=True)
+        student = env['student.student'].browse(student_id)
+
+        if not student.exists():
             return request.redirect('/my/faculty/students')
 
         # Get student's attendance in faculty's subjects
-        attendance = request.env['student.attendance'].search([
+        attendance = env['student.attendance'].search([
             ('student_id', '=', student_id),
             ('faculty_id', '=', faculty.id)
         ], order='date desc', limit=20)
