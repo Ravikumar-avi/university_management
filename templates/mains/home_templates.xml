@@ -496,4 +496,20 @@
             </div>
         </t>
     </template>
+
+    <!--     This template is to hide menus from faculty -->
+    <!--    <template id="hide_menu_for_faculty" inherit_id="website.layout" name="Hide Menu For Faculty">-->
+    <!--        <xpath expr="//head" position="inside">-->
+    <!--            <t t-if="request.env.user.has_group('university_management.group_faculty')">-->
+    <!--                <style>-->
+    <!--                    a[href='/events'],-->
+    <!--                    a[href='/my/parent/dashboard'],-->
+    <!--                    a[href='/my/student/dashboard'] {-->
+    <!--                        display: none !important;-->
+    <!--                    }-->
+    <!--                </style>-->
+    <!--            </t>-->
+    <!--        </xpath>-->
+    <!--    </template>-->
+
 </odoo>

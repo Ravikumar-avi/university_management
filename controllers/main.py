@@ -203,10 +203,14 @@ class UniversityWebsiteController(http.Controller):
     @http.route(['/events', '/events/page/<int:page>'], type='http', auth="public", website=True)
     def events_list(self, page=1, event_type=None, **kw):
         """List all events"""
+
+        # (menu is hidden via CSS template in home_templates.xml, this blocks direct URL access)
+        # if not request.env.user._is_public():
+        #     if request.env.user.has_group('university_management.group_faculty'):
+        #         return request.redirect('/')
+
         Event = request.env['university.event'].sudo()
 
-        # Use correct state values from model: 'published', 'registration_open', 'ongoing'
-        # Also check website_published
         domain = [
             ('state', 'in', ['published', 'registration_open', 'ongoing']),
             ('website_published', '=', True)
