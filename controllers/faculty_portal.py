@@ -187,10 +187,22 @@ class FacultyPortalController(CustomerPortal):
         if not faculty:
             return request.redirect('/my')
 
-        # Get batches assigned to faculty
-        batches = request.env['university.batch'].search([
+        # Get batches assigned to faculty (as coordinator OR as course faculty/co-faculty)
+        coordinator_batches = request.env['university.batch'].search([
             ('coordinator_id', '=', faculty.id)
         ])
+
+        # Batches where faculty teaches a course (as primary or co-faculty)
+        taught_courses = request.env['university.course'].search([
+            '|',
+            ('faculty_id', '=', faculty.id),
+            ('co_faculty_ids', 'in', [faculty.id])
+        ])
+        course_batch_ids = taught_courses.mapped('batch_id').ids
+
+        # Combine both sources and remove duplicates
+        all_batch_ids = list(set(coordinator_batches.ids + course_batch_ids))
+        batches = request.env['university.batch'].browse(all_batch_ids)
 
         # Get students
         domain = [('state', '=', 'enrolled')]
