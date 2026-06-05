@@ -93,7 +93,6 @@
     <record id="group_student_portal" model="res.groups">
         <field name="name">Student (Portal)</field>
         <field name="category_id" ref="module_category_university"/>
-        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         <field name="comment">Student portal access</field>
     </record>
 
@@ -101,7 +100,6 @@
     <record id="group_parent_portal" model="res.groups">
         <field name="name">Parent (Portal)</field>
         <field name="category_id" ref="module_category_university"/>
-        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         <field name="comment">Parent portal access</field>
     </record>
 
@@ -120,7 +118,6 @@
     <record id="group_alumni_portal" model="res.groups">
         <field name="name">Alumni (Portal)</field>
         <field name="category_id" ref="module_category_university"/>
-        <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         <field name="comment">Alumni portal access</field>
     </record>
 
