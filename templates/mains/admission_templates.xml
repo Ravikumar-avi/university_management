@@ -410,11 +410,11 @@
 
                                     <!-- Submit Button -->
                                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <a href="/admissions" class="btn btn-secondary me-md-2">
+                                        <a href="/admissions" class="btn btn-dark btn-lg me-md-2">
                                             <i class="fa fa-arrow-left me-2"/>
                                             Back
                                         </a>
-                                        <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">
+                                        <button type="submit" id="submit-btn" class="btn btn-dark btn-lg">
                                             <i class="fa fa-paper-plane me-2"/>
                                             Submit Application
                                         </button>
