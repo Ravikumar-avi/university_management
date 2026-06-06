@@ -149,6 +149,33 @@
                                            options="{'no_create': True}"/>
                                 </group>
                             </group>
+                            <group invisible="not revaluation_requested">
+                                <group string="Revaluator Details">
+                                    <field name="rev_revaluated_by" readonly="1"/>
+                                    <field name="rev_revaluation_date" readonly="1"/>
+                                    <field name="rev_revaluation_type" readonly="1"/>
+                                    <field name="rev_state" readonly="1"
+                                           widget="badge"
+                                           decoration-success="rev_state == 'completed'"
+                                           decoration-info="rev_state in ['under_review', 'revaluation_in_progress']"
+                                           decoration-warning="rev_state == 'submitted'"
+                                           decoration-danger="rev_state == 'rejected'"/>
+                                </group>
+                                <group string="Revaluation Result">
+                                    <field name="rev_original_marks" readonly="1"/>
+                                    <field name="rev_original_grade" readonly="1"/>
+                                    <field name="rev_revaluated_marks" readonly="1"/>
+                                    <field name="rev_revaluated_grade" readonly="1"/>
+                                    <field name="rev_marks_difference" readonly="1"
+                                           decoration-success="rev_marks_difference &gt; 0"
+                                           decoration-danger="rev_marks_difference &lt; 0"/>
+                                    <field name="rev_outcome" readonly="1"
+                                           widget="badge"
+                                           decoration-success="rev_outcome == 'increased'"
+                                           decoration-danger="rev_outcome == 'decreased'"
+                                           decoration-info="rev_outcome == 'no_change'"/>
+                                </group>
+                            </group>
                         </page>
 
                         <page string="Remarks" name="remarks">

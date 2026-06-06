@@ -91,6 +91,28 @@ class ExaminationResult(models.Model):
     revaluation_requested = fields.Boolean(string='Revaluation Requested')
     revaluation_id = fields.Many2one('examination.revaluation', string='Revaluation')
 
+    # Revaluation related fields for display in form
+    rev_revaluated_by = fields.Many2one('faculty.faculty', related='revaluation_id.revaluated_by',
+                                         string='Revaluated By', readonly=True)
+    rev_revaluation_date = fields.Date(related='revaluation_id.revaluation_date',
+                                        string='Revaluation Date', readonly=True)
+    rev_revaluation_type = fields.Selection(related='revaluation_id.revaluation_type',
+                                             string='Revaluation Type', readonly=True)
+    rev_state = fields.Selection(related='revaluation_id.state',
+                                  string='Revaluation Status', readonly=True)
+    rev_original_marks = fields.Integer(related='revaluation_id.original_marks',
+                                         string='Original Marks', readonly=True)
+    rev_original_grade = fields.Char(related='revaluation_id.original_grade',
+                                      string='Original Grade', readonly=True)
+    rev_revaluated_marks = fields.Integer(related='revaluation_id.revaluated_marks',
+                                           string='Revaluated Marks', readonly=True)
+    rev_revaluated_grade = fields.Char(related='revaluation_id.revaluated_grade',
+                                        string='Revaluated Grade', readonly=True)
+    rev_marks_difference = fields.Integer(related='revaluation_id.marks_difference',
+                                           string='Marks Difference', readonly=True)
+    rev_outcome = fields.Selection(related='revaluation_id.outcome',
+                                    string='Outcome', readonly=True)
+
     # Remarks
     remarks = fields.Text(string='Remarks')
 
