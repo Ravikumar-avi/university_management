@@ -395,28 +395,44 @@ class UniversityWebsiteController(http.Controller):
         # Get placement statistics
         current_year = request.env['university.academic.year'].sudo().search([('state', '=', 'active')], limit=1)
 
-        stats = {}
-        if current_year:
-            stats = {
-                'total_students': request.env['student.student'].sudo().search_count([
-                    ('academic_year_id', '=', current_year.id),
-                    ('state', '=', 'enrolled')
-                ]),
-                'placed_students': request.env['placement.application'].sudo().search_count([
-                    ('academic_year_id', '=', current_year.id),
-                    ('state', '=', 'selected')
-                ]),
-                'companies': request.env['placement.drive'].sudo().search_count([
-                    ('academic_year_id', '=', current_year.id)
-                ]),
-            }
+        # Get all active academic year ids to avoid missing data across years
+        all_active_years = request.env['university.academic.year'].sudo().search([('state', '=', 'active')])
+        active_year_ids = all_active_years.ids
+
+        stats = {
+            'total_students': request.env['student.student'].sudo().search_count([
+                ('academic_year_id', 'in', active_year_ids),
+                ('state', 'in', ['enrolled', 'active'])
+            ]) if active_year_ids else 0,
+            'placed_students': request.env['placement.application'].sudo().search_count([
+                ('state', '=', 'selected')
+            ]),
+            'companies': request.env['placement.drive'].sudo().search_count([]),
+        }
+
+        # Fetch all drives regardless of state
+        drives = request.env['placement.drive'].sudo().search([], order='id desc')
 
         values = {
             'stats': stats,
             'current_year': current_year,
+            'drives': drives,
             'page_name': 'placements',
         }
         return request.render("university_management.placements_page", values)
+
+    @http.route(['/placements/drive/<int:drive_id>'], type='http', auth="public", website=True)
+    def placement_drive_detail(self, drive_id, **kw):
+        """Placement drive detail page"""
+        drive = request.env['placement.drive'].sudo().browse(drive_id)
+        if not drive.exists():
+            return request.not_found()
+
+        values = {
+            'drive': drive,
+            'page_name': 'placement_drive_detail',
+        }
+        return request.render("university_management.placement_drive_detail", values)
 
     # ==================== DOWNLOADS ====================
     @http.route(['/downloads'], type='http', auth="public", website=True)

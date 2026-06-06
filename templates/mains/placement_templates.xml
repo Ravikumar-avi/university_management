@@ -109,14 +109,41 @@
                             </div>
 
                             <!-- Placement Drives List -->
-                            <div class="row g-4">
-                                <!-- This would be dynamically populated with placement.drive records -->
-                                <div class="col-12 text-center py-5" id="placement-drives-list">
-                                    <div class="alert alert-info">
-                                        <h4 class="alert-heading">No Active Drives</h4>
-                                        <p>There are currently no active placement drives. Please check back later.</p>
+                            <div class="row g-4" id="placement-drives-list">
+                                <t t-if="drives">
+                                    <t t-foreach="drives" t-as="drive">
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="card h-100 shadow-sm border-0">
+                                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                                    <h6 class="mb-0 fw-bold"><t t-esc="drive.name"/></h6>
+                                                    <span t-attf-class="badge bg-{'success' if drive.state == 'active' else 'secondary'}">
+                                                        <t t-esc="drive.state.capitalize()"/>
+                                                    </span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p class="mb-1"><i class="fa fa-building me-2 text-primary"/><strong><t t-esc="drive.company_id.name or '—'"/></strong></p>
+                                                    <p class="mb-1"><i class="fa fa-briefcase me-2 text-muted"/><t t-esc="drive.job_title"/></p>
+                                                    <p class="mb-1"><i class="fa fa-calendar me-2 text-muted"/><t t-esc="drive.drive_date"/></p>
+                                                    <t t-if="drive.ctc_max">
+                                                        <p class="mb-1"><i class="fa fa-money me-2 text-success"/><t t-esc="drive.ctc_min"/> - <t t-esc="drive.ctc_max"/> LPA</p>
+                                                    </t>
+                                                    <p class="mb-1"><i class="fa fa-map-marker me-2 text-muted"/><t t-esc="drive.job_location or '—'"/></p>
+                                                </div>
+                                                <div class="card-footer bg-transparent">
+                                                    <a t-attf-href="/placements/drive/#{drive.id}" class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <div class="col-12 text-center py-5">
+                                        <div class="alert alert-info">
+                                            <h4 class="alert-heading">No Drives Found</h4>
+                                            <p>There are currently no placement drives. Please check back later.</p>
+                                        </div>
                                     </div>
-                                </div>
+                                </t>
                             </div>
                         </div>
                     </section>
@@ -235,4 +262,86 @@
         </template>
 
     </data>
+
+    <template id="placement_drive_detail" name="Placement Drive Detail">
+        <t t-call="website.layout">
+            <div class="container py-5">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/placements">Placements</a></li>
+                        <li class="breadcrumb-item active"><t t-esc="drive.name"/></li>
+                    </ol>
+                </nav>
+
+                <div class="row g-4">
+                    <!-- Left: Drive Info -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                                <h4 class="mb-0 fw-bold"><t t-esc="drive.name"/></h4>
+                                <span t-attf-class="badge bg-{'success' if drive.state == 'active' else 'secondary'} fs-6">
+                                    <t t-esc="drive.state.capitalize()"/>
+                                </span>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><i class="fa fa-building me-2 text-primary"/><strong>Company:</strong> <t t-esc="drive.company_id.name or '—'"/></p>
+                                        <p class="mb-2"><i class="fa fa-briefcase me-2 text-primary"/><strong>Position:</strong> <t t-esc="drive.job_title"/></p>
+                                        <p class="mb-2"><i class="fa fa-map-marker me-2 text-primary"/><strong>Location:</strong> <t t-esc="drive.job_location or '—'"/></p>
+                                        <p class="mb-2"><i class="fa fa-calendar me-2 text-primary"/><strong>Drive Date:</strong> <t t-esc="drive.drive_date"/></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <t t-if="drive.ctc_max">
+                                            <p class="mb-2"><i class="fa fa-money me-2 text-success"/><strong>CTC:</strong> <t t-esc="drive.ctc_min"/> - <t t-esc="drive.ctc_max"/> LPA</p>
+                                        </t>
+                                        <p class="mb-2"><i class="fa fa-users me-2 text-primary"/><strong>Positions:</strong> <t t-esc="drive.total_positions"/></p>
+                                        <p class="mb-2"><i class="fa fa-map-pin me-2 text-primary"/><strong>Venue:</strong> <t t-esc="drive.venue or '—'"/></p>
+                                        <t t-if="drive.registration_end">
+                                            <p class="mb-2"><i class="fa fa-clock-o me-2 text-danger"/><strong>Register By:</strong> <t t-esc="drive.registration_end"/></p>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <t t-if="drive.job_description">
+                                    <h5 class="fw-bold mt-3 mb-2">Job Description</h5>
+                                    <div t-field="drive.job_description"/>
+                                </t>
+
+                                <t t-if="drive.eligibility_criteria">
+                                    <h5 class="fw-bold mt-3 mb-2">Eligibility Criteria</h5>
+                                    <div t-field="drive.eligibility_criteria"/>
+                                </t>
+
+                                <t t-if="drive.selection_rounds">
+                                    <h5 class="fw-bold mt-3 mb-2">Selection Process</h5>
+                                    <div t-field="drive.selection_rounds"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Summary -->
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3">Quick Info</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><strong>Min CGPA:</strong> <t t-esc="drive.min_cgpa"/></li>
+                                    <li class="mb-2"><strong>Max Backlogs:</strong> <t t-esc="drive.max_backlogs"/></li>
+                                    <li class="mb-2"><strong>Applications:</strong> <t t-esc="drive.total_applications"/></li>
+                                    <li class="mb-2"><strong>Offers:</strong> <t t-esc="drive.total_offers"/></li>
+                                </ul>
+                                <a href="/placements" class="btn btn-outline-primary w-100 mt-2">
+                                    <i class="fa fa-arrow-left me-2"/>Back to Placements
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
 </odoo>
