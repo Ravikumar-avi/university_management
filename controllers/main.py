@@ -166,35 +166,78 @@ class UniversityWebsiteController(http.Controller):
 
     @http.route(['/admission/submit'], type='http', auth="public", methods=['POST'], website=True, csrf=True)
     def admission_submit(self, **post):
-        """Submit admission application"""
+        """Submit admission application — creates a Student Enquiry (pipeline entry).
+
+        The website form is the first step of the admission pipeline:
+            Website Form → student.enquiry (state: new)
+                → contacted → counselling → seat_blocked → student.admission (internal)
+
+        A full student.admission record is created internally by the admission team
+        after counselling and seat blocking, NOT directly from the public website form.
+        """
         try:
-            # Create admission record
-            admission_vals = {
-                'applicant_name': post.get('applicant_name'),
-                'email': post.get('email'),
-                'mobile': post.get('mobile'),
-                'date_of_birth': post.get('date_of_birth'),
-                'gender': post.get('gender'),
-                'program_id': int(post.get('program_id')),
-                'previous_school': post.get('previous_school'),
-                'previous_percentage': float(post.get('previous_percentage', 0)),
-                'permanent_address': post.get('permanent_address'),
-                'city': post.get('city'),
+            # ── Server-side validation (safety net even if JS is bypassed) ──
+            required_fields = {
+                'applicant_name': 'Full Name',
+                'email': 'Email Address',
+                'mobile': 'Mobile Number',
+                'date_of_birth': 'Date of Birth',
+                'gender': 'Gender',
+                'program_id': 'Program',
+                'previous_school': 'Previous School/College',
+                'previous_percentage': 'Percentage/CGPA',
+                'permanent_address': 'Permanent Address',
+                'city': 'City',
+                'country_id': 'Country',
+                'father_name': "Father's Name",
+                'mother_name': "Mother's Name",
+                'guardian_mobile': "Guardian's Mobile Number",
+            }
+            missing = [label for field, label in required_fields.items() if not post.get(field, '').strip()]
+            if missing:
+                return request.render("university_management.admission_error_page", {
+                    'error': "Please fill in all required fields: " + ", ".join(missing),
+                })
+
+            # Declaration checkbox must be checked
+            if not post.get('terms'):
+                return request.render("university_management.admission_error_page", {
+                    'error': "You must accept the declaration before submitting your application.",
+                })
+
+            enquiry_vals = {
+                'applicant_name': post.get('applicant_name', '').strip(),
+                'email': post.get('email', '').strip(),
+                'mobile': post.get('mobile', '').strip(),
+                'program_id': int(post.get('program_id')) if post.get('program_id') else False,
+                'gender': post.get('gender') or False,
+                'date_of_birth': post.get('date_of_birth') or False,
+                'previous_school': post.get('previous_school', ''),
+                'previous_percentage': float(post.get('previous_percentage') or 0),
+                'city': post.get('city', ''),
                 'state_id': int(post.get('state_id')) if post.get('state_id') else False,
-                'country_id': int(post.get('country_id')) if post.get('country_id') else False,
-                'zip': post.get('zip'),
-                'father_name': post.get('father_name'),
-                'mother_name': post.get('mother_name'),
-                'guardian_mobile': post.get('guardian_mobile'),
+                'state': 'new',
+                'notes': (
+                    f"Permanent Address: {post.get('permanent_address', '')}\n"
+                    f"ZIP: {post.get('zip', '')}\n"
+                    f"Father: {post.get('father_name', '')}\n"
+                    f"Mother: {post.get('mother_name', '')}\n"
+                    f"Guardian Mobile: {post.get('guardian_mobile', '')}\n"
+                    f"Submitted via: Website"
+                ),
             }
 
-            admission = request.env['student.admission'].sudo().create(admission_vals)
+            # Filter to only valid model fields to be safe
+            valid_fields = request.env['student.enquiry'].sudo().fields_get().keys()
+            enquiry_vals = {k: v for k, v in enquiry_vals.items() if k in valid_fields}
+
+            enquiry = request.env['student.enquiry'].sudo().create(enquiry_vals)
 
             return request.render("university_management.admission_success_page", {
-                'admission': admission,
+                'admission': enquiry,
             })
         except Exception as e:
-            _logger.error("Error submitting admission: %s", str(e))
+            _logger.error("Error submitting admission enquiry: %s", str(e))
             return request.render("university_management.admission_error_page", {
                 'error': str(e),
             })

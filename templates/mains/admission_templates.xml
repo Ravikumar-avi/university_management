@@ -165,6 +165,7 @@
 
                                 <!-- Application Form -->
                                 <form id="admission-form" t-att-action="'/admission/submit'" method="POST" class="needs-validation" novalidate="novalidate">
+                                    <!-- novalidate kept intentionally — JS below handles validation including custom messages -->
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
                                     <!-- Personal Information -->
@@ -413,12 +414,84 @@
                                             <i class="fa fa-arrow-left me-2"/>
                                             Back
                                         </a>
-                                        <button type="submit" class="btn btn-primary btn-lg">
+                                        <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">
                                             <i class="fa fa-paper-plane me-2"/>
                                             Submit Application
                                         </button>
                                     </div>
                                 </form>
+
+                                <script>
+                                (function () {
+                                    'use strict';
+
+                                    var form = document.getElementById('admission-form');
+                                    var termsCheckbox = document.getElementById('terms');
+
+                                    // Validate declaration checkbox
+                                    function validateTerms() {
+                                        var feedback = termsCheckbox.parentElement.querySelector('.invalid-feedback');
+                                        if (!termsCheckbox.checked) {
+                                            termsCheckbox.classList.add('is-invalid');
+                                            if (feedback) { feedback.style.display = 'block'; }
+                                            return false;
+                                        }
+                                        termsCheckbox.classList.remove('is-invalid');
+                                        if (feedback) { feedback.style.display = 'none'; }
+                                        return true;
+                                    }
+
+                                    // Validate gender radio group (browser won't highlight radios by default)
+                                    function validateGender() {
+                                        var radios = form.querySelectorAll('input[name="gender"]');
+                                        var isChecked = false;
+                                        var i = 0;
+                                        while (i &lt; radios.length) {
+                                            if (radios[i].checked) { isChecked = true; }
+                                            i++;
+                                        }
+                                        var container = document.getElementById('gender_male').closest('.col-md-6');
+                                        var feedback = container ? container.querySelector('.invalid-feedback') : null;
+                                        if (!isChecked) {
+                                            var j = 0;
+                                            while (j &lt; radios.length) { radios[j].classList.add('is-invalid'); j++; }
+                                            if (feedback) { feedback.style.display = 'block'; }
+                                            return false;
+                                        }
+                                        var k = 0;
+                                        while (k &lt; radios.length) { radios[k].classList.remove('is-invalid'); k++; }
+                                        if (feedback) { feedback.style.display = 'none'; }
+                                        return true;
+                                    }
+
+                                    form.addEventListener('submit', function (event) {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+
+                                        var nativeValid = form.checkValidity();
+                                        var termsValid = validateTerms();
+                                        var genderValid = validateGender();
+
+                                        // Apply Bootstrap red/green borders to all fields
+                                        form.classList.add('was-validated');
+
+                                        if (nativeValid &amp;&amp; termsValid &amp;&amp; genderValid) {
+                                            var btn = document.getElementById('submit-btn');
+                                            btn.disabled = true;
+                                            btn.innerHTML = 'Submitting...';
+                                            form.submit();
+                                        } else {
+                                            var firstInvalid = form.querySelector('.is-invalid');
+                                            if (firstInvalid) {
+                                                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }
+                                        }
+                                    });
+
+                                    // Clear checkbox error in real time when user checks it
+                                    termsCheckbox.addEventListener('change', validateTerms);
+                                })();
+                                </script>
                             </div>
                         </div>
                     </div>
@@ -454,14 +527,14 @@
                                     <div class="card-body text-start">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <p><strong>Application Number:</strong> <t t-esc="admission.name"/></p>
+                                                <p><strong>Reference ID:</strong> ENQ-<t t-esc="admission.id"/></p>
                                                 <p><strong>Applicant Name:</strong> <t t-esc="admission.applicant_name"/></p>
                                                 <p><strong>Email:</strong> <t t-esc="admission.email"/></p>
                                             </div>
                                             <div class="col-md-6">
                                                 <p><strong>Program:</strong> <t t-esc="admission.program_id.name"/></p>
-                                                <p><strong>Application Date:</strong> <t t-esc="admission.application_date"/></p>
-                                                <p><strong>Status:</strong> <span class="badge bg-info">Submitted</span></p>
+                                                <p><strong>Mobile:</strong> <t t-esc="admission.mobile"/></p>
+                                                <p><strong>Status:</strong> <span class="badge bg-info">Enquiry Received</span></p>
                                             </div>
                                         </div>
                                     </div>
