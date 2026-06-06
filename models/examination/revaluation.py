@@ -148,6 +148,11 @@ class ExaminationRevaluation(models.Model):
         if not self.fee_paid:
             raise ValidationError(_('Revaluation fee must be paid before submission!'))
         self.write({'state': 'submitted'})
+        # Mark revaluation as requested on the exam result as soon as submitted
+        self.result_id.write({
+            'revaluation_requested': True,
+            'revaluation_id': self.id,
+        })
 
     def action_review(self):
         self.write({'state': 'under_review'})
