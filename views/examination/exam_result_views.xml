@@ -367,6 +367,7 @@
                 <field name="is_pass"/>
                 <field name="is_absent"/>
                 <field name="revaluation_requested"/>
+                <field name="rev_state"/>
                 <field name="state"/>
 
                 <progressbar field="state"
@@ -466,9 +467,21 @@
 
                                     <div class="row mt-2" t-if="record.revaluation_requested.raw_value">
                                         <div class="col-12">
-                                            <span class="badge text-bg-warning">
-                                                <i class="fa fa-refresh"/> Revaluation Requested
-                                            </span>
+                                            <t t-if="record.rev_state.raw_value == 'completed'">
+                                                <span class="badge text-bg-success">
+                                                    <i class="fa fa-check-circle"/> Revaluation Completed
+                                                </span>
+                                            </t>
+                                            <t t-elif="record.rev_state.raw_value in ['revaluation_in_progress', 'under_review']">
+                                                <span class="badge text-bg-info">
+                                                    <i class="fa fa-spinner"/> Revaluation In Progress
+                                                </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="badge text-bg-warning">
+                                                    <i class="fa fa-refresh"/> Revaluation Requested
+                                                </span>
+                                            </t>
                                         </div>
                                     </div>
                                 </div>
