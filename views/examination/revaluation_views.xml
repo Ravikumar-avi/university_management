@@ -105,8 +105,7 @@
                                 </group>
                                 <group string="New Result">
                                     <field name="revaluated_marks"/>
-                                    <field name="revaluated_grade"
-                                           placeholder="e.g., A+, B, C"/>
+                                    <field name="revaluated_grade" readonly="1"/>
                                 </group>
                             </group>
 

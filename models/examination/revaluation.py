@@ -27,11 +27,15 @@ class ExaminationRevaluation(models.Model):
                                      string='Examination', store=True)
     subject_id = fields.Many2one(related='result_id.subject_id', string='Subject', store=True)
 
-    # Original Marks
-    original_marks = fields.Integer(related='result_id.total_marks',
-                                    string='Original Marks', readonly=True)
-    original_grade = fields.Char(related='result_id.grade_letter',
-                                 string='Original Grade', readonly=True)
+    # Original Marks - stored when result is linked, not a related field to avoid recompute issues
+    original_marks = fields.Integer(string='Original Marks', readonly=True)
+    original_grade = fields.Char(string='Original Grade', readonly=True)
+
+    @api.onchange('result_id')
+    def _onchange_result_id(self):
+        if self.result_id:
+            self.original_marks = self.result_id.total_marks
+            self.original_grade = self.result_id.grade_letter
 
     # Application Details
     application_date = fields.Date(string='Application Date', default=fields.Date.today(),
@@ -61,7 +65,21 @@ class ExaminationRevaluation(models.Model):
     revaluation_date = fields.Date(string='Revaluation Date')
 
     revaluated_marks = fields.Integer(string='Revaluated Marks')
-    revaluated_grade = fields.Char(string='Revaluated Grade')
+    revaluated_grade = fields.Char(string='Revaluated Grade', compute='_compute_revaluated_grade', store=True)
+
+    @api.depends('revaluated_marks', 'result_id')
+    def _compute_revaluated_grade(self):
+        for rec in self:
+            if rec.revaluated_marks and rec.result_id:
+                max_marks = rec.result_id.max_marks or 100
+                percentage = (rec.revaluated_marks / max_marks) * 100
+                grade = rec.env['examination.grade.system'].search([
+                    ('min_percentage', '<=', percentage),
+                    ('max_percentage', '>=', percentage)
+                ], limit=1)
+                rec.revaluated_grade = grade.grade if grade else ''
+            else:
+                rec.revaluated_grade = ''
 
     marks_difference = fields.Integer(string='Marks Difference',
                                       compute='_compute_difference', store=True)
@@ -99,12 +117,17 @@ class ExaminationRevaluation(models.Model):
     def create(self, vals):
         if vals.get('name', '/') == '/':
             vals['name'] = self.env['ir.sequence'].next_by_code('examination.revaluation') or '/'
+        # Auto-populate original marks from result when creating
+        if vals.get('result_id') and not vals.get('original_marks'):
+            result = self.env['examination.result'].browse(vals['result_id'])
+            vals['original_marks'] = result.total_marks
+            vals['original_grade'] = result.grade_letter
         return super(ExaminationRevaluation, self).create(vals)
 
     @api.depends('original_marks', 'revaluated_marks')
     def _compute_difference(self):
         for record in self:
-            if record.revaluated_marks:
+            if record.revaluated_marks and record.original_marks:
                 record.marks_difference = record.revaluated_marks - record.original_marks
                 record.marks_changed = record.marks_difference != 0
             else:
@@ -133,17 +156,40 @@ class ExaminationRevaluation(models.Model):
         self.write({'state': 'revaluation_in_progress'})
 
     def action_complete(self):
+        # Store original marks before any update (in case not already stored)
+        original = self.original_marks or self.result_id.total_marks
+        original_grade = self.original_grade or self.result_id.grade_letter
+
         self.write({
             'state': 'completed',
-            'revaluation_date': fields.Date.today()
+            'revaluation_date': fields.Date.today(),
+            'original_marks': original,
+            'original_grade': original_grade,
         })
 
-        # Update original result if marks changed
-        if self.marks_changed:
-            self.result_id.write({
-                'total_marks': self.revaluated_marks,
-                'remarks': f"Revaluation: Original {self.original_marks}, Changed to {self.revaluated_marks}"
+        # Recompute difference using stored original, not related field
+        diff = self.revaluated_marks - original
+        self.write({
+            'marks_difference': diff,
+            'marks_changed': diff != 0,
+        })
+
+        # Update original result
+        result = self.result_id
+        if diff != 0:
+            # total_marks is computed from internal+external, distribute difference to external
+            new_external = result.external_marks + diff
+            new_external = max(0, min(new_external, result.external_max))
+            result.write({
+                'external_marks': new_external,
+                'remarks': f'Revaluation {self.name}: Original {original}, Changed to {self.revaluated_marks}',
             })
+
+        # Always update revaluation status on the result
+        result.write({
+            'revaluation_requested': True,
+            'revaluation_id': self.id,
+        })
 
     def action_reject(self):
         self.write({'state': 'rejected'})
