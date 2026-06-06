@@ -50,8 +50,11 @@
                                                  class="img-fluid w-100 h-100 object-fit-cover"
                                                  t-att-alt="program.name"/>
                                         </div>
-                                        <div t-else="" class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                            <i class="fa fa-graduation-cap fa-4x text-muted"/>
+                                        <div t-else="" class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);">
+                                            <div class="text-center text-white">
+                                                <i class="fa fa-graduation-cap fa-4x mb-2"/>
+                                                <div class="fw-bold fs-6 px-3" style="line-height:1.2;"><t t-esc="program.name"/></div>
+                                            </div>
                                         </div>
 
                                         <!-- Program Badge -->
