@@ -44,6 +44,13 @@ class FeeReminder(models.Model):
         store=True,
         currency_field='currency_id')
 
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        related='fee_structure_id.company_id',
+        store=True,
+        readonly=True,
+    )
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
 
     # Reminder Details
@@ -187,8 +194,6 @@ class FeeReminder(models.Model):
                     'Please update parent information before sending reminders.'
                 ))
 
-            success = True
-
             try:
                 if record.send_email:
                     record._send_email_reminder()
@@ -198,9 +203,11 @@ class FeeReminder(models.Model):
 
                 record.write({'state': 'sent'})
             except Exception as e:
-                _logger.error(f"Failed to send reminder {record.name}: {str(e)}")
+                _logger.error(f"Failed to send reminder {record.name}: {str(e)}", exc_info=True)
                 record.write({'state': 'failed'})
-                success = False
+                raise ValidationError(_(
+                    'Failed to send reminder: %s\nPlease check email/SMS configuration and try again.'
+                ) % str(e))
 
         return True
 
@@ -218,15 +225,68 @@ class FeeReminder(models.Model):
         return True
 
     def _send_email_reminder(self):
-        """Send email reminder"""
-        template = self.env.ref('university_management.email_template_fee_reminder',
-                                raise_if_not_found=False)
-        if template:
-            template.send_mail(self.id, force_send=True)
-            self.write({
-                'email_sent': True,
-                'email_sent_date': fields.Datetime.now()
-            })
+        """Send email reminder by building body directly in Python."""
+        recipient_emails = self.recipient_emails or self.student_id.email
+        if not recipient_emails:
+            _logger.warning(
+                "No recipient email found for reminder %s. Skipping email.", self.name
+            )
+            return
+
+        student_name = self.student_id.name or ''
+        outstanding = '{:,.2f}'.format(self.outstanding_amount)
+        due_date = str(self.due_date) if self.due_date else 'N/A'
+        company_name = self.company_id.name or self.env.company.name
+        email_from = self.company_id.email or self.env.company.email or self.env.user.email_formatted
+
+        portal_url = self.student_id.get_portal_url() if hasattr(self.student_id, 'get_portal_url') else '#'
+
+        body_html = """
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background: #FF5722; color: white; padding: 20px; text-align: center;">
+        <h1>Fee Payment Reminder</h1>
+    </div>
+    <div style="padding: 20px; background: #f9f9f9;">
+        <p>Dear <strong>{student_name}</strong>,</p>
+        <p>This is a friendly reminder regarding your pending fee payment.</p>
+        <div style="background: white; padding: 15px; border-left: 4px solid #FF5722; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Outstanding Amount: <span style="color: #FF5722;">&#8377; {outstanding}</span></h3>
+        </div>
+        <p><strong>Due Date:</strong> {due_date}</p>
+        <p>Please make the payment at your earliest convenience to avoid any late fees or restrictions.</p>
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="{portal_url}" style="background: #FF5722; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Pay Now
+            </a>
+        </div>
+        <p>For any queries, please contact the Accounts Office.</p>
+        <p>Best Regards,<br/>
+        <strong>Accounts Department</strong><br/>
+        {company_name}</p>
+    </div>
+</div>
+""".format(
+            student_name=student_name,
+            outstanding=outstanding,
+            due_date=due_date,
+            company_name=company_name,
+            portal_url=portal_url,
+        )
+
+        mail_values = {
+            'subject': 'Fee Payment Reminder - %s' % student_name,
+            'email_from': email_from,
+            'email_to': recipient_emails,
+            'body_html': body_html,
+            'auto_delete': True,
+        }
+        mail = self.env['mail.mail'].sudo().create(mail_values)
+        mail.send()
+
+        self.write({
+            'email_sent': True,
+            'email_sent_date': fields.Datetime.now(),
+        })
 
     def _send_sms_reminder(self):
         """Send SMS reminder"""

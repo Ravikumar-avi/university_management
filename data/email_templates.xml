@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
 
         <!-- ========================================== -->
         <!-- EMAIL TEMPLATES -->
@@ -79,7 +79,7 @@
                         <p>This is a friendly reminder regarding your pending fee payment.</p>
 
                         <div style="background: white; padding: 15px; border-left: 4px solid #FF5722; margin: 20px 0;">
-                            <h3 style="margin-top: 0;">Outstanding Amount: <span style="color: #FF5722;">₹ {{ "{:,.2f}".format(object.amount_due) }}</span></h3>
+                            <h3 style="margin-top: 0;">Outstanding Amount: <span style="color: #FF5722;">&#8377; {{ "{:,.2f}".format(object.outstanding_amount) }}</span></h3>
                         </div>
 
                         <p><strong>Due Date:</strong> {{ object.due_date }}</p>
