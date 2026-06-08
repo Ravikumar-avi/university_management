@@ -7,6 +7,7 @@ from odoo.tools import groupby as groupbyelem
 from operator import itemgetter
 import base64
 import logging
+import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class StudentPortalController(CustomerPortal):
                 ('student_id', '=', student.id)
             ], limit=5, order='date desc'),
 
-            'recent_fees': student.fee_payment_ids.sorted(key=lambda r: r.payment_date, reverse=True)[:5],
+            'recent_fees': student.fee_payment_ids.sorted(key=lambda r: r.payment_date or datetime.date.min, reverse=True)[:5],
 
             # Upcoming
             'upcoming_exams': request.env['examination.examination'].search([
