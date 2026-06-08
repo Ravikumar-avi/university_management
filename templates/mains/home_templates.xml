@@ -77,57 +77,47 @@
                                 <p class="lead text-muted">Explore our top-rated academic programs</p>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm border-0">
-                                    <div class="card-body text-center p-4">
-                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 80px; height: 80px;">
-                                            <i class="fa fa-laptop fa-2x"></i>
+                        <div class="row" t-if="featured_programs">
+                            <t t-foreach="featured_programs" t-as="program">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 shadow-sm border-0">
+                                        <div class="card-body text-center p-4">
+                                            <div t-if="program.image_128"
+                                                 class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 overflow-hidden"
+                                                 style="width: 80px; height: 80px;">
+                                                <img t-attf-src="/web/image/university.program/#{program.id}/image_128"
+                                                     class="img-fluid w-100 h-100"
+                                                     style="object-fit: cover;"
+                                                     t-att-alt="program.name"/>
+                                            </div>
+                                            <div t-else=""
+                                                 class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                                 style="width: 80px; height: 80px;">
+                                                <i class="fa fa-graduation-cap fa-2x"></i>
+                                            </div>
+                                            <h4 class="card-title">
+                                                <t t-esc="program.name"/>
+                                            </h4>
+                                            <p class="card-text text-muted">
+                                                <t t-if="program.department_id">
+                                                    <t t-esc="program.department_id.name"/>
+                                                </t>
+                                                <t t-if="program.duration_years">
+                                                    — <t t-esc="program.duration_years"/> Years
+                                                </t>
+                                            </p>
+                                            <a t-attf-href="/program/#{program.id}" class="btn btn-outline-primary">
+                                                Learn More
+                                            </a>
                                         </div>
-                                        <h4 class="card-title">Computer Science</h4>
-                                        <p class="card-text text-muted">
-                                            Bachelor's, Master's, and PhD programs with industry partnerships.
-                                        </p>
-                                        <a href="/programs/computer-science" class="btn btn-outline-primary">
-                                            Learn More
-                                        </a>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm border-0">
-                                    <div class="card-body text-center p-4">
-                                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 80px; height: 80px;">
-                                            <i class="fa fa-flask fa-2x"></i>
-                                        </div>
-                                        <h4 class="card-title">Biotechnology</h4>
-                                        <p class="card-text text-muted">
-                                            Cutting-edge research facilities and industry-ready curriculum.
-                                        </p>
-                                        <a href="/programs/biotechnology" class="btn btn-outline-success">
-                                            Learn More
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm border-0">
-                                    <div class="card-body text-center p-4">
-                                        <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                             style="width: 80px; height: 80px;">
-                                            <i class="fa fa-balance-scale fa-2x"></i>
-                                        </div>
-                                        <h4 class="card-title">Business Administration</h4>
-                                        <p class="card-text text-muted">
-                                            MBA and BBA programs with international accreditation.
-                                        </p>
-                                        <a href="/programs/business" class="btn btn-outline-info">
-                                            Learn More
-                                        </a>
-                                    </div>
-                                </div>
+                            </t>
+                        </div>
+                        <div class="row" t-else="">
+                            <div class="col-12 text-center text-muted py-4">
+                                <i class="fa fa-graduation-cap fa-3x mb-3 d-block"></i>
+                                <p>No active programs found.</p>
                             </div>
                         </div>
                         <div class="text-center mt-4">
