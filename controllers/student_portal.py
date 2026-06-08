@@ -320,7 +320,7 @@ class StudentPortalController(CustomerPortal):
         return request.render("university_management.student_library", values)
 
     # ==================== EVENTS ====================
-    @http.route(['/my/events'], type='http', auth="user", website=True)
+    @http.route(['/my/events', '/my/registrations'], type='http', auth="user", website=True)
     def student_events(self, **kw):
         """View registered events"""
         student = request.env['student.student'].search([('user_id', '=', request.env.uid)], limit=1)
@@ -328,7 +328,7 @@ class StudentPortalController(CustomerPortal):
         if not student:
             return request.redirect('/my')
 
-        registrations = request.env['university.event.registration'].search([
+        registrations = request.env['university.event.registration'].sudo().search([
             ('student_id', '=', student.id)
         ], order='create_date desc')
 
