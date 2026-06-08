@@ -820,6 +820,8 @@ class UniversityDashboard extends Component {
     openStudents() { this.navigateTo("university_management.action_student"); }
     openAdmissions() { this.navigateTo("university_management.action_student_admission"); }
     openFaculty() { this.navigateTo("university_management.action_faculty"); }
+    openFacultyPresent() { this.drillDownFacultyStatus('present', 'Present Today'); }
+    openFacultyOnLeave() { this.drillDownFacultyStatus('on_leave', 'On Leave Today'); }
     openFeePayments() { this.navigateTo("university_management.action_fee_payment"); }
     openFeeStructures() { this.navigateTo("university_management.action_fee_structure"); }
 

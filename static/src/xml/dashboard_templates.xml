@@ -423,7 +423,7 @@
                         <div class="uni-kpi-value" t-esc="state.faculty.total || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green" t-on-click="openFaculty">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openFacultyPresent">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-check-circle"/>
                     </div>
@@ -432,7 +432,7 @@
                         <div class="uni-kpi-value" t-esc="state.faculty.present_today || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFaculty">
+                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFacultyOnLeave">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-calendar-times-o"/>
                     </div>
