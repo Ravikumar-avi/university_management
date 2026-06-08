@@ -688,17 +688,16 @@ class UniversityDashboard(models.TransientModel):
     def _get_hostel_data(self):
         env = self.env
         total_rooms = 0
-        occupied_rooms = 0
+        total_beds = 0
+        occupied_beds = 0
         pending_complaints = 0
 
         try:
-            total_rooms = env['hostel.room'].search_count([('active', '=', True)])
-        except Exception:
-            pass
-        try:
-            occupied_rooms = env['hostel.allocation'].search_count([
-                ('state', 'in', ['active', 'allocated', 'occupied'])
-            ])
+            active_rooms = env['hostel.room'].search([('active', '=', True)])
+            total_rooms = len(active_rooms)
+            # Sum actual bed capacity and occupied beds across all active rooms
+            total_beds = sum(active_rooms.mapped('capacity'))
+            occupied_beds = sum(active_rooms.mapped('occupied_beds'))
         except Exception:
             pass
         try:
@@ -724,11 +723,13 @@ class UniversityDashboard(models.TransientModel):
         except Exception:
             pass
 
-        occupancy_rate = round(occupied_rooms / total_rooms * 100, 1) if total_rooms else 0
+        # Occupancy rate = occupied beds / total bed capacity (capped at 100%)
+        occupancy_rate = round(min(occupied_beds / total_beds * 100, 100.0), 1) if total_beds else 0
 
         return {
             'total_rooms': total_rooms,
-            'occupied_rooms': occupied_rooms,
+            'total_beds': total_beds,
+            'occupied_beds': occupied_beds,
             'pending_complaints': pending_complaints,
             'occupancy_rate': occupancy_rate,
             'complaints_breakdown': complaints_breakdown,
