@@ -234,13 +234,17 @@
                                                 Details
                                             </a>
                                             <t t-if="event.requires_registration and event.registration_open and request.website.user_id.id">
-                                                <a t-att-href="'/event/' + str(event.id) + '/register'"
-                                                   class="btn btn-primary btn-sm"
-                                                   data-method="post"
-                                                   t-att-disabled="event.max_participants and event.total_registrations >= event.max_participants">
-                                                    <i class="fa fa-user-plus me-1"></i>
-                                                    Register
-                                                </a>
+                                                <form t-att-action="'/event/' + str(event.id) + '/register'"
+                                                      method="post"
+                                                      class="mb-0">
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                    <button type="submit"
+                                                            class="btn btn-primary btn-sm"
+                                                            t-att-disabled="event.max_participants and event.total_registrations >= event.max_participants">
+                                                        <i class="fa fa-user-plus me-1"></i>
+                                                        Register
+                                                    </button>
+                                                </form>
                                             </t>
                                         </div>
                                     </div>
