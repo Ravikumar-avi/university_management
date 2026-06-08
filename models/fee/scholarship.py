@@ -581,7 +581,7 @@ class ScholarshipApplicationDocument(models.Model):
                                      required=True, ondelete='cascade')
     document_type_id = fields.Many2one('scholarship.document.type', string='Document Type',
                                        required=True)
-    attachment_id = fields.Many2one('ir.attachment', string='Attachment', required=True)
+    attachment_id = fields.Many2one('ir.attachment', string='Attachment', required=True, ondelete='cascade')
 
     is_verified = fields.Boolean(string='Verified')
     verified_by = fields.Many2one('res.users', string='Verified By', readonly=True)
