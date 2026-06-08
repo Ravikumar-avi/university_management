@@ -165,6 +165,24 @@ class UniversityDashboard(models.TransientModel):
                 ('state', 'in', ['registration_open', 'registration_closed', 'scheduled', 'ongoing'])
             ])
             recruiting_companies = env['placement.company'].search_count([('active', '=', True)])
+
+            # Compute highest package from accepted placement offers
+            accepted_offers = env['placement.offer'].search(
+                [('state', '=', 'accepted'), ('ctc', '>', 0)],
+                order='ctc desc',
+                limit=1,
+            )
+            if accepted_offers:
+                top_offer = accepted_offers[0]
+                ctc_value = top_offer.ctc
+                currency = top_offer.currency_id
+                symbol = currency.symbol if currency else ''
+                # Format as LPA if currency is INR, otherwise use 2-decimal format
+                if currency and currency.name == 'INR':
+                    lpa = ctc_value / 100000  # convert to Lakhs Per Annum
+                    highest_package = '{}{:.2f} LPA'.format(symbol, lpa)
+                else:
+                    highest_package = '{}{:,.0f}'.format(symbol, ctc_value)
         except Exception:
             pass
 
