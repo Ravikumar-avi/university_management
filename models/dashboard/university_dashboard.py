@@ -393,7 +393,7 @@ class UniversityDashboard(models.TransientModel):
             pass
 
         try:
-            evals = env['faculty.evaluation'].search([('state', '=', 'done')])
+            evals = env['faculty.evaluation'].search([('state', '=', 'approved')])
             if evals:
                 avg_rating = sum(e.overall_rating for e in evals if e.overall_rating) / len(evals)
         except Exception:
