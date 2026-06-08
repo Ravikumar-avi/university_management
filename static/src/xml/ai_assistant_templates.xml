@@ -83,11 +83,6 @@
 
                 <!-- Quick action pills -->
                 <div class="uni-ai-quick-actions">
-                    <t t-foreach="suggestions" t-as="s" t-key="s">
-                        <button class="uni-ai-quick-btn" t-on-click="() => askSuggested(s)">
-                            <t t-esc="s"/>
-                        </button>
-                    </t>
                     <button class="uni-ai-quick-btn uni-ai-quick-btn--clear" t-on-click="clearChat">
                         Clear All
                     </button>

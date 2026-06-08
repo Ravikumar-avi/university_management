@@ -184,12 +184,7 @@ class UniversityAIAssistant extends Component {
     }
 
     get suggestions() {
-        return [
-            "What can you do?",
-            "Fee summary",
-            "Low attendance students",
-            "Top CGPA students",
-        ];
+        return [];
     }
 
     // ── Formatting ────────────────────────────────────────────────────────
