@@ -54,14 +54,14 @@ class FacultyEvaluation(models.Model):
     research_contribution = fields.Float(string='Research Contribution (1-10)', default=5.0)
     administrative_work = fields.Float(string='Administrative Work (1-10)', default=5.0)
 
-    overall_rating = fields.Float(string='Overall Rating', compute='_compute_overall_rating', store=True)
+    overall_rating = fields.Float(string='Overall Rating', compute='_compute_overall_rating', store=True, compute_sudo=True)
     performance_grade = fields.Selection([
         ('outstanding',       'Outstanding'),
         ('excellent',         'Excellent'),
         ('good',              'Good'),
         ('satisfactory',      'Satisfactory'),
         ('needs_improvement', 'Needs Improvement'),
-    ], string='Performance Grade', compute='_compute_grade', store=True)
+    ], string='Performance Grade', compute='_compute_grade', store=True, compute_sudo=True)
 
     strengths = fields.Html(string='Strengths')
     areas_of_improvement = fields.Html(string='Areas of Improvement')

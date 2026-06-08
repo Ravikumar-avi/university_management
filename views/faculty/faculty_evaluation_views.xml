@@ -136,8 +136,7 @@
 
                             <group>
                                 <group string="Overall Performance">
-                                    <field name="overall_rating" readonly="1"
-                                           widget="float" class="oe_read_only"/>
+                                    <field name="overall_rating" readonly="1"/>
                                     <field name="performance_grade" readonly="1"
                                            widget="badge"
                                            decoration-success="performance_grade == 'outstanding'"
