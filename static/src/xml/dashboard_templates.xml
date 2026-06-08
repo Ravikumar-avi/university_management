@@ -559,16 +559,16 @@
                     </div>
                 </div>
                 <!-- Late Payments -->
-                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFeeOverdue">
-                    <div class="uni-kpi-icon">
-                        <i class="fa fa-clock-o"/>
-                    </div>
-                    <div class="uni-kpi-info">
-                        <div class="uni-kpi-label">Late Payments</div>
-                        <div class="uni-kpi-value" t-esc="state.fees.late_payments || 0"/>
-                        <div class="uni-kpi-change negative">Students overdue</div>
-                    </div>
-                </div>
+<!--                <div class="uni-kpi-card uni-kpi-orange" t-on-click="openFeeOverdue">-->
+<!--                    <div class="uni-kpi-icon">-->
+<!--                        <i class="fa fa-clock-o"/>-->
+<!--                    </div>-->
+<!--                    <div class="uni-kpi-info">-->
+<!--                        <div class="uni-kpi-label">Late Payments</div>-->
+<!--                        <div class="uni-kpi-value" t-esc="state.fees.late_payments || 0"/>-->
+<!--                        <div class="uni-kpi-change negative">Students overdue</div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
 
             <!-- ═══════════════════════════════════════════════════════ -->
