@@ -1297,12 +1297,22 @@
                                                             <small class="text-muted"><t t-esc="reg.event_id.event_type"/></small>
                                                         </td>
                                                         <td>
-                                                            <t t-esc="reg.event_id.start_date"/>
-                                                            <t t-if="reg.event_id.end_date">
-                                                                <br/><small>to <t t-esc="reg.event_id.end_date"/></small>
+                                                            <t t-esc="reg.event_id.start"/>
+                                                            <t t-if="reg.event_id.stop">
+                                                                <br/><small>to <t t-esc="reg.event_id.stop"/></small>
                                                             </t>
                                                         </td>
-                                                        <td><t t-esc="reg.event_id.venue"/></td>
+                                                        <td>
+                                                            <t t-if="reg.event_id.venue_address">
+                                                                <t t-esc="reg.event_id.venue_address"/>
+                                                            </t>
+                                                            <t t-elif="reg.event_id.venue_type">
+                                                                <span class="badge bg-secondary text-capitalize">
+                                                                    <t t-esc="reg.event_id.venue_type"/>
+                                                                </span>
+                                                            </t>
+                                                            <t t-else="">—</t>
+                                                        </td>
                                                         <td>
                                                             <t t-if="reg.registration_fee > 0">
                                                                 <span class="badge"
