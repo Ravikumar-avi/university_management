@@ -216,14 +216,11 @@
                                         <p class="card-text">
                                             Annual technology conference featuring industry leaders and workshops.
                                         </p>
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
                                             <span class="badge bg-light text-dark">
                                                 <i class="fa fa-calendar me-1"></i>
                                                 March 15-17, 2025
                                             </span>
-                                            <a href="/events/tech-summit" class="btn btn-sm btn-outline-danger">
-                                                Details
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -240,14 +237,11 @@
                                         <p class="card-text">
                                             100+ companies recruiting for internships and full-time positions.
                                         </p>
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
                                             <span class="badge bg-light text-dark">
                                                 <i class="fa fa-calendar me-1"></i>
                                                 April 10, 2025
                                             </span>
-                                            <a href="/events/career-fair" class="btn btn-sm btn-outline-success">
-                                                Register
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -264,14 +258,11 @@
                                         <p class="card-text">
                                             3-day cultural extravaganza with performances, competitions, and food.
                                         </p>
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
                                             <span class="badge bg-light text-dark">
                                                 <i class="fa fa-calendar me-1"></i>
                                                 February 20-22, 2025
                                             </span>
-                                            <a href="/events/cultural-fest" class="btn btn-sm btn-outline-primary">
-                                                Participate
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
