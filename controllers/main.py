@@ -15,8 +15,12 @@ class UniversityWebsiteController(http.Controller):
     @http.route(['/'], type='http', auth="public", website=True)
     def index(self, **kw):
         """Homepage"""
+        featured_programs = request.env['university.program'].sudo().search(
+            [('active', '=', True)], limit=3, order='name'
+        )
         values = {
             'page_name': 'home',
+            'featured_programs': featured_programs,
         }
         return request.render("university_management.homepage", values)
 
@@ -62,6 +66,7 @@ class UniversityWebsiteController(http.Controller):
     @http.route(['/program/<model("university.program"):program>'], type='http', auth="public", website=True)
     def program_detail(self, program, **kw):
         """Program detail page"""
+        program = program.sudo()
         values = {
             'program': program,
             'page_name': 'program_detail',
