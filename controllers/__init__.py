@@ -1,5 +1,4 @@
 from . import main
-from . import dashboard_controller
 from . import id_card_controller
 from . import hall_ticket_controller
 from . import marksheet_controller
