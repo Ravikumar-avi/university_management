@@ -937,6 +937,30 @@ class UniversityDashboard extends Component {
     openHallTickets() { this.navigateTo("university_management.action_examination_hall_ticket"); }
     openExamResults() { this.navigateTo("university_management.action_exam_result"); }
     openHostel() { this.navigateTo("university_management.action_hostel_hostel"); }
+    openHostelRooms() {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: 'Hostel — All Rooms',
+                res_model: 'hostel.room',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [['active', '=', true]],
+            });
+        } catch (e) { console.warn('openHostelRooms failed:', e); }
+    }
+    openHostelOccupiedRooms() {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: 'Hostel — Occupied Rooms',
+                res_model: 'hostel.room',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [['active', '=', true], ['state', 'in', ['occupied', 'full']]],
+            });
+        } catch (e) { console.warn('openHostelOccupiedRooms failed:', e); }
+    }
     openHostelComplaints() { this.navigateTo("university_management.action_hostel_complaint"); }
     openLibrary() { this.navigateTo("university_management.action_library_book"); }
     openLibraryIssues() { this.navigateTo("university_management.action_library_issue"); }

@@ -880,7 +880,7 @@
                 <button class="uni-action-btn" t-on-click="openHostel">Manage Hostels</button>
             </div>
             <div class="uni-kpi-row">
-                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openHostel">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openHostelRooms">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-building"/>
                     </div>
@@ -889,7 +889,7 @@
                         <div class="uni-kpi-value" t-esc="state.hostel.total_rooms || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green" t-on-click="openHostel">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openHostelOccupiedRooms">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-bed"/>
                     </div>
