@@ -818,6 +818,28 @@ class UniversityDashboard extends Component {
     }
 
     openStudents() { this.navigateTo("university_management.action_student"); }
+
+    openLowAttendance() {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: 'Low Attendance Students (<75%)',
+                res_model: 'student.student',
+                view_mode: 'kanban,list,form',
+                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                domain: [
+                    ['state', 'in', ['active', 'enrolled', 'admitted']],
+                    ['attendance_percentage', '<', 75],
+                    ['attendance_percentage', '>', 0],
+                ],
+                context: {
+                    search_default_group_by_program: 1,
+                },
+            });
+        } catch (e) {
+            console.warn('openLowAttendance failed:', e);
+        }
+    }
     openAdmissions() { this.navigateTo("university_management.action_student_admission"); }
     openFaculty() { this.navigateTo("university_management.action_faculty"); }
     openFacultyPresent() { this.drillDownFacultyStatus('present', 'Present Today'); }

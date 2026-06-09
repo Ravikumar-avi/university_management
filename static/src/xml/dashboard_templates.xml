@@ -338,7 +338,7 @@
                         <div class="uni-kpi-value" t-esc="state.students.pending_admissions || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-red" t-on-click="openStudents">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openLowAttendance">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-exclamation-triangle"/>
                     </div>
