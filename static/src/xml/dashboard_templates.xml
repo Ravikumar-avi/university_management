@@ -320,7 +320,7 @@
                         <div class="uni-kpi-value" t-esc="state.students.total_enrolled || 0"/>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-green" t-on-click="openAdmissions">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openNewThisYear">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-user-plus"/>
                     </div>

@@ -844,6 +844,26 @@ class UniversityDashboard extends Component {
             console.warn('openLowAttendance failed:', e);
         }
     }
+    openNewThisYear() {
+        const yearStart = new Date(new Date().getFullYear(), 0, 1)
+            .toISOString().split('T')[0];
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: 'New Admissions This Year',
+                res_model: 'student.admission',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [
+                    ['state', 'in', ['approved', 'admitted']],
+                    ['application_date', '>=', yearStart],
+                ],
+                context: { search_default_group_by_program: 1 },
+            });
+        } catch (e) {
+            console.warn('openNewThisYear failed:', e);
+        }
+    }
     openAdmissions() { this.navigateTo("university_management.action_student_admission"); }
     openFaculty() { this.navigateTo("university_management.action_faculty"); }
     openFacultyPresent() { this.drillDownFacultyStatus('present', 'Present Today'); }
