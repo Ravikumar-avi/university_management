@@ -817,7 +817,27 @@ class UniversityDashboard extends Component {
         }
     }
 
-    openStudents() { this.navigateTo("university_management.action_student"); }
+    openStudents() {
+        try {
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: 'Total Enrolled Students',
+                res_model: 'student.student',
+                view_mode: 'kanban,list,form',
+                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                domain: [],
+                context: {
+                    search_default_filter_enrolled: 1,
+                    search_default_filter_active: 1,
+                    search_default_filter_admitted: 1,
+                    search_default_group_by_program: 1,
+                },
+            });
+        } catch (e) {
+            console.warn('openStudents failed:', e);
+            this.navigateTo("university_management.action_student");
+        }
+    }
 
     async openLowAttendance() {
         try {
