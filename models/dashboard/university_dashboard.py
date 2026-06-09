@@ -984,6 +984,29 @@ class UniversityDashboard(models.TransientModel):
 
         return result
 
+    @api.model
+    def get_low_attendance_student_ids(self):
+        """Return IDs of active students whose attendance is below 75%."""
+        env = self.env
+        today = date.today()
+        year_start = today.replace(month=1, day=1)
+        low_ids = []
+        try:
+            students = env['student.student'].search(self._student_active_domain())
+            for student in students:
+                att_records = env['student.attendance'].search([
+                    ('student_id', '=', student.id),
+                    ('date', '>=', year_start.strftime('%Y-%m-%d')),
+                ])
+                if att_records:
+                    present = len(att_records.filtered(lambda r: r.state == 'present'))
+                    pct = present / len(att_records) * 100
+                    if pct < 75:
+                        low_ids.append(student.id)
+        except Exception as e:
+            _logger.warning("get_low_attendance_student_ids error: %s", e)
+        return low_ids
+
     @staticmethod
     def _format_amount(amount):
         if not amount:

@@ -819,22 +819,26 @@ class UniversityDashboard extends Component {
 
     openStudents() { this.navigateTo("university_management.action_student"); }
 
-    openLowAttendance() {
+    async openLowAttendance() {
         try {
+            const studentIds = await this.orm.call(
+                'university.dashboard',
+                'get_low_attendance_student_ids',
+                [],
+                {}
+            );
+            if (!studentIds || studentIds.length === 0) {
+                this.notification.add('No students with attendance below 75%.', { type: 'info' });
+                return;
+            }
             this.action.doAction({
                 type: 'ir.actions.act_window',
                 name: 'Low Attendance Students (<75%)',
-                res_model: 'student.student',
-                view_mode: 'kanban,list,form',
-                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
-                domain: [
-                    ['state', 'in', ['active', 'enrolled', 'admitted']],
-                    ['attendance_percentage', '<', 75],
-                    ['attendance_percentage', '>', 0],
-                ],
-                context: {
-                    search_default_group_by_program: 1,
-                },
+                res_model: 'student.attendance',
+                view_mode: 'list,form',
+                views: [[false, 'list'], [false, 'form']],
+                domain: [['student_id', 'in', studentIds]],
+                context: { search_default_group_by_student: 1 },
             });
         } catch (e) {
             console.warn('openLowAttendance failed:', e);
@@ -937,30 +941,6 @@ class UniversityDashboard extends Component {
     openHallTickets() { this.navigateTo("university_management.action_examination_hall_ticket"); }
     openExamResults() { this.navigateTo("university_management.action_exam_result"); }
     openHostel() { this.navigateTo("university_management.action_hostel_hostel"); }
-    openHostelRooms() {
-        try {
-            this.action.doAction({
-                type: 'ir.actions.act_window',
-                name: 'Hostel — All Rooms',
-                res_model: 'hostel.room',
-                view_mode: 'list,form',
-                views: [[false, 'list'], [false, 'form']],
-                domain: [['active', '=', true]],
-            });
-        } catch (e) { console.warn('openHostelRooms failed:', e); }
-    }
-    openHostelOccupiedRooms() {
-        try {
-            this.action.doAction({
-                type: 'ir.actions.act_window',
-                name: 'Hostel — Occupied Rooms',
-                res_model: 'hostel.room',
-                view_mode: 'list,form',
-                views: [[false, 'list'], [false, 'form']],
-                domain: [['active', '=', true], ['state', 'in', ['occupied', 'full']]],
-            });
-        } catch (e) { console.warn('openHostelOccupiedRooms failed:', e); }
-    }
     openHostelComplaints() { this.navigateTo("university_management.action_hostel_complaint"); }
     openLibrary() { this.navigateTo("university_management.action_library_book"); }
     openLibraryIssues() { this.navigateTo("university_management.action_library_issue"); }
