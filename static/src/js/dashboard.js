@@ -823,6 +823,75 @@ class UniversityDashboard extends Component {
     openFacultyPresent() { this.drillDownFacultyStatus('present', 'Present Today'); }
     openFacultyOnLeave() { this.drillDownFacultyStatus('on_leave', 'On Leave Today'); }
     openFeePayments() { this.navigateTo("university_management.action_fee_payment"); }
+
+    openFeeCollectionMonth() {
+        try {
+            const today = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const monthStartStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-01`;
+            const monthName = today.toLocaleString('en-IN', { month: 'long', year: 'numeric' });
+
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Fee Collection — ${monthName}`,
+                res_model: 'fee.payment',
+                view_mode: 'kanban,list,form',
+                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                domain: [
+                    ['state', 'in', ['paid', 'partial']],
+                    ['payment_date', '>=', monthStartStr],
+                ],
+                context: { search_default_this_month: 1 },
+            });
+        } catch (e) {
+            console.warn('openFeeCollectionMonth failed:', e);
+        }
+    }
+
+    openFeeCollectionYear() {
+        try {
+            const today = new Date();
+            const yearStartStr = `${today.getFullYear()}-01-01`;
+
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Fee Collection — Year ${today.getFullYear()}`,
+                res_model: 'fee.payment',
+                view_mode: 'kanban,list,form',
+                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                domain: [
+                    ['state', 'in', ['paid', 'partial']],
+                    ['payment_date', '>=', yearStartStr],
+                ],
+            });
+        } catch (e) {
+            console.warn('openFeeCollectionYear failed:', e);
+        }
+    }
+
+    openFeeCollectionToday() {
+        try {
+            const today = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+            const label = today.toLocaleString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            this.action.doAction({
+                type: 'ir.actions.act_window',
+                name: `Fee Collection — ${label}`,
+                res_model: 'fee.payment',
+                view_mode: 'kanban,list,form',
+                views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+                domain: [
+                    ['state', 'in', ['paid', 'partial']],
+                    ['payment_date', '=', todayStr],
+                ],
+            });
+        } catch (e) {
+            console.warn('openFeeCollectionToday failed:', e);
+        }
+    }
+
     openFeeStructures() { this.navigateTo("university_management.action_fee_structure"); }
 
     openFeeOverdue() {

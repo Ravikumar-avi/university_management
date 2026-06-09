@@ -131,7 +131,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="uni-kpi-card uni-kpi-red" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-red" t-on-click="openFeeCollectionMonth">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-money"/>
                     </div>
@@ -501,7 +501,7 @@
             <!-- ═══════════════════════════════════════════════════════ -->
             <div class="uni-kpi-row">
                 <!-- Total Collected (Year) -->
-                <div class="uni-kpi-card uni-kpi-green" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-green" t-on-click="openFeeCollectionYear">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-check-circle"/>
                     </div>
@@ -516,7 +516,7 @@
                     </div>
                 </div>
                 <!-- This Month -->
-                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-blue" t-on-click="openFeeCollectionMonth">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-money"/>
                     </div>
@@ -532,7 +532,7 @@
                     </div>
                 </div>
                 <!-- Today's Collection  (PDF Finance Dashboard – "Today's Fee Collection") -->
-                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openFeePayments">
+                <div class="uni-kpi-card uni-kpi-teal" t-on-click="openFeeCollectionToday">
                     <div class="uni-kpi-icon">
                         <i class="fa fa-calendar-check-o"/>
                     </div>
