@@ -563,8 +563,8 @@ const UniversityCharts = {
         this._destroy(id);
         const ctx = canvas.getContext('2d');
 
-        const occupied = hostel.occupied_rooms || 0;
-        const vacant   = Math.max(0, (hostel.total_rooms || 0) - occupied);
+        const occupied = hostel.occupied_beds || 0;
+        const vacant   = Math.max(0, (hostel.total_beds || hostel.total_rooms || 0) - occupied);
         const sliceKeys = ['occupied', 'vacant'];
 
         this.instances[id] = new Chart(ctx, {
@@ -818,7 +818,7 @@ const UniversityCharts = {
         const ctx = canvas.getContext('2d');
 
         const total    = hostel.total_rooms    || 0;
-        const occupied = hostel.occupied_rooms || 0;
+        const occupied = hostel.occupied_beds || 0;
         const vacant   = Math.max(0, total - occupied);
         const barKeys  = ['total', 'occupied', 'vacant'];
 

@@ -895,7 +895,7 @@
                     </div>
                     <div class="uni-kpi-info">
                         <div class="uni-kpi-label">Occupied Rooms</div>
-                        <div class="uni-kpi-value" t-esc="state.hostel.occupied_rooms || 0"/>
+                        <div class="uni-kpi-value" t-esc="state.hostel.occupied_beds || 0"/>
                     </div>
                 </div>
                 <div class="uni-kpi-card uni-kpi-orange" t-on-click="openHostelComplaints">

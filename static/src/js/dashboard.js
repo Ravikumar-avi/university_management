@@ -78,7 +78,7 @@ class UniversityDashboard extends Component {
             },
             hostel: {
                 total_rooms: 0,
-                occupied_rooms: 0,
+                occupied_beds: 0,
                 pending_complaints: 0,
                 occupancy_rate: 0,
             },
