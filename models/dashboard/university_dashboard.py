@@ -325,7 +325,7 @@ class UniversityDashboard(models.TransientModel):
         new_this_year = 0
         pending_admissions = 0
         try:
-            total_active = env['student.student'].search_count(self._student_active_domain())
+            total_active = env['student.student'].search_count([('state', '=', 'enrolled')])
             new_this_year = env['student.admission'].search_count([
                 ('state', 'in', ['approved', 'admitted']),
                 ('application_date', '>=', year_start.strftime('%Y-%m-%d')),
@@ -355,7 +355,8 @@ class UniversityDashboard(models.TransientModel):
         program_distribution = []
         try:
             programs = env['university.program'].search([])
-            total = max(total_active, 1)
+            all_active_count = env['student.student'].search_count(self._student_active_domain())
+            total = max(all_active_count, 1)
             for prog in programs:
                 count = env['student.student'].search_count(
                     [('program_id', '=', prog.id)] + self._student_active_domain()
