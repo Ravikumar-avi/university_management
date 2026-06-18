@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
+from markupsafe import Markup
 import qrcode
 import base64
 from io import BytesIO
@@ -145,11 +146,128 @@ class ExaminationHallTicket(models.Model):
         self.write({'state': 'draft'})
 
     def _send_hall_ticket(self):
-        """Send hall ticket via email"""
-        template = self.env.ref('university_management.email_template_hall_ticket',
-                                raise_if_not_found=False)
-        if template:
-            template.send_mail(self.id, force_send=True)
+        """Send hall ticket via email by building body directly in Python."""
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        recipient_email = self.student_id.email
+        if not recipient_email:
+            _logger.warning(
+                "No recipient email found for hall ticket %s. Skipping email.", self.name
+            )
+            return
+
+        student_name = self.student_id.name or ''
+        exam_name = self.examination_id.name or ''
+        hall_ticket_number = self.name or ''
+        reg_number = self.student_id.registration_number or ''
+        academic_year = self.examination_id.academic_year_id.name if self.examination_id.academic_year_id else ''
+        semester = self.examination_id.semester_id.name if self.examination_id.semester_id else ''
+        start_date = str(self.examination_id.start_date) if self.examination_id.start_date else 'N/A'
+        end_date = str(self.examination_id.end_date) if self.examination_id.end_date else 'N/A'
+        company_name = self.examination_id.company_id.name if self.examination_id.company_id else self.env.company.name
+        email_from = (
+                (self.examination_id.company_id.email if self.examination_id.company_id else False)
+                or self.env.company.email
+                or self.env.user.email
+                or self.env['ir.config_parameter'].sudo().get_param('mail.default.from')
+                or False
+        )
+
+        if not email_from:
+            _logger.warning(
+                "No sender email configured for hall ticket %s. Skipping email.", self.name
+            )
+            return
+        portal_url = self.get_portal_url()
+
+        body_html = """
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #2196F3; color: white; padding: 20px; text-align: center;">
+            <h2 style="margin: 0;">{company_name}</h2>
+            <h3 style="margin: 10px 0 0 0;">Examination Hall Ticket</h3>
+        </div>
+        <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
+            <p>Dear <strong>{student_name}</strong>,</p>
+            <p>Your hall ticket for <strong>{exam_name}</strong> has been generated.</p>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h4 style="margin-top: 0;">Hall Ticket Details:</h4>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Hall Ticket Number:</strong></td>
+                        <td style="padding: 5px 0;">{hall_ticket_number}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Student Name:</strong></td>
+                        <td style="padding: 5px 0;">{student_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Registration Number:</strong></td>
+                        <td style="padding: 5px 0;">{reg_number}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Examination:</strong></td>
+                        <td style="padding: 5px 0;">{exam_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Academic Year:</strong></td>
+                        <td style="padding: 5px 0;">{academic_year}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Semester:</strong></td>
+                        <td style="padding: 5px 0;">{semester}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Exam Period:</strong></td>
+                        <td style="padding: 5px 0;">{start_date} to {end_date}</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{portal_url}" style="background: #2196F3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Download Hall Ticket
+                </a>
+            </div>
+            <div style="background: #FFF3E0; border-left: 4px solid #FF9800; padding: 15px; margin: 20px 0;">
+                <h4 style="margin-top: 0; color: #FF9800;">Important Instructions:</h4>
+                <ul style="margin-bottom: 0;">
+                    <li>Carry this hall ticket and a valid photo ID to the exam center</li>
+                    <li>Report to the exam center 30 minutes before the scheduled time</li>
+                    <li>Follow all examination rules and regulations</li>
+                    <li>Mobile phones and electronic devices are not allowed</li>
+                </ul>
+            </div>
+            <p>If you have any questions, please contact the examination department.</p>
+            <p>Best regards,<br/>
+            <strong>Examination Department</strong><br/>
+            {company_name}</p>
+        </div>
+        <div style="background: #f9f9f9; padding: 15px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd;">
+            <p style="margin: 0;">This is an automated email. Please do not reply to this message.</p>
+        </div>
+    </div>
+    """.format(
+            student_name=student_name,
+            exam_name=exam_name,
+            hall_ticket_number=hall_ticket_number,
+            reg_number=reg_number,
+            academic_year=academic_year,
+            semester=semester,
+            start_date=start_date,
+            end_date=end_date,
+            company_name=company_name,
+            portal_url=portal_url,
+        )
+
+        mail_values = {
+            'subject': 'Hall Ticket for %s - %s' % (exam_name, student_name),
+            'email_from': email_from,
+            'email_to': recipient_email,
+            'body_html': body_html,
+            'auto_delete': True,
+        }
+        mail = self.env['mail.mail'].sudo().create(mail_values)
+        mail.send()
 
     @api.model
     def _check_eligibility(self, student_id, examination_id):
