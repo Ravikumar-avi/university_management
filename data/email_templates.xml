@@ -106,60 +106,60 @@
         <record id="email_template_hall_ticket" model="mail.template">
             <field name="name">Hall Ticket Issued</field>
             <field name="model_id" ref="model_examination_hall_ticket"/>
-            <field name="email_from">${object.examination_id.company_id.email or ''}</field>
-            <field name="email_to">${object.student_id.email}</field>
-            <field name="partner_to">${object.student_id.partner_id.id}</field>
-            <field name="subject">Hall Ticket for ${object.examination_id.name} - ${object.student_id.name}</field>
-            <field name="body_html"><![CDATA[
+            <field name="email_from">{{ (object.examination_id.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.student_id.email }}</field>
+            <field name="partner_to">{{ object.student_id.partner_id.id }}</field>
+            <field name="subject">Hall Ticket for {{ object.examination_id.name }} - {{ object.student_id.name }}</field>
+            <field name="body_html" type="html">
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <div style="background: #2196F3; color: white; padding: 20px; text-align: center;">
-                        <h2 style="margin: 0;">${object.examination_id.company_id.name or 'University'}</h2>
+                        <h2 style="margin: 0;">{{ object.examination_id.company_id.name }}</h2>
                         <h3 style="margin: 10px 0 0 0;">Examination Hall Ticket</h3>
                     </div>
 
                     <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
-                        <p>Dear <strong>${object.student_id.name}</strong>,</p>
+                        <p>Dear <strong>{{ object.student_id.name }}</strong>,</p>
 
-                        <p>Your hall ticket for <strong>${object.examination_id.name}</strong> has been generated.</p>
+                        <p>Your hall ticket for <strong>{{ object.examination_id.name }}</strong> has been generated.</p>
 
                         <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
                             <h4 style="margin-top: 0;">Hall Ticket Details:</h4>
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Hall Ticket Number:</strong></td>
-                                    <td style="padding: 5px 0;">${object.name}</td>
+                                    <td style="padding: 5px 0;">{{ object.name }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Student Name:</strong></td>
-                                    <td style="padding: 5px 0;">${object.student_id.name}</td>
+                                    <td style="padding: 5px 0;">{{ object.student_id.name }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Registration Number:</strong></td>
-                                    <td style="padding: 5px 0;">${object.student_id.registration_number}</td>
+                                    <td style="padding: 5px 0;">{{ object.student_id.registration_number }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Examination:</strong></td>
-                                    <td style="padding: 5px 0;">${object.examination_id.name}</td>
+                                    <td style="padding: 5px 0;">{{ object.examination_id.name }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Academic Year:</strong></td>
-                                    <td style="padding: 5px 0;">${object.examination_id.academic_year_id.name}</td>
+                                    <td style="padding: 5px 0;">{{ object.examination_id.academic_year_id.name }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Semester:</strong></td>
-                                    <td style="padding: 5px 0;">${object.examination_id.semester_id.name}</td>
+                                    <td style="padding: 5px 0;">{{ object.examination_id.semester_id.name }}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 5px 0;"><strong>Exam Period:</strong></td>
                                     <td style="padding: 5px 0;">
-                                        ${object.examination_id.start_date} to ${object.examination_id.end_date}
+                                        {{ object.examination_id.start_date }} to {{ object.examination_id.end_date }}
                                     </td>
                                 </tr>
                             </table>
                         </div>
 
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="${object.get_portal_url()}"
+                            <a href="{{ object.get_portal_url() }}"
                                style="background: #2196F3; color: white; padding: 12px 24px;
                                       text-decoration: none; border-radius: 5px; font-weight: bold;">
                                 Download Hall Ticket
@@ -178,9 +178,9 @@
 
                         <p>If you have any questions, please contact the examination department.</p>
 
-                        <p>Best regards,<br>
-                        <strong>Examination Department</strong><br>
-                        ${object.examination_id.company_id.name or 'University'}</p>
+                        <p>Best regards,<br/>
+                        <strong>Examination Department</strong><br/>
+                        {{ object.examination_id.company_id.name }}</p>
                     </div>
 
                     <div style="background: #f9f9f9; padding: 15px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd;">
@@ -189,7 +189,7 @@
                         </p>
                     </div>
                 </div>
-            ]]></field>
+            </field>
         </record>
 
         <!-- 4. Result Published -->
