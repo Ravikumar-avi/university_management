@@ -72,6 +72,10 @@ class Examination(models.Model):
     # Instructions
     instructions = fields.Html(string='Exam Instructions')
 
+    # Company
+    company_id = fields.Many2one('res.company', string='Company',
+                                 default=lambda self: self.env.company, index=True)
+
     # Status
     state = fields.Selection([
         ('draft', 'Draft'),
