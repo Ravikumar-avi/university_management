@@ -202,8 +202,105 @@ class ExaminationResult(models.Model):
         self.write({'state': 'draft'})
 
     def _send_result_notification(self):
-        """Send result notification to student"""
-        template = self.env.ref('university_management.email_template_result_notification',
-                                raise_if_not_found=False)
-        if template:
-            template.send_mail(self.id, force_send=True)
+        """Send result notification to student via email."""
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        recipient_email = self.student_id.email
+        if not recipient_email:
+            _logger.warning("No email for student on result %s. Skipping.", self.name)
+            return
+
+        student_name = self.student_id.name or ''
+        exam_name = self.examination_id.name or ''
+        subject_name = self.subject_id.name if self.subject_id else ''
+        total_marks = self.total_marks or 0
+        max_marks = self.max_marks or 100
+        percentage = '{:.2f}'.format(self.percentage) if self.percentage else '0.00'
+        grade = self.grade_letter or 'N/A'
+        result_status = 'PASS' if self.is_pass else 'FAIL'
+        result_color = '#4CAF50' if self.is_pass else '#F44336'
+        academic_year = self.academic_year_id.name if self.academic_year_id else ''
+        semester = self.semester_id.name if self.semester_id else ''
+        company_name = self.env.company.name
+        email_from = (
+                self.env.company.email
+                or self.env.user.email
+                or self.env['ir.config_parameter'].sudo().get_param('mail.default.from')
+                or False
+        )
+
+        if not email_from:
+            _logger.warning("No sender email configured for result %s. Skipping.", self.name)
+            return
+
+        body_html = """
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #4CAF50; color: white; padding: 20px; text-align: center;">
+            <h1>Examination Results Published</h1>
+        </div>
+        <div style="padding: 20px; background: #f9f9f9;">
+            <p>Dear <strong>{student_name}</strong>,</p>
+            <p>Your examination results for <strong>{exam_name}</strong> have been published.</p>
+            <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center;">
+                <h2 style="color: {result_color}; margin: 0;">{result_status}</h2>
+                <p style="margin: 5px 0;">Grade: <strong>{grade}</strong></p>
+            </div>
+            <div style="background: white; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Subject:</strong></td>
+                        <td style="padding: 5px 0;">{subject_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Academic Year:</strong></td>
+                        <td style="padding: 5px 0;">{academic_year}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Semester:</strong></td>
+                        <td style="padding: 5px 0;">{semester}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Marks Obtained:</strong></td>
+                        <td style="padding: 5px 0;">{total_marks} / {max_marks}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Percentage:</strong></td>
+                        <td style="padding: 5px 0;">{percentage}%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0;"><strong>Grade:</strong></td>
+                        <td style="padding: 5px 0;">{grade}</td>
+                    </tr>
+                </table>
+            </div>
+            <p>You can download your marksheet from the student portal.</p>
+            <p>Best Regards,<br/>
+            <strong>Examination Controller</strong><br/>
+            {company_name}</p>
+        </div>
+    </div>
+    """.format(
+            student_name=student_name,
+            exam_name=exam_name,
+            subject_name=subject_name,
+            total_marks=total_marks,
+            max_marks=max_marks,
+            percentage=percentage,
+            grade=grade,
+            result_status=result_status,
+            result_color=result_color,
+            academic_year=academic_year,
+            semester=semester,
+            company_name=company_name,
+        )
+
+        mail_values = {
+            'subject': 'Exam Results Published - %s' % exam_name,
+            'email_from': email_from,
+            'email_to': recipient_email,
+            'body_html': body_html,
+            'auto_delete': True,
+        }
+        mail = self.env['mail.mail'].sudo().create(mail_values)
+        mail.send()
