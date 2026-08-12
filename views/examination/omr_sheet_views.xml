@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- OMR Sheet — Form -->
+    <!-- ============================================================ -->
+    <record id="view_omr_sheet_form" model="ir.ui.view">
+        <field name="name">exam.omr.sheet.form</field>
+        <field name="model">exam.omr.sheet</field>
+        <field name="arch" type="xml">
+            <form string="OMR Sheet">
+                <header>
+                    <button name="action_generate_pdf" type="object"
+                            string="Generate OMR PDF" class="oe_highlight"
+                            invisible="state not in ('draft',)"/>
+                    <button name="action_download" type="object"
+                            string="Download OMR Sheet" class="oe_highlight"
+                            invisible="state not in ('generated', 'downloaded')"/>
+                    <button name="action_mark_attached" type="object"
+                            string="Mark as Attached to Booklet"
+                            invisible="state not in ('generated', 'downloaded')"/>
+                    <button name="action_reset_draft" type="object"
+                            string="Reset to Draft"
+                            invisible="state == 'draft'"
+                            confirm="Reset this OMR sheet to draft?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,generated,downloaded,attached,scanned"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Student Details">
+                            <field name="serial_number"/>
+                            <field name="student_id"/>
+                            <field name="registration_number"/>
+                            <field name="student_name"/>
+                            <field name="hall_ticket_number"/>
+                            <field name="program_id"/>
+                            <field name="department_id"/>
+                            <field name="branch_name"/>
+                        </group>
+                        <group string="Exam Details">
+                            <field name="examination_id"/>
+                            <field name="exam_month_year" placeholder="e.g., AUGUST 2026"/>
+                            <field name="exam_date"/>
+                            <field name="subject_id"/>
+                            <field name="subject_code"/>
+                            <field name="subject_name"/>
+                            <field name="omr_template_id"/>
+                        </group>
+                    </group>
+
+                    <group string="Barcode">
+                        <field name="barcode_data"/>
+                        <field name="barcode_image" widget="image" class="oe_avatar"/>
+                    </group>
+
+                    <group string="Student Photo">
+                        <field name="student_photo" widget="image" class="oe_avatar"/>
+                    </group>
+
+                    <group string="Generated PDF"
+                           invisible="not omr_pdf">
+                        <field name="omr_pdf" filename="omr_pdf_filename"/>
+                        <field name="omr_pdf_filename" invisible="1"/>
+                        <field name="download_count"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- OMR Sheet — List -->
+    <record id="view_omr_sheet_list" model="ir.ui.view">
+        <field name="name">exam.omr.sheet.list</field>
+        <field name="model">exam.omr.sheet</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="serial_number"/>
+                <field name="registration_number"/>
+                <field name="student_name"/>
+                <field name="examination_id"/>
+                <field name="subject_code"/>
+                <field name="subject_name"/>
+                <field name="omr_template_id"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state in ('generated', 'downloaded')"
+                       decoration-warning="state == 'attached'"
+                       decoration-muted="state == 'scanned'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- OMR Sheet — Search -->
+    <record id="view_omr_sheet_search" model="ir.ui.view">
+        <field name="name">exam.omr.sheet.search</field>
+        <field name="model">exam.omr.sheet</field>
+        <field name="arch" type="xml">
+            <search string="OMR Sheets">
+                <field name="serial_number"/>
+                <field name="registration_number"/>
+                <field name="student_name"/>
+                <field name="student_id"/>
+                <field name="examination_id"/>
+                <field name="subject_id"/>
+                <filter name="draft" string="Draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="generated" string="Generated"
+                        domain="[('state', '=', 'generated')]"/>
+                <filter name="attached" string="Attached"
+                        domain="[('state', '=', 'attached')]"/>
+                <filter name="scanned" string="Scanned"
+                        domain="[('state', '=', 'scanned')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_exam" string="Examination"
+                            context="{'group_by': 'examination_id'}"/>
+                    <filter name="group_subject" string="Subject"
+                            context="{'group_by': 'subject_id'}"/>
+                    <filter name="group_template" string="Template"
+                            context="{'group_by': 'omr_template_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_omr_sheet" model="ir.actions.act_window">
+        <field name="name">OMR Sheets</field>
+        <field name="res_model">exam.omr.sheet</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Generate OMR Sheets
+            </p>
+            <p>Each student gets an OMR sheet with a barcode encoding their registration number and details. Download and attach to the answer booklet.</p>
+        </field>
+    </record>
+
+</odoo>

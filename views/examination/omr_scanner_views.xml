@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- OMR Scanner — Form -->
+    <!-- ============================================================ -->
+    <record id="view_omr_scanner_form" model="ir.ui.view">
+        <field name="name">exam.omr.scanner.form</field>
+        <field name="model">exam.omr.scanner</field>
+        <field name="arch" type="xml">
+            <form string="OMR Scanner">
+                <header>
+                    <button name="action_process_all" type="object"
+                            string="Process All (Barcode + OCR + Confirm)"
+                            class="oe_highlight"
+                            invisible="state not in ('draft',)"/>
+                    <button name="action_decode_barcode" type="object"
+                            string="1. Decode Barcode"
+                            invisible="state not in ('draft',)"/>
+                    <button name="action_detect_marks" type="object"
+                            string="2. Detect Marks (OCR)"
+                            invisible="state not in ('decoded',)"/>
+                    <button name="action_confirm_marks" type="object"
+                            string="3. Confirm &amp; Update Result"
+                            class="oe_highlight"
+                            invisible="state not in ('ocr_done',)"
+                            confirm="This will update the student's result record with the marks. Continue?"/>
+                    <button name="action_reset_draft" type="object"
+                            string="Reset"
+                            invisible="state == 'draft'"
+                            confirm="Reset this scan record?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,decoded,ocr_done,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!-- Error banner -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not error_message">
+                        <field name="error_message" readonly="1"/>
+                    </div>
+
+                    <group>
+                        <group string="Upload Scanned Sheet">
+                            <field name="scanned_file" filename="scanned_filename"
+                                   widget="binary"/>
+                            <field name="scanned_filename" invisible="1"/>
+                            <field name="scan_date"/>
+                            <field name="valuation_part"/>
+                        </group>
+                        <group string="Barcode Decoded Info">
+                            <field name="barcode_raw"/>
+                            <field name="decoded_registration"/>
+                            <field name="decoded_student_name"/>
+                            <field name="decoded_subject_code"/>
+                            <field name="decoded_serial"/>
+                            <field name="decoded_hall_ticket"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Linked Records">
+                            <field name="student_id"/>
+                            <field name="examination_id"/>
+                            <field name="subject_id"/>
+                            <field name="omr_sheet_id"/>
+                            <field name="result_id"/>
+                        </group>
+                        <group string="Detected Marks">
+                            <field name="detected_grand_total"/>
+                            <field name="grand_total"
+                                   invisible="state not in ('ocr_done',)"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Question-wise Marks" name="marks_detail">
+                            <group>
+                                <field name="question_marks_display"
+                                       placeholder="Q1a=5, Q1b=3, Q2a=7 …"
+                                       help="Edit these values if OCR detected incorrectly."/>
+                            </group>
+                            <group string="Raw OCR Data (JSON)"
+                                   invisible="not detected_marks_json">
+                                <field name="detected_marks_json" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- OMR Scanner — List -->
+    <record id="view_omr_scanner_list" model="ir.ui.view">
+        <field name="name">exam.omr.scanner.list</field>
+        <field name="model">exam.omr.scanner</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="scan_date"/>
+                <field name="decoded_registration"/>
+                <field name="decoded_student_name"/>
+                <field name="decoded_subject_code"/>
+                <field name="grand_total"/>
+                <field name="valuation_part"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state in ('decoded', 'ocr_done')"
+                       decoration-success="state == 'confirmed'"
+                       decoration-danger="state == 'failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- OMR Scanner — Search -->
+    <record id="view_omr_scanner_search" model="ir.ui.view">
+        <field name="name">exam.omr.scanner.search</field>
+        <field name="model">exam.omr.scanner</field>
+        <field name="arch" type="xml">
+            <search string="OMR Scans">
+                <field name="name"/>
+                <field name="decoded_registration"/>
+                <field name="decoded_student_name"/>
+                <field name="student_id"/>
+                <field name="examination_id"/>
+                <filter name="draft" string="Pending" domain="[('state', '=', 'draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_exam" string="Examination"
+                            context="{'group_by': 'examination_id'}"/>
+                    <filter name="group_subject" string="Subject"
+                            context="{'group_by': 'subject_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_omr_scanner" model="ir.actions.act_window">
+        <field name="name">OMR Sheet Scanner</field>
+        <field name="res_model">exam.omr.scanner</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Scan a Corrected OMR Sheet
+            </p>
+            <p>Upload the scanned image of a corrected OMR sheet. The system will read the barcode to identify the student and use OCR to detect handwritten marks, then update the student's result.</p>
+        </field>
+    </record>
+
+</odoo>

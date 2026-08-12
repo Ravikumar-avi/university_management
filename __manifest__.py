@@ -134,6 +134,11 @@
         'views/examination/mcq_question_bank_views.xml',
         'views/examination/online_exam_views.xml',
         'views/examination/online_exam_attempt_views.xml',
+        'views/examination/question_bank_theory_views.xml',
+        'views/examination/question_paper_views.xml',
+        'views/examination/omr_sheet_template_views.xml',
+        'views/examination/omr_sheet_views.xml',
+        'views/examination/omr_scanner_views.xml',
 
         # Views - Student
         'views/student/student_attendance_views.xml',
@@ -289,6 +294,8 @@
         'wizard/result/publish_result_wizard_views.xml',
         'wizard/examination/auto_evaluate_wizard_views.xml',
         'wizard/examination/generate_seating_wizard_views.xml',
+        'wizard/examination/generate_omr_sheets_wizard_views.xml',
+        'wizard/examination/bulk_omr_scan_wizard_views.xml',
         'wizard/attendance/attendance_report_wizard_views.xml',
         'wizard/attendance/bulk_attendance_wizard_views.xml',
         'wizard/placements/placement_report_wizard_views.xml',
@@ -376,6 +383,10 @@
         'static/description/banner.png',
         'static/description/icon.png',
     ],
+
+    'external_dependencies': {
+            'python': ['reportlab', 'Pillow', 'pyzbar', 'pytesseract', 'qrcode'],
+        },
 
     'installable': True,
     'application': True,

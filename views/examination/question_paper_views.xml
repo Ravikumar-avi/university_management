@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Question Paper — Form -->
+    <!-- ============================================================ -->
+    <record id="view_question_paper_form" model="ir.ui.view">
+        <field name="name">exam.question.paper.form</field>
+        <field name="model">exam.question.paper</field>
+        <field name="arch" type="xml">
+            <form string="Question Paper">
+                <header>
+                    <button name="action_generate_paper" type="object"
+                            string="Auto-Generate Paper" class="oe_highlight"
+                            invisible="state != 'draft'"
+                            confirm="This will clear existing questions and generate new ones. Continue?"/>
+                    <button name="action_approve" type="object" string="Approve"
+                            invisible="state != 'generated'" class="oe_highlight"/>
+                    <button name="action_lock" type="object" string="Lock / Print"
+                            invisible="state != 'approved'" class="oe_highlight"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state == 'draft'"
+                            confirm="Reset this paper to draft?"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,generated,approved,locked"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Paper Details">
+                            <field name="name" placeholder="e.g., Digital Image Processing — Final"/>
+                            <field name="code"/>
+                            <field name="subject_id"/>
+                            <field name="department_id"/>
+                            <field name="semester_id"/>
+                            <field name="regulation"/>
+                            <field name="examination_id"/>
+                        </group>
+                        <group string="Configuration">
+                            <field name="paper_pattern"/>
+                            <field name="total_marks"/>
+                            <field name="duration_minutes"/>
+                            <field name="number_of_questions"
+                                   invisible="paper_pattern != 'custom'"/>
+                        </group>
+                    </group>
+
+                    <group string="R20 Pattern Config"
+                           invisible="paper_pattern != 'r20'">
+                        <group>
+                            <field name="part_a_questions"/>
+                            <field name="part_a_marks_each"/>
+                        </group>
+                        <group>
+                            <field name="part_b_questions"/>
+                            <field name="part_b_marks_each"/>
+                        </group>
+                    </group>
+
+                    <group string="Source Question Banks">
+                        <field name="bank_ids" widget="many2many_tags" nolabel="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Generated Questions" name="questions">
+                            <field name="paper_question_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="part"/>
+                                    <field name="question_number"/>
+                                    <field name="sub_part"/>
+                                    <field name="question_text"/>
+                                    <field name="marks"/>
+                                    <field name="unit"/>
+                                    <field name="co_level"/>
+                                    <field name="rbt_level"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Instructions" name="instructions">
+                            <field name="instructions"/>
+                        </page>
+                        <page string="PDF" name="pdf">
+                            <group>
+                                <field name="paper_pdf" filename="paper_pdf_filename"/>
+                                <field name="paper_pdf_filename" invisible="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Question Paper — List -->
+    <record id="view_question_paper_list" model="ir.ui.view">
+        <field name="name">exam.question.paper.list</field>
+        <field name="model">exam.question.paper</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="subject_id"/>
+                <field name="paper_pattern"/>
+                <field name="total_marks"/>
+                <field name="examination_id"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'generated'"
+                       decoration-success="state in ('approved', 'locked')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Question Paper — Search -->
+    <record id="view_question_paper_search" model="ir.ui.view">
+        <field name="name">exam.question.paper.search</field>
+        <field name="model">exam.question.paper</field>
+        <field name="arch" type="xml">
+            <search string="Question Papers">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="subject_id"/>
+                <field name="examination_id"/>
+                <filter name="approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_subject" string="Subject"
+                            context="{'group_by': 'subject_id'}"/>
+                    <filter name="group_pattern" string="Pattern"
+                            context="{'group_by': 'paper_pattern'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_question_paper" model="ir.actions.act_window">
+        <field name="name">Question Papers</field>
+        <field name="res_model">exam.question.paper</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Question Paper
+            </p>
+            <p>Auto-generate question papers from theory question banks with unit coverage and marks distribution.</p>
+        </field>
+    </record>
+
+</odoo>

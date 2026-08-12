@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- OMR Sheet Template — Form -->
+    <!-- ============================================================ -->
+    <record id="view_omr_template_form" model="ir.ui.view">
+        <field name="name">exam.omr.template.form</field>
+        <field name="model">exam.omr.template</field>
+        <field name="arch" type="xml">
+            <form string="OMR Sheet Template">
+                <sheet>
+                    <group>
+                        <group string="Template Info">
+                            <field name="name" placeholder="e.g., R22 M.Tech Template"/>
+                            <field name="code"/>
+                            <field name="format_type"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Institution Details">
+                            <field name="institution_name"/>
+                            <field name="institution_subtitle"/>
+                            <field name="valuation_copies"/>
+                        </group>
+                    </group>
+
+                    <!-- R22 Settings -->
+                    <group string="R22 Format Settings"
+                           invisible="format_type != 'r22'">
+                        <group>
+                            <field name="r22_total_questions"/>
+                            <field name="r22_sub_parts"/>
+                        </group>
+                    </group>
+
+                    <!-- R20 Settings -->
+                    <group string="R20 Format Settings"
+                           invisible="format_type != 'r20'">
+                        <group string="Part-A (Objective)">
+                            <field name="r20_part_a_columns"/>
+                            <field name="r20_part_a_questions"/>
+                        </group>
+                        <group string="Part-B (Descriptive)">
+                            <field name="r20_part_b_questions"/>
+                            <field name="r20_part_b_sub_parts"/>
+                        </group>
+                    </group>
+
+                    <!-- Custom Settings -->
+                    <group string="Custom Format Settings"
+                           invisible="format_type != 'custom'">
+                        <group>
+                            <field name="custom_total_questions"/>
+                            <field name="custom_sub_parts"/>
+                        </group>
+                        <group>
+                            <field name="custom_has_part_a"/>
+                            <field name="custom_part_a_columns"
+                                   invisible="not custom_has_part_a"/>
+                        </group>
+                    </group>
+
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- OMR Template — List -->
+    <record id="view_omr_template_list" model="ir.ui.view">
+        <field name="name">exam.omr.template.list</field>
+        <field name="model">exam.omr.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="format_type"/>
+                <field name="valuation_copies"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_omr_template" model="ir.actions.act_window">
+        <field name="name">OMR Sheet Templates</field>
+        <field name="res_model">exam.omr.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create an OMR Sheet Template
+            </p>
+            <p>Configure the OMR grid layout — R20 (Part A + Part B), R22 (10 questions), or custom format.</p>
+        </field>
+    </record>
+
+</odoo>
