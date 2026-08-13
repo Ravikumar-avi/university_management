@@ -40,6 +40,14 @@ class OMRSheetTemplate(models.Model):
         string='Subtitle',
         default='An Autonomous Institution',
     )
+    institution_accreditation = fields.Text(
+        string='Accreditation / Address Lines',
+        default=('Approved by AICTE & Permanently Affiliated to JNTUGV, Vizianagaram\n'
+                 'Accredited by NAAC with "A" Grade\n'
+                 'Jonnada (Village), Denkada (Mandal), Vizianagaram Dist. \u2013 535 005'),
+        help='One line per row — printed under the subtitle, e.g. AICTE '
+             'approval, affiliation, NAAC grade, and campus address.',
+    )
 
     # ------------------------------------------------------------------
     # R22 format settings
