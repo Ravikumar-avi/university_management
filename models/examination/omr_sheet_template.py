@@ -29,7 +29,7 @@ class OMRSheetTemplate(models.Model):
         ('r20', 'R20 — Part-A (Objective) + Part-B (Descriptive)'),
         ('r22', 'R22 — 10 Questions with sub-parts (a,b,c,d)'),
         ('custom', 'Custom'),
-    ], string='Format Type', required=True, default='r22', tracking=True)
+    ], string='Format Type', required=True, default='r20', tracking=True)
 
     # Institution details printed on OMR
     institution_name = fields.Char(
