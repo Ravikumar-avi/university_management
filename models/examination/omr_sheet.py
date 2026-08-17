@@ -205,13 +205,46 @@ class OMRSheet(models.Model):
             # Hide the template's placeholder word without disturbing its border.
             c.setFillColor(colors.white)
             c.rect(x + 1, self.PAGE_H - top_y - h + 1, w - 2, h - 2, fill=1, stroke=0)
-            probe = code128.Code128(str(self.barcode_data), barWidth=1, barHeight=h - 4, humanReadable=False)
+            # quiet=False: Code128's default quiet-zone margin is a fixed
+            # 0.25in per side, which would blow out any box narrower than
+            # ~0.5in (e.g. the small left-margin stub barcode). Disabling
+            # it lets the bars scale to fill the box we actually have.
+            probe = code128.Code128(str(self.barcode_data), barWidth=1, barHeight=h - 4, humanReadable=False, quiet=False)
             bw = (w - 10) / probe.width if probe.width else 1
-            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=h - 4, humanReadable=False)
+            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=h - 4, humanReadable=False, quiet=False)
             c.setFillColor(colors.black)
             obj.drawOn(c, x + 5, self.PAGE_H - top_y - h + 2)
         except Exception as exc:
             _logger.warning('Barcode render failed: %s', exc)
+
+    def _draw_barcode_vertical(self, c, x_center, top_start, length, thickness, box_x0=None, box_x1=None, box_top0=None, box_top1=None):
+        # Vertical barcode for the rotated left-margin stub: reads
+        # top-to-bottom (bars horizontal), matching the orientation of the
+        # "Examination:/Sub Code:/Sub Name:" labels above it.
+        # box_x0/x1/top0/top1, when given, are the exact coordinates of the
+        # template's outer stub box; we whiteout that whole interior (which
+        # also erases the smaller placeholder box nested inside it) rather
+        # than just the area under the bars, so nothing is left peeking out.
+        if not self.barcode_data:
+            return
+        try:
+            c.setFillColor(colors.white)
+            if box_x0 is not None:
+                c.rect(box_x0 + 1, self.PAGE_H - box_top1 + 1, (box_x1 - box_x0) - 2, (box_top1 - box_top0) - 2, fill=1, stroke=0)
+            else:
+                c.rect(x_center - thickness / 2 - 1, self.PAGE_H - top_start - length - 1,
+                       thickness + 2, length + 2, fill=1, stroke=0)
+            c.setFillColor(colors.black)
+            probe = code128.Code128(str(self.barcode_data), barWidth=1, barHeight=thickness, humanReadable=False, quiet=False)
+            bw = length / probe.width if probe.width else 1
+            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=thickness, humanReadable=False, quiet=False)
+            c.saveState()
+            c.translate(x_center - thickness / 2, self.PAGE_H - top_start)
+            c.rotate(-90)
+            obj.drawOn(c, 0, 0)
+            c.restoreState()
+        except Exception as exc:
+            _logger.warning('Vertical barcode render failed: %s', exc)
 
     def _draw_photo(self, c, x, top_y, w, h):
         # White out the placeholder text only; preserve the original border.
@@ -250,6 +283,15 @@ class OMRSheet(models.Model):
         self._draw_text_rotated(c, 66, 208, self.examination_id.name, 4.5, max_width=170)
         self._draw_text_rotated(c, 74, 212, self.subject_code, 4.5, max_width=170)
         self._draw_text_rotated(c, 86, 211, self.subject_name, 4.5, max_width=170)
+
+        # Left-margin stub also carries a barcode, printed vertically
+        # (bars horizontal, reading top-to-bottom) to match the rotated
+        # labels above it, sized to exactly fill the template's stub box
+        # (which also contains a smaller nested placeholder box we erase).
+        self._draw_barcode_vertical(
+            c, x_center=78.35, top_start=256.156, length=123.141, thickness=20.219,
+            box_x0=66.238, box_x1=90.457, box_top0=253.156, box_top1=382.297,
+        )
 
     def _draw_section_dynamic(self, c, barcode_top, value_tops):
         # Exact coordinates taken from the vector PDF generated from the
