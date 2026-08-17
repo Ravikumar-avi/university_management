@@ -170,6 +170,27 @@ class OMRSheet(models.Model):
                 s = s[:-1] + '…'
         c.drawString(x, self.PAGE_H - top_y - size + 1, s)
 
+    def _draw_text_rotated(self, c, x, top_y, text, size=4.5, max_width=None):
+        # Draws text rotated 90° (reading bottom-to-top), anchored so it
+        # continues on the same vertical line as the pre-printed stub
+        # labels ("Examination:", "Sub Code:", "Sub Name:") on the far
+        # left margin of the template.
+        if not text:
+            return
+        font = 'Helvetica'
+        s = str(text)
+        if max_width:
+            while len(s) > 1 and c.stringWidth(s, font, size) > max_width:
+                s = s[:-1]
+            if s != str(text):
+                s = s[:-1] + '…'
+        c.saveState()
+        c.translate(x, self.PAGE_H - top_y)
+        c.rotate(90)
+        c.setFont(font, size)
+        c.drawString(0, 0, s)
+        c.restoreState()
+
     def _draw_center(self, c, x, top_y, text, size=6.0, bold=False):
         if not text:
             return
@@ -222,6 +243,13 @@ class OMRSheet(models.Model):
         tops = [104.8, 116.9, 129.0, 143.2, 157.3, 171.4, 185.5, 199.7]
         for top, val in zip(tops, vals):
             self._draw_text(c, 143.5, top, val, 5.8, max_width=128)
+
+        # Left-margin stub: "Examination:", "Sub Code:", "Sub Name:" are
+        # pre-printed rotated labels; continue each one with its value on
+        # the same vertical line.
+        self._draw_text_rotated(c, 66, 208, self.examination_id.name, 4.5, max_width=170)
+        self._draw_text_rotated(c, 74, 212, self.subject_code, 4.5, max_width=170)
+        self._draw_text_rotated(c, 86, 211, self.subject_name, 4.5, max_width=170)
 
     def _draw_section_dynamic(self, c, barcode_top, value_tops):
         # Exact coordinates taken from the vector PDF generated from the
