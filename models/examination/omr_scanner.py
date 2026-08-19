@@ -224,6 +224,82 @@ class OMRScanner(models.Model):
 
     company_id = fields.Many2one('res.company', default=lambda s: s.env.company)
 
+    # Plain reference to the ir.attachment wrapping the originally
+    # uploaded sheet — not shown in any view. Not currently used by any
+    # action; kept as a stable pointer to "the real attachment" in case
+    # it's useful later.
+    main_sheet_attachment_id = fields.Many2one('ir.attachment', copy=False)
+
+    # ==================================================================
+    # UPLOAD → CHATTER PREVIEW
+    # ==================================================================
+    # Post the actual uploaded sheet into the chatter as soon as it's
+    # saved, rather than only ever showing generic status text. Covers
+    # both "new record created with a file already attached" and
+    # "existing record's file replaced" (write()).
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec, vals in zip(records, vals_list):
+            if vals.get('scanned_file'):
+                rec._post_uploaded_sheet_preview()
+        return records
+
+    def write(self, vals):
+        result = super().write(vals)
+        if vals.get('scanned_file'):
+            for rec in self:
+                rec._post_uploaded_sheet_preview()
+        return result
+
+    def _post_uploaded_sheet_preview(self):
+        """Set the just-uploaded file as the record's main attachment, so
+        Odoo's built-in o_attachment_preview panel (the split-screen
+        PDF/image viewer next to the form — see hr.payslip for the same
+        pattern) shows the actual scanned sheet.
+
+        Deliberately does NOT also post a resized PNG copy to the
+        chatter: o_attachment_preview lets you cycle between every
+        attachment linked to the record via the small arrows at its
+        edges, so a second "preview" image just became a confusing
+        second, lower-quality thing to click through to. One real
+        attachment (the original PDF/image, full quality) is enough.
+        """
+        self.ensure_one()
+        self._set_main_attachment_from_scanned_file()
+
+    def _set_main_attachment_from_scanned_file(self):
+        """Wrap the raw uploaded file (PDF or image) as a real
+        ir.attachment and point message_main_attachment_id at it, so the
+        actual original file — barcode, photo, handwriting and all — is
+        what shows in the preview panel, not a re-generated copy.
+
+        Also remembered in main_sheet_attachment_id, a plain reference
+        (not shown in any view) to whichever attachment is the actual
+        uploaded sheet, kept in case it's useful later.
+        """
+        self.ensure_one()
+        if not self.scanned_file:
+            return
+        try:
+            data = base64.b64decode(self.scanned_file)
+            attachment_vals = {
+                'name': self.scanned_filename or f'OMR_Scan_{self.name}.pdf',
+                'datas': self.scanned_file,
+                'res_model': self._name,
+                'res_id': self.id,
+            }
+            # Odoo auto-detects mimetype from content/filename when it's
+            # not supplied — only worth overriding for the PDF case,
+            # which we can already detect confidently and cheaply.
+            if self._looks_like_pdf(data):
+                attachment_vals['mimetype'] = 'application/pdf'
+            attachment = self.env['ir.attachment'].create(attachment_vals)
+            self.message_main_attachment_id = attachment.id
+            self.main_sheet_attachment_id = attachment.id
+        except Exception as e:
+            _logger.warning('Failed to set main attachment for OMR preview panel: %s', e)
+
     # ==================================================================
     # 1. DECODE BARCODE
     # ==================================================================
@@ -318,16 +394,16 @@ class OMRScanner(models.Model):
         if self.state not in ('decoded', 'ocr_done'):
             raise UserError(_('Please decode the barcode first.'))
 
-        if not HAS_TESSERACT:
+        if not HAS_TESSERACT and not HAS_EASYOCR:
             raise UserError(_(
-                'pytesseract is not installed on the server. '
-                'Install it with: pip install pytesseract\n'
-                'Also ensure Tesseract OCR engine is installed on the OS.'
+                'No OCR engine is installed on the server (neither easyocr nor '
+                'pytesseract). Install one with: pip install easyocr'
             ))
 
         img = self._get_image()
         if img is None:
             raise UserError(_('Could not read the uploaded file.'))
+
 
         marks_data, grand_total, needs_review, review_notes, unread_cells, engine_used = self._ocr_marks_grid(img)
 
