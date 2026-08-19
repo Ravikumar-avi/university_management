@@ -85,6 +85,7 @@
         # Data
         'data/sequence.xml',
         'data/online_exam_sequences.xml',
+        'data/omr_sequences.xml',
         'data/email_templates.xml',
         'data/sms_templates.xml',
         'data/automated_actions.xml',
