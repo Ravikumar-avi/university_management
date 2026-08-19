@@ -385,7 +385,7 @@
     ],
 
     'external_dependencies': {
-            'python': ['reportlab', 'pypdf', 'Pillow', 'pyzbar', 'pytesseract', 'qrcode'],
+            'python': ['reportlab', 'pypdf', 'Pillow', 'pyzbar', 'pytesseract', 'qrcode', 'easyocr'],
         },
 
     'installable': True,
