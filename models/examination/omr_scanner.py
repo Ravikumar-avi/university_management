@@ -47,6 +47,73 @@ except Exception as e:
         'Detail: %s', e
     )
 
+# EasyOCR is a deep-learning OCR engine (CRAFT text detection + CRNN
+# recognition) and is used in preference to Tesseract for reading the
+# handwritten marks grid — Tesseract is a print-OCR engine and performs
+# poorly on handwritten digits (see _ocr_cell). Barcode reading and the
+# rest of the pipeline are unaffected; this only changes how individual
+# grid cells are read. Falls back to Tesseract automatically if EasyOCR
+# (or its ~100MB model download, fetched once on first use) isn't
+# available.
+try:
+    import warnings
+    # EasyOCR's internal DataLoader defaults to pin_memory=True, which is
+    # a GPU-only optimisation; on a CPU-only server (no accelerator)
+    # PyTorch raises a UserWarning every single time it's used — i.e.
+    # once per grid cell, dozens of times per scan. It's not an error and
+    # doesn't affect the result, just log noise, so it's silenced here
+    # specifically (not warnings globally) right before importing torch's
+    # dependents.
+    warnings.filterwarnings(
+        'ignore', message=".*pin_memory.*no accelerator is found.*", category=UserWarning)
+    import easyocr
+    import numpy as np
+    HAS_EASYOCR = True
+except Exception as e:
+    HAS_EASYOCR = False
+    _logger.warning(
+        'easyocr not available — falling back to Tesseract for handwritten '
+        'mark detection, which is noticeably less accurate on handwriting. '
+        'Install it with: pip install easyocr. Detail: %s', e
+    )
+
+_EASYOCR_READER = None
+
+
+def _get_easyocr_reader():
+    """Lazily create and cache a single easyocr.Reader for the process.
+
+    Loading the model is slow (a few seconds) and the model weights are
+    ~100MB, downloaded once on first use — so this must not be
+    re-created per cell or per scan.
+    """
+    global _EASYOCR_READER
+    if _EASYOCR_READER is None and HAS_EASYOCR:
+        try:
+            _EASYOCR_READER = easyocr.Reader(['en'], gpu=False, verbose=False)
+        except Exception as e:
+            _logger.warning('Failed to initialise easyocr.Reader: %s', e)
+            _EASYOCR_READER = False  # sentinel: don't retry every call
+    return _EASYOCR_READER or None
+
+# PyMuPDF is used to rasterize an uploaded PDF's page(s) into images so
+# that the same PIL/pyzbar/pytesseract pipeline used for JPEG/PNG scans
+# can be reused for PDF uploads. Pillow alone cannot open PDF files.
+try:
+    import fitz  # PyMuPDF
+    HAS_FITZ = True
+except Exception as e:
+    HAS_FITZ = False
+    _logger.warning(
+        'PyMuPDF (fitz) not available — PDF uploads cannot be rasterized '
+        'to an image, so OMR scans uploaded as PDF will fail to decode. '
+        'Install it with "pip install PyMuPDF". Detail: %s', e
+    )
+
+# Render resolution when rasterizing a PDF page to an image. 300 DPI keeps
+# barcode + handwritten-digit detail sharp without producing huge images.
+PDF_RENDER_DPI = 300
+
 
 class OMRScanner(models.Model):
     """
@@ -62,6 +129,14 @@ class OMRScanner(models.Model):
     _description = 'OMR Sheet Scanner (OCR)'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'scan_date desc'
+
+    # Reference page size (PDF points) that all _GRID_LAYOUT / _COLS_*
+    # coordinates below were measured against — must match exam.omr.sheet's
+    # PAGE_W/PAGE_H, since that's the exact PDF these sheets are printed
+    # from. A scanned upload is assumed to be that same page (any
+    # resolution), scaled proportionally — see _ocr_marks_grid.
+    PAGE_W_REF = 651.12
+    PAGE_H_REF = 1089.12
 
     name = fields.Char(string='Scan Reference',
                        default=lambda self: self.env['ir.sequence'].next_by_code('exam.omr.scanner') or 'NEW',
@@ -126,6 +201,27 @@ class OMRScanner(models.Model):
 
     error_message = fields.Text(string='Error / Warnings', readonly=True)
 
+    # ---- Human-review gate ----
+    # Tesseract is a print-OCR engine, not a handwriting specialist: it can
+    # (and does) confidently return a wrong digit, or silently drop a cell
+    # that clearly has ink in it. needs_review is set by _ocr_marks_grid
+    # whenever it isn't confident the detected marks are correct — e.g. a
+    # cell has ink but no digit could be read, or the grand-total cell
+    # OCR disagrees with the sum of the question-wise cells that WERE
+    # read. action_confirm_marks refuses to run while needs_review is set
+    # and reviewed_manually is not ticked, so a low-confidence OCR pass
+    # can no longer be confirmed straight through without a human looking
+    # at the sheet.
+    needs_review = fields.Boolean(string='Needs Manual Review', readonly=True)
+    review_notes = fields.Text(string='Review Notes', readonly=True,
+                               help='Specific reasons OCR confidence was low for this scan.')
+    reviewed_manually = fields.Boolean(
+        string='I have checked the flagged marks against the scanned sheet',
+        help='Tick this after visually comparing "Question-wise Marks" and '
+             '"Grand Total Marks" below against the uploaded scan, then use '
+             '3. Confirm & Update Result.',
+    )
+
     company_id = fields.Many2one('res.company', default=lambda s: s.env.company)
 
     # ==================================================================
@@ -144,6 +240,12 @@ class OMRScanner(models.Model):
                 'log at startup for the exact reason (commonly a missing '
                 'native library — libzbar on Linux/Mac, libzbar-64.dll on '
                 'Windows — or a missing Tesseract OCR installation).'
+            ))
+        if self._looks_like_pdf(base64.b64decode(self.scanned_file)) and not HAS_FITZ:
+            raise UserError(_(
+                'The uploaded file is a PDF, but PyMuPDF is not installed '
+                'on this server, so it cannot be converted to an image. '
+                'Install it with: pip install PyMuPDF, then try again.'
             ))
         if not HAS_PYZBAR:
             _logger.info(
@@ -164,45 +266,44 @@ class OMRScanner(models.Model):
             })
             return
 
-        # Parse barcode: REG|NAME|SUBCODE|EXAMID|SERIAL|HALLTICKET
-        parts = barcode_data.split('|')
+        # The barcode printed on the sheet (see exam.omr.sheet._compute_barcode_data)
+        # holds only the sheet's serial_number — not a pipe-delimited composite.
+        # Look up the exam.omr.sheet record it was generated from and pull the
+        # student/exam/subject/hall-ticket off THAT record, which is already
+        # the single source of truth (and stays correct even if the student's
+        # registration number, name, etc. change after the sheet was printed).
+        serial = barcode_data.strip()
+        omr = self.env['exam.omr.sheet'].search([
+            ('serial_number', '=', serial),
+        ], limit=1)
+
+        if not omr:
+            self.write({
+                'state': 'failed',
+                'barcode_raw': barcode_data,
+                'error_message': _(
+                    'Barcode decoded as "%s" but no OMR sheet with that serial '
+                    'number was found. It may not have been generated from '
+                    'this system, or the barcode was misread.', serial,
+                ),
+            })
+            return
+
         vals = {
             'barcode_raw': barcode_data,
-            'decoded_registration': parts[0] if len(parts) > 0 else '',
-            'decoded_student_name': parts[1] if len(parts) > 1 else '',
-            'decoded_subject_code': parts[2] if len(parts) > 2 else '',
-            'decoded_exam_id': int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0,
-            'decoded_serial': parts[4] if len(parts) > 4 else '',
-            'decoded_hall_ticket': parts[5] if len(parts) > 5 else '',
+            'decoded_registration': omr.registration_number or '',
+            'decoded_student_name': omr.student_name or '',
+            'decoded_subject_code': omr.subject_id.code or '',
+            'decoded_exam_id': omr.examination_id.id or 0,
+            'decoded_serial': omr.serial_number or '',
+            'decoded_hall_ticket': omr.hall_ticket_number or '',
+            'student_id': omr.student_id.id,
+            'examination_id': omr.examination_id.id,
+            'subject_id': omr.subject_id.id,
+            'omr_sheet_id': omr.id,
+            'state': 'decoded',
+            'error_message': False,
         }
-
-        # Resolve linked records
-        student = self.env['student.student'].search([
-            ('registration_number', '=', vals['decoded_registration']),
-        ], limit=1)
-        if student:
-            vals['student_id'] = student.id
-
-        if vals['decoded_exam_id']:
-            exam = self.env['examination.examination'].browse(vals['decoded_exam_id'])
-            if exam.exists():
-                vals['examination_id'] = exam.id
-
-        subject = self.env['university.subject'].search([
-            ('code', '=', vals['decoded_subject_code']),
-        ], limit=1)
-        if subject:
-            vals['subject_id'] = subject.id
-
-        # Find OMR sheet
-        omr = self.env['exam.omr.sheet'].search([
-            ('serial_number', '=', vals.get('decoded_serial', '')),
-        ], limit=1)
-        if omr:
-            vals['omr_sheet_id'] = omr.id
-
-        vals['state'] = 'decoded'
-        vals['error_message'] = False
         self.write(vals)
 
     # ==================================================================
@@ -228,11 +329,16 @@ class OMRScanner(models.Model):
         if img is None:
             raise UserError(_('Could not read the uploaded file.'))
 
-        marks_data, grand_total = self._ocr_marks_grid(img)
+        marks_data, grand_total, needs_review, review_notes, unread_cells, engine_used = self._ocr_marks_grid(img)
 
         display_lines = []
         for key in sorted(marks_data.keys()):
             display_lines.append(f"{key}={marks_data[key]}")
+        if unread_cells:
+            # Surface unread-but-inked cells explicitly instead of just
+            # omitting them, so the examiner knows exactly which boxes on
+            # the sheet still need to be typed in by hand.
+            display_lines.append('UNREAD(check sheet)=' + ','.join(sorted(unread_cells)))
 
         self.write({
             'detected_marks_json': json.dumps(marks_data, indent=2),
@@ -240,6 +346,9 @@ class OMRScanner(models.Model):
             'question_marks_display': ', '.join(display_lines),
             'grand_total': grand_total,
             'state': 'ocr_done',
+            'needs_review': needs_review,
+            'review_notes': review_notes,
+            'reviewed_manually': False,
             'error_message': False,
         })
 
@@ -339,15 +448,67 @@ class OMRScanner(models.Model):
     # INTERNAL HELPERS
     # ==================================================================
     def _get_image(self):
-        """Return a PIL Image from the uploaded binary field."""
+        """
+        Return a PIL Image built from the uploaded binary field.
+
+        Supports plain image uploads (JPEG/PNG/...) as well as PDF
+        uploads — PDFs are rasterized to an image (first page) before
+        being handed to the barcode/OCR pipeline, since PIL cannot open
+        PDF files directly.
+        """
         if not HAS_PIL:
             _logger.error('Pillow (PIL) not installed.')
             return None
         try:
             data = base64.b64decode(self.scanned_file)
-            return Image.open(io.BytesIO(data))
         except Exception as e:
-            _logger.warning('Failed to open scanned file: %s', e)
+            _logger.warning('Failed to decode base64 of scanned file: %s', e)
+            return None
+
+        if self._looks_like_pdf(data):
+            return self._pdf_to_image(data)
+
+        try:
+            img = Image.open(io.BytesIO(data))
+            img.load()  # force-read now so problems surface here, not later
+            return img
+        except Exception as e:
+            _logger.warning('Failed to open scanned file as an image: %s', e)
+            return None
+
+    @staticmethod
+    def _looks_like_pdf(data):
+        """Detect PDF content regardless of the filename/extension used."""
+        return bool(data) and data[:5] == b'%PDF-'
+
+    def _pdf_to_image(self, data):
+        """
+        Rasterize the first page of an uploaded PDF into a PIL Image
+        at PDF_RENDER_DPI, so the same barcode/OCR pipeline used for
+        image uploads can be reused for PDF uploads.
+        """
+        if not HAS_FITZ:
+            _logger.error(
+                'Uploaded file is a PDF but PyMuPDF (fitz) is not '
+                'installed, so it cannot be converted to an image. '
+                'Install it with: pip install PyMuPDF'
+            )
+            return None
+        try:
+            doc = fitz.open(stream=data, filetype='pdf')
+            if doc.page_count == 0:
+                _logger.warning('Uploaded PDF has no pages.')
+                return None
+            page = doc.load_page(0)
+            zoom = PDF_RENDER_DPI / 72.0
+            matrix = fitz.Matrix(zoom, zoom)
+            pix = page.get_pixmap(matrix=matrix, alpha=False)
+            img = Image.open(io.BytesIO(pix.tobytes('png')))
+            img.load()
+            doc.close()
+            return img
+        except Exception as e:
+            _logger.warning('Failed to rasterize uploaded PDF: %s', e)
             return None
 
     def _read_barcode(self, img):
@@ -403,95 +564,269 @@ class OMRScanner(models.Model):
         threshold = 128
         yield gray.point(lambda p: 255 if p > threshold else 0, '1')
 
+    # ------------------------------------------------------------------
+    # Fixed grid geometry, measured directly off the printed template
+    # (OMR.drawio.xml / the generated PDF) in PDF points, same coordinate
+    # system as PAGE_W/PAGE_H and the _draw_* methods in omr_sheet.py.
+    # Column positions are identical in PART-A and PART-B and in both the
+    # Valuation and Re-Valuation copies — only the row y-positions differ
+    # between the two copies (they're two separate printed sections).
+    # ------------------------------------------------------------------
+    _COLS_PART_A = {
+        'A': (277.44, 290.88), 'B': (290.88, 304.56), 'C': (304.56, 318.0),
+        'D': (318.0, 331.68), 'E': (331.68, 344.64), 'F': (344.64, 358.08),
+        'G': (358.08, 371.76), 'H': (371.76, 385.2), 'I': (385.2, 398.64),
+        'J': (398.64, 412.32), 'extra': (412.32, 426.48), 'total': (426.48, 446.88),
+    }
+    _COLS_PART_B_LEFT = {
+        'a': (277.44, 290.88), 'b': (290.88, 304.56), 'c': (304.56, 318.0),
+        'd': (318.0, 331.68), 'total': (331.68, 344.64),
+    }
+    _COLS_PART_B_RIGHT = {
+        'a': (358.08, 371.76), 'b': (371.76, 385.2), 'c': (385.2, 398.64),
+        'd': (398.64, 412.32), 'total': (412.32, 426.48),
+    }
+    _BEST_COL = (426.48, 446.88)
+
+    # (question-left, question-right, row-top, row-bottom) for each PART-B
+    # row, and the PART-A / grand-total row bands, per valuation part.
+    _GRID_LAYOUT = {
+        'valuation_1': {
+            'part_a_row': (825.36, 838.8),
+            'part_b_rows': [
+                (1, 2, 865.92, 879.6), (3, 4, 879.6, 893.04), (5, 6, 893.04, 906.72),
+                (7, 8, 906.72, 920.16), (9, 10, 920.16, 933.6), (11, 12, 933.6, 947.28),
+            ],
+            'grand_total_row': (947.28, 960.72),
+        },
+        'revaluation': {
+            'part_a_row': (486.72, 500.16),
+            'part_b_rows': [
+                (1, 2, 527.28, 540.72), (3, 4, 540.72, 554.4), (5, 6, 554.4, 567.84),
+                (7, 8, 567.84, 581.52), (9, 10, 581.52, 594.96), (11, 12, 594.96, 608.64),
+            ],
+            'grand_total_row': (608.64, 622.08),
+        },
+    }
+
+    # Minimum fraction of dark pixels inside a cell (after excluding its
+    # border) for the cell to be considered "has a handwritten mark".
+    # Below this it's treated as blank rather than risking a false read
+    # off the cell's own border lines.
+    _INK_THRESHOLD = 0.03
+
+    def _cell_ink_density(self, img, x0, y0, x1, y1, scale_x, scale_y, inset=6):
+        px0 = int(x0 * scale_x + inset)
+        py0 = int(y0 * scale_y + inset)
+        px1 = int(x1 * scale_x - inset)
+        py1 = int(y1 * scale_y - inset)
+        if px1 <= px0 or py1 <= py0:
+            return 0.0
+        region = img.crop((px0, py0, px1, py1)).convert('L')
+        import numpy as np  # local import: numpy is a Pillow/reportlab dependency already present
+        arr = np.array(region)
+        return float((arr < 150).mean())
+
+    # Tesseract's own 0-100 confidence score (from image_to_data). Below
+    # this, a "successful" digit read is treated the same as no read at
+    # all — a confident wrong guess is worse than an honest blank, since
+    # a blank gets surfaced to the examiner via unread_cells while a wrong
+    # guess silently overwrites the correct mark (see the docstring on
+    # needs_review).
+    _OCR_CONF_THRESHOLD = 45
+
+    def _ocr_cell(self, img, x0, y0, x1, y1, scale_x, scale_y, pad=4, upscale=6, threshold=150):
+        """OCR a single grid cell, isolated by its own coordinates, instead
+        of guessing which digit-shaped blob on the page belongs to it.
+
+        Returns (value, confidence_0_to_100) — value is None if no digit
+        could be read with acceptable confidence.
+
+        Tries EasyOCR first (a deep-learning engine, much better on
+        handwriting than Tesseract — see the import block at the top of
+        this file), falling back to Tesseract only if EasyOCR isn't
+        available. pad was increased from the original 2pt to 4pt:
+        handwritten digits (loopy 8s/9s especially) routinely overflow a
+        tightly-cropped cell, and clipping the top of an 8 or the tail of
+        a 9 is exactly what turns them into a 4 or a 2.
+        """
+        px0 = x0 * scale_x - pad
+        py0 = y0 * scale_y - pad
+        px1 = x1 * scale_x + pad
+        py1 = y1 * scale_y + pad
+        base_crop = img.crop((px0, py0, px1, py1)).convert('RGB')
+
+        reader = _get_easyocr_reader() if HAS_EASYOCR else None
+        if reader is not None:
+            try:
+                results = reader.readtext(np.array(base_crop), allowlist='0123456789', detail=1)
+            except Exception as e:
+                _logger.warning('EasyOCR cell read failed, falling back to Tesseract: %s', e)
+                results = None
+            if results:
+                text = ''.join(r[1] for r in results).strip()
+                # confidence of the weakest detected character/word in the
+                # cell — one misread digit shouldn't be hidden behind a
+                # confident neighbour's score.
+                conf = min(r[2] for r in results) * 100.0
+                if text.isdigit() and conf >= self._OCR_CONF_THRESHOLD:
+                    return int(text), conf
+                return None, conf  # low confidence, or not a clean digit — don't guess
+
+        if not HAS_TESSERACT:
+            return None, 0.0
+
+        best_value, best_conf = None, -1.0
+        for thresh in (threshold, 180, 120):
+            crop = base_crop.convert('L').resize(
+                (max(1, base_crop.width * upscale), max(1, base_crop.height * upscale)), Image.LANCZOS)
+            crop = crop.point(lambda p, t=thresh: 255 if p > t else 0)
+            for psm in (7, 8, 6):
+                config = f'--psm {psm} -c tessedit_char_whitelist=0123456789'
+                try:
+                    data = pytesseract.image_to_data(
+                        crop, config=config, output_type=pytesseract.Output.DICT)
+                except Exception as e:
+                    _logger.warning('Tesseract cell OCR failed: %s', e)
+                    continue
+                for text, conf in zip(data.get('text', []), data.get('conf', [])):
+                    text = text.strip()
+                    try:
+                        conf = float(conf)
+                    except (TypeError, ValueError):
+                        conf = -1.0
+                    if text.isdigit() and conf > best_conf:
+                        best_value, best_conf = int(text), conf
+        if best_value is not None and best_conf >= self._OCR_CONF_THRESHOLD:
+            return best_value, best_conf
+        return None, best_conf
+
     def _ocr_marks_grid(self, img):
         """
-        Detect handwritten digits in the marks grid area.
-        Returns (marks_dict, grand_total).
+        Detect handwritten digits in the marks grid, cell by cell, using
+        the fixed grid geometry of the printed template (see _GRID_LAYOUT)
+        rather than guessing positions from an unordered list of detected
+        digits. Each cell is checked for ink first (_cell_ink_density) so
+        a blank cell's own border lines can't be misread as a mark.
 
-        Strategy:
-        - Convert to grayscale, enhance contrast.
-        - Use Tesseract with digit-only whitelist.
-        - Parse the output looking for numbers in grid positions.
+        Returns (marks_dict, grand_total, needs_review, review_notes,
+        unread_cells, engine_used). Cells with no confidently-detected mark are absent
+        from marks_dict — they are NOT assumed to be 0, since "blank" and
+        "OCR couldn't read it" are different things the examiner should be
+        able to tell apart when reviewing the result. Cells that clearly
+        have ink but couldn't be read with acceptable confidence are
+        collected into unread_cells instead of being silently dropped.
+
+        NOTE: Tesseract is a general-purpose print-OCR engine, not a
+        handwritten-digit specialist. Even with correct cell coordinates,
+        stylised handwriting (loopy 8s, joined digits, etc.) will
+        sometimes be missed or misread — and can do so *confidently*,
+        which a bare digit-string check can't tell apart from a correct
+        read. This detection is a best-effort first pass — needs_review /
+        review_notes exist precisely so a low-confidence pass can't be
+        confirmed without a human comparing it to the scanned sheet (see
+        action_confirm_marks).
         """
-        if not HAS_TESSERACT:
-            return {}, 0
+        if not HAS_TESSERACT and not HAS_EASYOCR:
+            return {}, 0, True, 'No OCR engine is installed (neither easyocr nor pytesseract) — nothing was detected automatically. Enter all marks manually.', [], 'None'
 
-        w, h = img.size
+        easyocr_active = HAS_EASYOCR and _get_easyocr_reader() is not None
+        engine_used = 'EasyOCR' if easyocr_active else ('Tesseract (fallback)' if HAS_TESSERACT else 'None')
+        engine_note = []
+        if easyocr_active:
+            engine_note.append('Using OCR engine: EasyOCR (handwriting-capable).')
+        elif HAS_TESSERACT:
+            engine_note.append(
+                'Using OCR engine: Tesseract only — EasyOCR is not active on this server, so '
+                'handwritten-digit accuracy will be noticeably lower than it should be. Run '
+                '"pip install easyocr" in the same Python environment as this Odoo server, then '
+                'restart the server, to enable it.')
 
-        # The marks grid is typically in the lower 60% of the page
-        # (below the header / student info)
-        grid_region = img.crop((0, int(h * 0.35), w, h))
+        layout = self._GRID_LAYOUT.get(self.valuation_part) or self._GRID_LAYOUT['valuation_1']
+        scale_x = img.width / self.PAGE_W_REF
+        scale_y = img.height / self.PAGE_H_REF
 
-        # Preprocess
-        gray = grid_region.convert('L')
-        enhancer = ImageEnhance.Contrast(gray)
-        enhanced = enhancer.enhance(2.5)
-        sharpened = enhanced.filter(ImageFilter.SHARPEN)
-
-        # Binarize for better OCR
-        threshold = 140
-        binary = sharpened.point(lambda p: 255 if p > threshold else 0, 'L')
-
-        # OCR with digit-only config
-        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
-        try:
-            # Use image_to_data for positional information
-            data = pytesseract.image_to_data(
-                binary, config=custom_config, output_type=pytesseract.Output.DICT
-            )
-        except Exception as e:
-            _logger.warning('Tesseract OCR failed: %s', e)
-            return {}, 0
-
-        # Collect detected numbers with their positions
-        numbers = []
-        for i in range(len(data['text'])):
-            text = data['text'][i].strip()
-            conf = int(data['conf'][i]) if data['conf'][i] != '-1' else 0
-            if text and conf > 30:
-                try:
-                    val = int(text)
-                    numbers.append({
-                        'value': val,
-                        'x': data['left'][i],
-                        'y': data['top'][i],
-                        'w': data['width'][i],
-                        'h': data['height'][i],
-                        'conf': conf,
-                    })
-                except ValueError:
-                    pass
-
-        # Sort by position (top-to-bottom, left-to-right)
-        numbers.sort(key=lambda n: (n['y'] // 20, n['x']))
-
-        # Build marks dict — heuristic mapping based on grid layout
         marks_dict = {}
-        grand_total = 0
-        q_num = 1
-        sub_idx = 0
-        sub_labels = ['a', 'b', 'c', 'd']
+        unread_cells = []
 
-        for n in numbers:
-            # Numbers > 100 likely are grand total
-            if n['value'] > 100:
-                grand_total = n['value']
-                continue
+        def read_cell(key, x0, y0, x1, y1):
+            if self._cell_ink_density(img, x0, y0, x1, y1, scale_x, scale_y) <= self._INK_THRESHOLD:
+                return  # genuinely blank — nothing written here
+            val, conf = self._ocr_cell(img, x0, y0, x1, y1, scale_x, scale_y)
+            if val is not None:
+                marks_dict[key] = val
+            else:
+                unread_cells.append(key)
 
-            # Map to question + sub-part
-            key = f"Q{q_num}{sub_labels[sub_idx] if sub_idx < len(sub_labels) else ''}"
-            marks_dict[key] = n['value']
+        # PART-A: single row, columns A-J (+ one unlabeled column) + Total.
+        a_y0, a_y1 = layout['part_a_row']
+        for label, (x0, x1) in self._COLS_PART_A.items():
+            read_cell(f'Q1{label}', x0, a_y0, x1, a_y1)
 
-            sub_idx += 1
-            if sub_idx >= len(sub_labels):
-                sub_idx = 0
-                q_num += 1
+        # PART-B: 6 printed rows, each holding two question numbers
+        # side by side (odd on the left, even on the right).
+        for q_left, q_right, y0, y1 in layout['part_b_rows']:
+            for label, (x0, x1) in self._COLS_PART_B_LEFT.items():
+                read_cell(f'Q{q_left}{label}', x0, y0, x1, y1)
+            for label, (x0, x1) in self._COLS_PART_B_RIGHT.items():
+                read_cell(f'Q{q_right}{label}', x0, y0, x1, y1)
 
-        # If grand total not found, sum all values
-        if grand_total == 0:
-            grand_total = sum(marks_dict.values())
+        # GRAND TOTAL box (printed once, under the BEST column of the
+        # last PART-B row) — this is the authoritative total the
+        # examiner wrote, so prefer it over summing our own cell reads.
+        gt_y0, gt_y1 = layout['grand_total_row']
+        grand_total_ocr = None
+        gt_conf = -1.0
+        if self._cell_ink_density(img, self._BEST_COL[0], gt_y0, self._BEST_COL[1], gt_y1, scale_x, scale_y) > self._INK_THRESHOLD:
+            grand_total_ocr, gt_conf = self._ocr_cell(
+                img, self._BEST_COL[0], gt_y0, self._BEST_COL[1], gt_y1, scale_x, scale_y)
 
-        return marks_dict, grand_total
+        # marks_dict also contains each question's own "...total" cell
+        # (e.g. Q1total, the printed per-question total column) which
+        # would double-count against that question's a/b/c/d cells if
+        # included here, so exclude any key containing "total".
+        sum_of_parts = sum(v for k, v in marks_dict.items() if 'total' not in k.lower())
+
+        notes = []
+        # Surface the degraded-accuracy warning prominently (and force a
+        # review) whenever EasyOCR isn't the engine actually being used —
+        # Tesseract-only results should never be trusted the way an
+        # EasyOCR result can be. When EasyOCR *is* active, we don't add
+        # noise here; its per-cell confidence already drives needs_review
+        # via the unread/mismatch checks below.
+        if HAS_TESSERACT and not easyocr_active:
+            notes.extend(engine_note)
+        if grand_total_ocr is not None:
+            grand_total = grand_total_ocr
+            # A lower partial sum is *expected* whenever some cells are
+            # unread (they're simply missing from the sum, not wrong), so
+            # only treat this as a suspicious mismatch when every cell
+            # WAS read and it still doesn't add up — that's the case that
+            # actually indicates a misread somewhere.
+            if not unread_cells and sum_of_parts > 0 and abs(grand_total_ocr - sum_of_parts) > 2:
+                notes.append(
+                    f'Grand Total cell reads {grand_total_ocr}, but the question-wise '
+                    f'cells that were read sum to {sum_of_parts}. One of them is '
+                    f'likely wrong — check the Grand Total box on the sheet by eye.')
+        else:
+            grand_total = sum_of_parts
+            notes.append(
+                f'The Grand Total box on the sheet could not be read with confidence '
+                f'(best guess confidence {gt_conf:.0f}/100) — Grand Total Marks was '
+                f'filled in as {sum_of_parts}, the sum of the question-wise cells that '
+                f'WERE read. Please read the Grand Total box on the sheet by eye and '
+                f'correct this field if it differs.')
+
+        if unread_cells:
+            notes.append(
+                f'{len(unread_cells)} cell(s) have handwriting in them that OCR could '
+                f'not confidently read as a digit: {", ".join(sorted(unread_cells))}. '
+                f'Look these up on the sheet and add them to Question-wise Marks '
+                f'manually.')
+
+        needs_review = bool(notes)
+        review_notes = '\n'.join(notes)
+        return marks_dict, grand_total, needs_review, review_notes, unread_cells, engine_used
 
     # ==================================================================
     # Bulk scan wizard entry point

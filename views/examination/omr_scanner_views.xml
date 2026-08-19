@@ -11,17 +11,17 @@
             <form string="OMR Scanner">
                 <header>
                     <button name="action_process_all" type="object"
-                            string="Process All (Barcode + OCR + Confirm)"
+                            string="Scan"
                             class="oe_highlight"
                             invisible="state not in ('draft',)"/>
                     <button name="action_decode_barcode" type="object"
-                            string="1. Decode Barcode"
+                            string="Decode Barcode"
                             invisible="state not in ('draft',)"/>
                     <button name="action_detect_marks" type="object"
-                            string="2. Detect Marks (OCR)"
+                            string="Detect Marks (OCR)"
                             invisible="state not in ('decoded',)"/>
                     <button name="action_confirm_marks" type="object"
-                            string="3. Confirm &amp; Update Result"
+                            string="Confirm &amp; Update Result"
                             class="oe_highlight"
                             invisible="state not in ('ocr_done',)"
                             confirm="This will update the student's result record with the marks. Continue?"/>
