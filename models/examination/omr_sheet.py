@@ -10159,13 +10159,19 @@ class OMRSheet(models.Model):
             # Hide the template's placeholder word without disturbing its border.
             c.setFillColor(colors.white)
             c.rect(x + 1, self.PAGE_H - top_y - h + 1, w - 2, h - 2, fill=1, stroke=0)
-            # quiet=False: Code128's default quiet-zone margin is a fixed
-            # 0.25in per side, which would blow out any box narrower than
-            # ~0.5in (e.g. the small left-margin stub barcode). Disabling
-            # it lets the bars scale to fill the box we actually have.
+            # A Code128 symbol needs a real quiet (blank) zone on each side —
+            # scanners use it to find the start/stop of the symbol. The old
+            # code passed quiet=False to fit the box, which left ~0 margin
+            # and made the barcode effectively undecodable. Instead, size
+            # the bars AND a proper quiet zone (10x module width, the spec
+            # minimum) to fit within the available width.
             probe = code128.Code128(str(self.barcode_data), barWidth=1, barHeight=h - 4, humanReadable=False, quiet=False)
-            bw = (w - 10) / probe.width if probe.width else 1
-            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=h - 4, humanReadable=False, quiet=False)
+            modules = probe.width or 1
+            quiet_modules = 10.0
+            bw = (w - 10) / (modules + 2 * quiet_modules)
+            quiet = quiet_modules * bw
+            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=h - 4, humanReadable=False,
+                                   quiet=True, lquiet=quiet, rquiet=quiet)
             c.setFillColor(colors.black)
             obj.drawOn(c, x + 5, self.PAGE_H - top_y - h + 2)
         except Exception as exc:
@@ -10189,9 +10195,15 @@ class OMRSheet(models.Model):
                 c.rect(x_center - thickness / 2 - 1, self.PAGE_H - top_start - length - 1,
                        thickness + 2, length + 2, fill=1, stroke=0)
             c.setFillColor(colors.black)
+            # Same fix as _draw_barcode: reserve a real quiet zone instead of
+            # stripping it, or the vertical stub barcode won't scan either.
             probe = code128.Code128(str(self.barcode_data), barWidth=1, barHeight=thickness, humanReadable=False, quiet=False)
-            bw = length / probe.width if probe.width else 1
-            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=thickness, humanReadable=False, quiet=False)
+            modules = probe.width or 1
+            quiet_modules = 10.0
+            bw = length / (modules + 2 * quiet_modules)
+            quiet = quiet_modules * bw
+            obj = code128.Code128(str(self.barcode_data), barWidth=bw, barHeight=thickness, humanReadable=False,
+                                   quiet=True, lquiet=quiet, rquiet=quiet)
             c.saveState()
             c.translate(x_center - thickness / 2, self.PAGE_H - top_start)
             c.rotate(-90)
