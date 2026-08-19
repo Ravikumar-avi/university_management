@@ -377,6 +377,8 @@
             'university_management/static/src/css/ai_assistant.css',
             'university_management/static/src/xml/ai_assistant_templates.xml',
             'university_management/static/src/js/ai_assistant.js',
+            'university_management/static/src/css/omr_scanner.css',
+            'university_management/static/src/js/omr_scanner_widget.js',
         ],
     },
 
