@@ -122,9 +122,6 @@ class QuestionPaper(models.Model):
 
         # Increment usage count
         used_q_ids = [l['question_id'] for l in lines if l.get('question_id')]
-        self.env['exam.theory.question'].browse(used_q_ids).write(
-            {'used_count': fields.Integer.add(1)}  # handled below
-        )
         for q in self.env['exam.theory.question'].browse(used_q_ids):
             q.used_count += 1
 
