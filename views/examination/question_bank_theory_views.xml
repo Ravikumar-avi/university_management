@@ -10,6 +10,10 @@
         <field name="arch" type="xml">
             <form string="Theory Question Bank">
                 <header>
+                    <button name="action_import_questions" type="object"
+                            string="Extract Questions" class="oe_highlight"
+                            invisible="not import_file"
+                            confirm="This will replace any existing questions in this bank with what's parsed from the file. Continue?"/>
                     <button name="action_submit_review" type="object" string="Submit for Review"
                             invisible="state != 'draft'" class="oe_highlight"/>
                     <button name="action_approve" type="object" string="Approve"
@@ -27,12 +31,24 @@
                             <field name="question_count" widget="statinfo"
                                    string="Questions"/>
                         </button>
+                        <button name="action_view_easy" type="object"
+                                class="oe_stat_button" icon="fa-circle-o">
+                            <field name="easy_count" widget="statinfo" string="Easy"/>
+                        </button>
+                        <button name="action_view_medium" type="object"
+                                class="oe_stat_button" icon="fa-adjust">
+                            <field name="medium_count" widget="statinfo" string="Medium"/>
+                        </button>
+                        <button name="action_view_hard" type="object"
+                                class="oe_stat_button" icon="fa-dot-circle-o">
+                            <field name="hard_count" widget="statinfo" string="Hard"/>
+                        </button>
                     </div>
                     <group>
                         <group>
                             <field name="name" placeholder="e.g., Digital Image Processing QB"/>
                             <field name="code"/>
-                            <field name="regulation" placeholder="e.g., R20, R22"/>
+                            <field name="regulation" placeholder="e.g., R20, R22, R23"/>
                             <field name="faculty_id"/>
                         </group>
                         <group>
@@ -45,6 +61,7 @@
                     <group string="Import Questions">
                         <field name="import_file" filename="import_filename"/>
                         <field name="import_filename" invisible="1"/>
+                        <field name="import_log" readonly="1" invisible="not import_log"/>
                     </group>
                     <notebook>
                         <page string="Questions" name="questions">
@@ -86,6 +103,9 @@
                 <field name="regulation"/>
                 <field name="faculty_id"/>
                 <field name="question_count"/>
+                <field name="easy_count"/>
+                <field name="medium_count"/>
+                <field name="hard_count"/>
                 <field name="state" widget="badge"
                        decoration-info="state == 'draft'"
                        decoration-warning="state == 'review'"

@@ -13,7 +13,14 @@
                     <button name="action_generate_paper" type="object"
                             string="Auto-Generate Paper" class="oe_highlight"
                             invisible="state != 'draft'"
-                            confirm="This will clear existing questions and generate new ones. Continue?"/>
+                            confirm="This will clear existing questions and generate new ones, then rebuild the PDF. Continue?"/>
+                    <button name="action_generate_paper" type="object"
+                            string="Regenerate Paper"
+                            invisible="state == 'draft'"
+                            confirm="This will clear existing questions and generate new ones, then rebuild the PDF. Continue?"/>
+                    <button name="action_print_pdf" type="object"
+                            string="Print PDF" class="oe_highlight"
+                            invisible="state == 'draft'"/>
                     <button name="action_approve" type="object" string="Approve"
                             invisible="state != 'generated'" class="oe_highlight"/>
                     <button name="action_lock" type="object" string="Lock / Print"
@@ -27,7 +34,7 @@
                 <sheet>
                     <group>
                         <group string="Paper Details">
-                            <field name="name" placeholder="e.g., Digital Image Processing — Final"/>
+                            <field name="name" placeholder="e.g., Power Systems-II — December 2025"/>
                             <field name="code"/>
                             <field name="subject_id"/>
                             <field name="department_id"/>
@@ -35,6 +42,17 @@
                             <field name="regulation"/>
                             <field name="examination_id"/>
                         </group>
+                        <group string="Letterhead">
+                            <field name="subject_code" placeholder="e.g., R23EEE-PC3103"/>
+                            <field name="exam_session" placeholder="e.g., III B. Tech, I-Semester Regular Examinations, December 2025"/>
+                            <field name="branch_short" placeholder="e.g., EEE"/>
+                            <field name="exam_date"/>
+                            <field name="affiliation_line"/>
+                            <field name="location_line"/>
+                        </group>
+                    </group>
+
+                    <group>
                         <group string="Configuration">
                             <field name="paper_pattern"/>
                             <field name="total_marks"/>
@@ -42,15 +60,10 @@
                             <field name="number_of_questions"
                                    invisible="paper_pattern != 'custom'"/>
                         </group>
-                    </group>
-
-                    <group string="R20 Pattern Config"
-                           invisible="paper_pattern != 'r20'">
-                        <group>
+                        <group string="Part A / Part B Config"
+                               invisible="paper_pattern not in ('r23', 'r20')">
                             <field name="part_a_questions"/>
                             <field name="part_a_marks_each"/>
-                        </group>
-                        <group>
                             <field name="part_b_questions"/>
                             <field name="part_b_marks_each"/>
                         </group>
@@ -81,7 +94,7 @@
                         </page>
                         <page string="PDF" name="pdf">
                             <group>
-                                <field name="paper_pdf" filename="paper_pdf_filename"/>
+                                <field name="paper_pdf" filename="paper_pdf_filename" readonly="1"/>
                                 <field name="paper_pdf_filename" invisible="1"/>
                             </group>
                         </page>
