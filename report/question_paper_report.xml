@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="paperformat_question_paper" model="report.paperformat">
+        <field name="name">Question Paper</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">18</field>
+        <field name="margin_left">12</field>
+        <field name="margin_right">12</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
     <!-- Report Action -->
     <record id="action_report_question_paper" model="ir.actions.report">
         <field name="name">Question Paper</field>
@@ -11,6 +25,7 @@
         <field name="binding_model_id" ref="model_exam_question_paper"/>
         <field name="binding_type">report</field>
         <field name="print_report_name">'Question Paper - %s' % (object.code or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_question_paper"/>
     </record>
 
     <!-- Report Template.
@@ -150,7 +165,7 @@
                             <t t-set="qnos" t-value="sorted(set(unit_lines.mapped('question_number')), key=lambda x: int(x) if x and x.isdigit() else 0)"/>
                             <t t-foreach="qnos" t-as="qno">
                                 <t t-set="sub_lines" t-value="unit_lines.filtered(lambda l: l.question_number == qno).sorted(key=lambda l: l.sequence)"/>
-                                <table class="qp-table" style="width:100%; margin-bottom:2px;">
+                                <table class="qp-table" style="width:100%; margin-bottom:2px; page-break-inside:avoid;">
                                     <t t-foreach="sub_lines" t-as="sub">
                                         <tr>
                                             <td t-if="sub_first" t-att-rowspan="len(sub_lines)"
@@ -171,7 +186,7 @@
                         </t>
                     </t>
 
-                    <div style="text-align:center; font-weight:bold; margin-top:14px;">----THE END----</div>
+                    <div style="text-align:center; font-weight:bold; margin-top:14px; page-break-before:avoid;">----THE END----</div>
 
                 </div>
             </t>
@@ -179,7 +194,7 @@
                  picks it up as a repeating footer on every physical page.
                  <span class="page"/> and <span class="topage"/> are wkhtmltopdf
                  magic variables that only get substituted in header/footer divs. -->
-            <div class="footer" style="text-align:center; font-size:10pt; font-family: 'Times New Roman', Times, serif;">
+            <div class="footer" style="text-align:center; font-size:10pt; font-family: 'Times New Roman', Times, serif; padding-top:4px;">
                 <span>Page </span><span class="page"/><span> of </span><span class="topage"/>
             </div>
         </t>
