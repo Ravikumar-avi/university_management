@@ -41,45 +41,60 @@
                         </tr>
                     </table>
 
-                    <!-- Header block: logo + college info -->
-                    <table class="qp-table" style="width:100%; margin-bottom:4px;">
-                        <tr>
-                            <td style="width:90px; vertical-align:top; text-align:left;">
-                                <img t-if="o.company_id.logo"
-                                     t-att-src="image_data_uri(o.company_id.logo)"
-                                     style="width:78px; height:78px; object-fit:contain;"/>
-                            </td>
-                            <td style="text-align:center; vertical-align:top;">
-                                <div style="font-weight:bold; font-size:13pt; text-transform:uppercase;">
-                                    <t t-esc="o.company_id.name or 'Lendi Institute of Engineering &amp; Technology'"/>
-                                    <t t-if="'AUTONOMOUS' not in (o.company_id.name or '').upper()"> (Autonomous)</t>
-                                </div>
-                                <div t-if="o.affiliation_line"><t t-esc="o.affiliation_line"/></div>
-                                <div t-if="o.location_line"><t t-esc="o.location_line"/></div>
-                                <div t-if="o.exam_session" style="font-weight:bold; margin-top:2px;">
-                                    <t t-esc="o.exam_session"/>
-                                </div>
-                                <div style="font-weight:bold; font-size:13pt; margin-top:3px;">
-                                    <t t-esc="o.subject_id.name"/>
-                                </div>
-                                <div t-if="o.branch_short"><i>(<t t-esc="o.branch_short"/>)</i></div>
-                            </td>
-                            <td style="width:90px;"/>
-                        </tr>
-                    </table>
+                    <!-- Header block: logo overlaid via position:absolute so it NEVER
+                         stretches the row height. Previously the logo sat in its own
+                         <td>; a table row is always as tall as its tallest cell, so a
+                         fixed 78px logo cell forced the row to 78px even when the text
+                         cell was shorter — leaving a visible blank gap between the
+                         header text and the Date/Time/Marks line below it. Overlaying
+                         the logo removes it from height calculation entirely.
+                         NOTE: do NOT add a min-height here — that reintroduces the exact
+                         same bug one level up. A fixed min-height on this div is itself
+                         a "tallest cell" forcing extra blank space whenever the actual
+                         header text (college name + affiliation + location + session +
+                         subject + branch) renders shorter than that number, which is
+                         what produced the bigger gap on some papers vs. others. The
+                         div's height should come purely from its own text content; the
+                         absolutely-positioned logo never contributes to that height
+                         either way, so no fallback min-height is needed. -->
+                    <div style="position:relative; text-align:center; margin-bottom:0; padding-bottom:0; padding-left:120px; padding-right:120px;">
+                        <img t-if="o.company_id.logo"
+                             t-att-src="image_data_uri(o.company_id.logo)"
+                             style="position:absolute; left:0; top:0; width:110px; height:110px; object-fit:contain;"/>
+                        <!-- College name + "(Autonomous)" kept on one line: font-size steps
+                             down as the name gets longer so long names (e.g. "SIR M
+                             VISVESVARAYA INSTITUTE OF TECHNOLOGY (AUTONOMOUS)") still fit
+                             on a single row instead of wrapping to a second line. -->
+                        <t t-set="college_name" t-value="o.company_id.name or 'Lendi Institute of Engineering &amp; Technology'"/>
+                        <t t-set="college_full" t-value="college_name + ('' if 'AUTONOMOUS' in college_name.upper() else ' (Autonomous)')"/>
+                        <t t-set="college_font_size" t-value="'13pt' if len(college_full) &lt;= 45 else ('11.5pt' if len(college_full) &lt;= 60 else '10pt')"/>
+                        <div t-attf-style="font-weight:bold; font-size:#{college_font_size}; text-transform:uppercase; white-space:nowrap;">
+                            <t t-esc="college_full"/>
+                        </div>
+                        <div t-if="o.affiliation_line"><t t-esc="o.affiliation_line"/></div>
+                        <div t-if="o.location_line"><t t-esc="o.location_line"/></div>
+                        <div t-if="o.exam_session" style="font-weight:bold;">
+                            <t t-esc="o.exam_session"/>
+                        </div>
+                        <div style="font-weight:bold; font-size:13pt;">
+                            <t t-esc="o.subject_id.name"/>
+                        </div>
+                        <div t-if="o.branch_short"><i>(<t t-esc="o.branch_short"/>)</i></div>
+                    </div>
 
                     <!-- Date / Time / Max Marks — deliberately its OWN table with its own
-                         inline border-top/bottom, not the qp-table class, so the qp-table
-                         border reset above can never touch it. -->
-                    <table style="width:100%; border:none; border-collapse:collapse; border-top:2px solid #000; border-bottom:2px solid #000; margin:6px 0 10px 0;">
+                         inline border-bottom, not the qp-table class, so the qp-table
+                         border reset above can never touch it. Only the bottom rule is
+                         wanted (no line above this row). -->
+                    <table style="width:100%; border:none; border-collapse:collapse; border-bottom:2px solid #000; margin:-2px 0 10px 0;">
                         <tr>
-                            <td style="border:none; padding:4px 0; text-align:left; width:33%;">
+                            <td style="border:none; padding:2px 0; text-align:left; width:33%;">
                                 Date: <t t-esc="o.exam_date and o.exam_date.strftime('%d-%m-%Y') or ''"/>
                             </td>
-                            <td style="border:none; padding:4px 0; text-align:center; width:34%;">
+                            <td style="border:none; padding:2px 0; text-align:center; width:34%;">
                                 Time: <t t-esc="'%.0f' % (o.duration_minutes / 60.0)"/> Hours.
                             </td>
-                            <td style="border:none; padding:4px 0; text-align:right; width:33%;">
+                            <td style="border:none; padding:2px 0; text-align:right; width:33%;">
                                 Max. Marks: <t t-esc="o.total_marks"/>
                             </td>
                         </tr>
@@ -158,12 +173,15 @@
 
                     <div style="text-align:center; font-weight:bold; margin-top:14px;">----THE END----</div>
 
-                    <!-- Page number footer: "Page 1 of 2" style, repeated on every physical page -->
-                    <div class="footer" style="text-align:center; font-size:10pt;">
-                        Page <span class="page"/> of <span class="topage"/>
-                    </div>
                 </div>
             </t>
+            <!-- Page number footer: placed OUTSIDE the .page div so wkhtmltopdf
+                 picks it up as a repeating footer on every physical page.
+                 <span class="page"/> and <span class="topage"/> are wkhtmltopdf
+                 magic variables that only get substituted in header/footer divs. -->
+            <div class="footer" style="text-align:center; font-size:10pt; font-family: 'Times New Roman', Times, serif;">
+                <span>Page </span><span class="page"/><span> of </span><span class="topage"/>
+            </div>
         </t>
     </template>
 
