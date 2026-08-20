@@ -13,34 +13,43 @@
         <field name="print_report_name">'Question Paper - %s' % (object.code or object.name)</field>
     </record>
 
-    <!-- Report Template -->
+    <!-- Report Template.
+         NOTE: floated divs were tried here and wkhtmltopdf mis-paginated them
+         (duplicated/garbled content across the page break). Back to <table>
+         layout, but every layout table carries class="qp-table" and a single
+         <style> block at the top kills borders on that class with !important
+         — so there is exactly one place border-removal can fail, not eleven
+         scattered inline overrides. -->
     <template id="report_question_paper">
         <t t-call="web.basic_layout">
+            <style>
+                table.qp-table, table.qp-table > tr > td, table.qp-table > tbody > tr > td {
+                    border: none !important;
+                    border-collapse: collapse;
+                    padding: 1px 2px;
+                }
+            </style>
             <t t-foreach="docs" t-as="o">
                 <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 11.5pt; color: #000; padding: 10px 20px;">
 
                     <!-- Code No. / Regulation -->
-                    <table style="width:100%; border:none; margin-bottom:2px;">
+                    <table class="qp-table" style="width:100%; margin-bottom:2px;">
                         <tr>
-                            <td style="border:none; font-weight:bold; text-align:left; width:33%;">
-                                <t t-esc="o.subject_code"/>
-                            </td>
-                            <td style="border:none; width:34%;"/>
-                            <td style="border:none; font-weight:bold; text-align:right; width:33%;">
-                                <t t-esc="o.regulation"/>
-                            </td>
+                            <td style="font-weight:bold; text-align:left; width:33%;"><t t-esc="o.subject_code"/></td>
+                            <td style="width:34%;"/>
+                            <td style="font-weight:bold; text-align:right; width:33%;"><t t-esc="o.regulation"/></td>
                         </tr>
                     </table>
 
                     <!-- Header block: logo + college info -->
-                    <table style="width:100%; border:none; margin-bottom:4px;">
+                    <table class="qp-table" style="width:100%; margin-bottom:4px;">
                         <tr>
-                            <td style="border:none; width:90px; vertical-align:top; text-align:left;">
+                            <td style="width:90px; vertical-align:top; text-align:left;">
                                 <img t-if="o.company_id.logo"
                                      t-att-src="image_data_uri(o.company_id.logo)"
                                      style="width:78px; height:78px; object-fit:contain;"/>
                             </td>
-                            <td style="border:none; text-align:center; vertical-align:top;">
+                            <td style="text-align:center; vertical-align:top;">
                                 <div style="font-weight:bold; font-size:13pt; text-transform:uppercase;">
                                     <t t-esc="o.company_id.name or 'Lendi Institute of Engineering &amp; Technology'"/>
                                     <t t-if="'AUTONOMOUS' not in (o.company_id.name or '').upper()"> (Autonomous)</t>
@@ -55,12 +64,14 @@
                                 </div>
                                 <div t-if="o.branch_short"><i>(<t t-esc="o.branch_short"/>)</i></div>
                             </td>
-                            <td style="border:none; width:90px;"/>
+                            <td style="width:90px;"/>
                         </tr>
                     </table>
 
-                    <!-- Date / Time / Max Marks -->
-                    <table style="width:100%; border-top:2px solid #000; border-bottom:2px solid #000; margin:6px 0 10px 0;">
+                    <!-- Date / Time / Max Marks — deliberately its OWN table with its own
+                         inline border-top/bottom, not the qp-table class, so the qp-table
+                         border reset above can never touch it. -->
+                    <table style="width:100%; border:none; border-collapse:collapse; border-top:2px solid #000; border-bottom:2px solid #000; margin:6px 0 10px 0;">
                         <tr>
                             <td style="border:none; padding:4px 0; text-align:left; width:33%;">
                                 Date: <t t-esc="o.exam_date and o.exam_date.strftime('%d-%m-%Y') or ''"/>
@@ -74,7 +85,8 @@
                         </tr>
                     </table>
 
-                    <!-- PART A -->
+                    <!-- PART A: one "1." spanning all ten lettered rows, exactly like the
+                         Lendi sample — sub-part letter + question text + marks per row. -->
                     <t t-set="part_a_lines" t-value="o.paper_question_ids.filtered(lambda l: l.part == 'part_a').sorted(key=lambda l: l.sequence)"/>
                     <t t-if="part_a_lines">
                         <div style="text-align:center; font-weight:bold;">
@@ -83,25 +95,23 @@
                         <div style="text-align:center; font-weight:bold; margin-bottom:6px;">
                             Answer All Questions, Each Question Carries Equal Marks
                         </div>
-                        <div style="margin-bottom:4px;">
-                            <span style="font-weight:bold;">1.</span>
+                        <table class="qp-table" style="width:100%;">
                             <t t-foreach="part_a_lines" t-as="line">
-                                <table style="width:100%; border:none; margin:2px 0 2px 22px; width:95%;">
-                                    <tr>
-                                        <td style="border:none; padding:1px; text-align:left; vertical-align:top;">
-                                            <b><t t-esc="line.sub_part"/>.</b>
-                                            <t t-esc="line.question_text"/>
-                                        </td>
-                                        <td style="border:none; padding:1px; text-align:right; white-space:nowrap; width:150px; vertical-align:top;">
-                                            [<t t-esc="line.marks"/> Marks;<t t-esc="line.co_level"/>;<t t-esc="line.rbt_display"/>]
-                                        </td>
-                                    </tr>
-                                </table>
-                                <div t-if="line.question_image" style="text-align:center; margin:4px 0;">
-                                    <img t-att-src="image_data_uri(line.question_image)" style="max-height:120px;"/>
-                                </div>
+                                <tr>
+                                    <td t-if="line_first" t-att-rowspan="len(part_a_lines)"
+                                        style="width:20px; vertical-align:top; font-weight:bold;">1.</td>
+                                    <td style="vertical-align:top; text-align:left;">
+                                        <b><t t-esc="line.sub_part"/>.</b> <t t-esc="line.question_text"/>
+                                        <div t-if="line.question_image" style="text-align:center; margin:4px 0;">
+                                            <img t-att-src="image_data_uri(line.question_image)" style="max-height:120px;"/>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align:top; text-align:right; white-space:nowrap; width:150px;">
+                                        [<t t-esc="line.marks"/> Marks;<t t-esc="line.co_level"/>;<t t-esc="line.rbt_display"/>]
+                                    </td>
+                                </tr>
                             </t>
-                        </div>
+                        </table>
                     </t>
 
                     <!-- PART B -->
@@ -124,30 +134,34 @@
                             <t t-set="unit_lines" t-value="part_b_lines.filtered(lambda l: l.unit == unit_name)"/>
                             <t t-set="qnos" t-value="sorted(set(unit_lines.mapped('question_number')), key=lambda x: int(x) if x and x.isdigit() else 0)"/>
                             <t t-foreach="qnos" t-as="qno">
-                                <div style="margin-bottom:4px;">
-                                    <span style="font-weight:bold;"><t t-esc="qno"/>.</span>
-                                    <t t-foreach="unit_lines.filtered(lambda l: l.question_number == qno).sorted(key=lambda l: l.sequence)" t-as="sub">
-                                        <table style="border:none; margin:2px 0 2px 22px; width:95%;">
-                                            <tr>
-                                                <td style="border:none; padding:1px; text-align:left; vertical-align:top;">
-                                                    <b><t t-esc="sub.sub_part"/>)</b>
-                                                    <t t-esc="sub.question_text"/>
-                                                </td>
-                                                <td style="border:none; padding:1px; text-align:right; white-space:nowrap; width:150px; vertical-align:top;">
-                                                    [<t t-esc="sub.marks"/> Marks;<t t-esc="sub.co_level"/>; <t t-esc="sub.rbt_display"/>]
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <div t-if="sub.question_image" style="text-align:center; margin:4px 0;">
-                                            <img t-att-src="image_data_uri(sub.question_image)" style="max-height:120px;"/>
-                                        </div>
+                                <t t-set="sub_lines" t-value="unit_lines.filtered(lambda l: l.question_number == qno).sorted(key=lambda l: l.sequence)"/>
+                                <table class="qp-table" style="width:100%; margin-bottom:2px;">
+                                    <t t-foreach="sub_lines" t-as="sub">
+                                        <tr>
+                                            <td t-if="sub_first" t-att-rowspan="len(sub_lines)"
+                                                style="width:24px; vertical-align:top; font-weight:bold;"><t t-esc="qno"/>.</td>
+                                            <td style="vertical-align:top; text-align:left;">
+                                                <b><t t-esc="sub.sub_part"/>)</b> <t t-esc="sub.question_text"/>
+                                                <div t-if="sub.question_image" style="text-align:center; margin:4px 0;">
+                                                    <img t-att-src="image_data_uri(sub.question_image)" style="max-height:120px;"/>
+                                                </div>
+                                            </td>
+                                            <td style="vertical-align:top; text-align:right; white-space:nowrap; width:150px;">
+                                                [<t t-esc="sub.marks"/> Marks;<t t-esc="sub.co_level"/>; <t t-esc="sub.rbt_display"/>]
+                                            </td>
+                                        </tr>
                                     </t>
-                                </div>
+                                </table>
                             </t>
                         </t>
                     </t>
 
                     <div style="text-align:center; font-weight:bold; margin-top:14px;">----THE END----</div>
+
+                    <!-- Page number footer: "Page 1 of 2" style, repeated on every physical page -->
+                    <div class="footer" style="text-align:center; font-size:10pt;">
+                        Page <span class="page"/> of <span class="topage"/>
+                    </div>
                 </div>
             </t>
         </t>
