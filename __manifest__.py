@@ -314,6 +314,7 @@
         'report/hall_ticket_report.xml',
         'report/fee_receipt.xml',
         'report/marksheet_report.xml',
+        'report/question_paper_report.xml',
         'report/salary_slip_report.xml',
         'report/faculty_form16_report.xml',
         'report/student_report.xml',
@@ -388,7 +389,7 @@
     ],
 
     'external_dependencies': {
-            'python': ['reportlab', 'pypdf', 'Pillow', 'pyzbar', 'pytesseract', 'qrcode', 'easyocr'],
+            'python': ['reportlab', 'pypdf', 'Pillow', 'pyzbar', 'pytesseract', 'qrcode', 'easyocr', 'python-docx'],
         },
 
     'installable': True,
