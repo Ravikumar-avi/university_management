@@ -163,11 +163,93 @@
         </field>
     </record>
 
+    <!-- Question Paper — Kanban -->
+    <record id="view_question_paper_kanban" model="ir.ui.view">
+        <field name="name">exam.question.paper.kanban</field>
+        <field name="model">exam.question.paper</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_group_by="state" quick_create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="subject_id"/>
+                <field name="examination_id"/>
+                <field name="paper_pattern"/>
+                <field name="total_marks"/>
+                <field name="question_line_count"/>
+                <field name="bank_count"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <strong>
+                                            <field name="name"/>
+                                        </strong>
+                                        <span t-att-class="'badge ms-2 text-bg-' + (record.state.raw_value in ['approved', 'locked'] ? 'success' : record.state.raw_value == 'generated' ? 'warning' : 'info')">
+                                            <field name="state"/>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted">
+                                        <field name="code"/> — <field name="subject_id"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="o_kanban_card_content">
+                                <div class="row mb-2" t-if="record.examination_id.raw_value">
+                                    <div class="col-12">
+                                        <i class="fa fa-graduation-cap text-primary"/>
+                                        <field name="examination_id"/>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-4">
+                                        <i class="fa fa-star text-warning"/>
+                                        <field name="total_marks"/> Marks
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fa fa-list-ol text-info"/>
+                                        <field name="question_line_count"/> Qs
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fa fa-book text-success"/>
+                                        <field name="bank_count"/> Banks
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            <field name="paper_pattern"/>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="o_kanban_card_footer">
+                                <div class="o_kanban_footer_left">
+                                    <!-- Empty for future use -->
+                                </div>
+                                <div class="o_kanban_footer_right">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <!-- Action -->
     <record id="action_question_paper" model="ir.actions.act_window">
         <field name="name">Question Papers</field>
         <field name="res_model">exam.question.paper</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a Question Paper

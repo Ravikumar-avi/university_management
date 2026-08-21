@@ -139,6 +139,88 @@
         </field>
     </record>
 
+    <!-- OMR Scanner — Kanban -->
+    <record id="view_omr_scanner_kanban" model="ir.ui.view">
+        <field name="name">exam.omr.scanner.kanban</field>
+        <field name="model">exam.omr.scanner</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_group_by="state" quick_create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="scan_date"/>
+                <field name="decoded_student_name"/>
+                <field name="decoded_registration"/>
+                <field name="decoded_subject_code"/>
+                <field name="grand_total"/>
+                <field name="valuation_part"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary">
+                                        <strong>
+                                            <field name="name"/>
+                                        </strong>
+                                        <span t-att-class="'badge ms-2 text-bg-' + (record.state.raw_value == 'confirmed' ? 'success' : record.state.raw_value == 'failed' ? 'danger' : record.state.raw_value == 'draft' ? 'info' : 'warning')">
+                                            <field name="state"/>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted">
+                                        <field name="decoded_student_name"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="o_kanban_card_content">
+                                <div class="row mb-2" t-if="record.decoded_registration.raw_value">
+                                    <div class="col-12">
+                                        <i class="fa fa-id-card text-primary"/>
+                                        <field name="decoded_registration"/>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-6" t-if="record.decoded_subject_code.raw_value">
+                                        <i class="fa fa-book text-info"/>
+                                        <field name="decoded_subject_code"/>
+                                    </div>
+                                    <div class="col-6" t-if="record.grand_total.raw_value">
+                                        <i class="fa fa-check-square-o text-success"/>
+                                        <strong><field name="grand_total"/></strong> Marks
+                                    </div>
+                                </div>
+
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">
+                                            <field name="valuation_part"/>
+                                        </small>
+                                    </div>
+                                    <div class="col-6" t-if="record.scan_date.raw_value">
+                                        <small class="text-muted">
+                                            <i class="fa fa-calendar"/> <field name="scan_date"/>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="o_kanban_card_footer">
+                                <div class="o_kanban_footer_left">
+                                    <!-- Empty for future use -->
+                                </div>
+                                <div class="o_kanban_footer_right">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <!-- OMR Scanner — Search -->
     <record id="view_omr_scanner_search" model="ir.ui.view">
         <field name="name">exam.omr.scanner.search</field>
@@ -169,7 +251,7 @@
     <record id="action_omr_scanner" model="ir.actions.act_window">
         <field name="name">OMR Sheet Scanner</field>
         <field name="res_model">exam.omr.scanner</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Scan a Corrected OMR Sheet
