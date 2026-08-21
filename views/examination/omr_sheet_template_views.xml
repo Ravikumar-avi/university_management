@@ -10,6 +10,15 @@
         <field name="arch" type="xml">
             <form string="OMR Sheet Template">
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sheets" type="object"
+                                class="oe_stat_button text-primary"
+                                icon="fa-file-text-o">
+                            <field name="sheet_count" widget="statinfo" string="OMR Sheets"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
                     <group>
                         <group string="Template Info">
                             <field name="name" placeholder="e.g., R22 M.Tech Template"/>
@@ -73,12 +82,16 @@
         <field name="name">exam.omr.template.list</field>
         <field name="model">exam.omr.template</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-muted="not active">
                 <field name="code"/>
                 <field name="name"/>
-                <field name="format_type"/>
+                <field name="format_type" widget="badge"
+                       decoration-info="format_type == 'r20'"
+                       decoration-warning="format_type == 'r22'"
+                       decoration-success="format_type == 'custom'"/>
+                <field name="sheet_count"/>
                 <field name="valuation_copies"/>
-                <field name="active"/>
+                <field name="active" column_invisible="True"/>
             </list>
         </field>
     </record>

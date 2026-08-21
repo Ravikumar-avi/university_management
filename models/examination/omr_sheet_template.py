@@ -22,6 +22,29 @@ class OMRSheetTemplate(models.Model):
     active = fields.Boolean(default=True)
     description = fields.Text(string='Description')
 
+    sheet_count = fields.Integer(string='OMR Sheets', compute='_compute_sheet_count')
+
+    def _compute_sheet_count(self):
+        grouped = {}
+        if self.ids:
+            data = self.env['exam.omr.sheet'].read_group(
+                [('omr_template_id', 'in', self.ids)],
+                ['omr_template_id'], ['omr_template_id'])
+            grouped = {d['omr_template_id'][0]: d['omr_template_id_count'] for d in data}
+        for rec in self:
+            rec.sheet_count = grouped.get(rec.id, 0)
+
+    def action_view_sheets(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('OMR Sheets'),
+            'res_model': 'exam.omr.sheet',
+            'view_mode': 'list,form',
+            'domain': [('omr_template_id', '=', self.id)],
+            'context': {'default_omr_template_id': self.id},
+        }
+
     # ------------------------------------------------------------------
     # Format selection
     # ------------------------------------------------------------------
