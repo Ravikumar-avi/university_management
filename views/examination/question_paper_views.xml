@@ -45,6 +45,14 @@
                             <field name="bank_count" widget="statinfo" string="Source Banks"/>
                         </button>
                     </div>
+
+                    <widget name="web_ribbon" title="Generated" bg_color="text-bg-info"
+                            invisible="state != 'generated'"/>
+                    <widget name="web_ribbon" title="Approved" bg_color="text-bg-success"
+                            invisible="state != 'approved'"/>
+                    <widget name="web_ribbon" title="Locked / Printed" bg_color="text-bg-dark"
+                            invisible="state != 'locked'"/>
+
                     <group>
                         <group string="Paper Details">
                             <field name="name" placeholder="e.g., Power Systems-II — December 2025"/>

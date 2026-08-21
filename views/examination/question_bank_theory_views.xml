@@ -44,6 +44,15 @@
                             <field name="hard_count" widget="statinfo" string="Hard"/>
                         </button>
                     </div>
+
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="Under Review" bg_color="text-bg-warning"
+                            invisible="state != 'review'"/>
+                    <widget name="web_ribbon" title="Approved" bg_color="text-bg-success"
+                            invisible="state != 'approved'"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+
                     <group>
                         <group>
                             <field name="name" placeholder="e.g., Digital Image Processing QB"/>

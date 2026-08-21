@@ -33,6 +33,14 @@
                             <field name="scan_count" widget="statinfo" string="Scan"/>
                         </button>
                     </div>
+
+                    <widget name="web_ribbon" title="Generated" bg_color="text-bg-info"
+                            invisible="state != 'generated'"/>
+                    <widget name="web_ribbon" title="Downloaded" bg_color="text-bg-success"
+                            invisible="state != 'downloaded'"/>
+                    <widget name="web_ribbon" title="Scanned" bg_color="text-bg-success"
+                            invisible="state != 'scanned'"/>
+
                     <div class="oe_title">
                         <h1>
                             <field name="name" readonly="1"/>
