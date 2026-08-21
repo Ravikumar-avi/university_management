@@ -86,6 +86,8 @@ class QuestionPaper(models.Model):
     # Generated questions
     paper_question_ids = fields.One2many('exam.question.paper.line', 'paper_id',
                                         string='Paper Questions')
+    question_line_count = fields.Integer(string='Questions', compute='_compute_line_counts')
+    bank_count = fields.Integer(string='Source Banks', compute='_compute_line_counts')
 
     # PDF output
     paper_pdf = fields.Binary(string='Question Paper PDF', attachment=True, readonly=True)
@@ -107,6 +109,32 @@ class QuestionPaper(models.Model):
     _sql_constraints = [
         ('code_unique', 'unique(code)', 'Paper Code must be unique!'),
     ]
+
+    @api.depends('paper_question_ids', 'bank_ids')
+    def _compute_line_counts(self):
+        for rec in self:
+            rec.question_line_count = len(rec.paper_question_ids)
+            rec.bank_count = len(rec.bank_ids)
+
+    def action_view_paper_questions(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Paper Questions'),
+            'res_model': 'exam.question.paper.line',
+            'view_mode': 'list,form',
+            'domain': [('paper_id', '=', self.id)],
+        }
+
+    def action_view_source_banks(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Source Question Banks'),
+            'res_model': 'exam.theory.question.bank',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.bank_ids.ids)],
+        }
 
     # ------------------------------------------------------------------
     # Auto-generation logic

@@ -11,27 +11,40 @@
             <form string="Question Paper">
                 <header>
                     <button name="action_generate_paper" type="object"
-                            string="Auto-Generate Paper" class="oe_highlight"
+                            string="Auto-Generate Paper" class="btn-primary"
                             invisible="state != 'draft'"
                             confirm="This will clear existing questions and generate new ones, then rebuild the PDF. Continue?"/>
                     <button name="action_generate_paper" type="object"
-                            string="Regenerate Paper"
+                            string="Regenerate Paper" class="btn-secondary"
                             invisible="state == 'draft'"
                             confirm="This will clear existing questions and generate new ones, then rebuild the PDF. Continue?"/>
                     <button name="action_print_pdf" type="object"
-                            string="Print PDF" class="oe_highlight"
+                            string="Print PDF" class="btn-primary"
                             invisible="state == 'draft'"/>
                     <button name="action_approve" type="object" string="Approve"
-                            invisible="state != 'generated'" class="oe_highlight"/>
+                            invisible="state != 'generated'" class="btn-success"/>
                     <button name="action_lock" type="object" string="Lock / Print"
-                            invisible="state != 'approved'" class="oe_highlight"/>
+                            invisible="state != 'approved'" class="btn-success"/>
                     <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            class="btn-danger"
                             invisible="state == 'draft'"
                             confirm="Reset this paper to draft?"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,generated,approved,locked"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_paper_questions" type="object"
+                                class="oe_stat_button text-primary" icon="fa-list-ol"
+                                invisible="not question_line_count">
+                            <field name="question_line_count" widget="statinfo" string="Questions"/>
+                        </button>
+                        <button name="action_view_source_banks" type="object"
+                                class="oe_stat_button text-info" icon="fa-book"
+                                invisible="not bank_count">
+                            <field name="bank_count" widget="statinfo" string="Source Banks"/>
+                        </button>
+                    </div>
                     <group>
                         <group string="Paper Details">
                             <field name="name" placeholder="e.g., Power Systems-II — December 2025"/>
