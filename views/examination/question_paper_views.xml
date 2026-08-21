@@ -201,6 +201,10 @@
                 <field name="question_line_count"/>
                 <field name="bank_count"/>
                 <field name="state"/>
+
+                <progressbar field="state"
+                             colors='{"draft": "secondary", "generated": "warning", "approved": "success", "locked": "dark"}'/>
+
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_card oe_kanban_global_click">

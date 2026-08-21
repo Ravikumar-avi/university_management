@@ -128,6 +128,10 @@
                 <field name="subject_name"/>
                 <field name="state"/>
                 <field name="student_photo"/>
+
+                <progressbar field="state"
+                             colors='{"draft": "secondary", "generated": "info", "downloaded": "success", "scanned": "success"}'/>
+
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_card oe_kanban_global_click">
@@ -207,7 +211,6 @@
                     <filter name="group_state" string="Status"
                             context="{'group_by': 'state'}"/>
                 </group>
-
                 <searchpanel>
                     <field name="examination_id" string="Examination"
                            select="multi"

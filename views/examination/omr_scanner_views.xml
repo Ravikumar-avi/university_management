@@ -164,6 +164,10 @@
                 <field name="grand_total"/>
                 <field name="valuation_part"/>
                 <field name="state"/>
+
+                <progressbar field="state"
+                             colors='{"draft": "secondary", "decoded": "info", "ocr_done": "warning", "confirmed": "success", "failed": "danger"}'/>
+
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_card oe_kanban_global_click">

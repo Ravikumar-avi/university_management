@@ -109,6 +109,10 @@
                 <field name="sheet_count"/>
                 <field name="valuation_copies"/>
                 <field name="active"/>
+
+                <progressbar field="format_type"
+                             colors='{"r20": "info", "r22": "warning", "custom": "success"}'/>
+
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_card oe_kanban_global_click #{record.active.raw_value ? '' : 'oe_kanban_card_inactive'}">
