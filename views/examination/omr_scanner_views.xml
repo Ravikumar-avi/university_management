@@ -243,6 +243,20 @@
                     <filter name="group_state" string="Status"
                             context="{'group_by': 'state'}"/>
                 </group>
+                <searchpanel>
+                    <field name="examination_id" string="Examination"
+                           select="multi"
+                           icon="fa-graduation-cap"/>
+                    <field name="subject_id" string="Subject"
+                           select="multi"
+                           icon="fa-book"/>
+                    <field name="valuation_part" string="Valuation Part"
+                           select="multi"
+                           icon="fa-copy"/>
+                    <field name="state" string="Status"
+                           select="multi"
+                           icon="fa-filter"/>
+                </searchpanel>
             </search>
         </field>
     </record>
