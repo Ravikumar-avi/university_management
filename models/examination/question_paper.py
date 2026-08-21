@@ -18,7 +18,7 @@ class QuestionPaper(models.Model):
     """
     _name = 'exam.question.paper'
     _description = 'Question Paper'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread.main.attachment', 'mail.activity.mixin']
     _order = 'create_date desc'
 
     name = fields.Char(string='Paper Title', required=True, tracking=True)
@@ -90,6 +90,7 @@ class QuestionPaper(models.Model):
     # PDF output
     paper_pdf = fields.Binary(string='Question Paper PDF', attachment=True, readonly=True)
     paper_pdf_filename = fields.Char(string='PDF Filename')
+    main_paper_attachment_id = fields.Many2one('ir.attachment', copy=False)
 
     # Status
     state = fields.Selection([
@@ -318,10 +319,29 @@ class QuestionPaper(models.Model):
         report = self.env.ref('university_management.action_report_question_paper')
         pdf_content, _fmt = report._render_qweb_pdf(
             'university_management.report_question_paper', self.ids)
+        filename = '%s.pdf' % (self.code or self.name or 'Question_Paper')
         self.write({
             'paper_pdf': base64.b64encode(pdf_content),
-            'paper_pdf_filename': '%s.pdf' % (self.code or self.name or 'Question_Paper'),
+            'paper_pdf_filename': filename,
         })
+        self._set_main_attachment_from_paper_pdf(pdf_content, filename)
+
+    def _set_main_attachment_from_paper_pdf(self, pdf_content, filename):
+        """Wrap the generated PDF as a real ir.attachment and point
+        message_main_attachment_id at it, the same way exam.omr.scanner
+        does for its uploaded sheet, so o_attachment_preview shows the
+        paper right after Auto-Generate / Regenerate.
+        """
+        self.ensure_one()
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': base64.b64encode(pdf_content),
+            'res_model': self._name,
+            'res_id': self.id,
+            'mimetype': 'application/pdf',
+        })
+        self.message_main_attachment_id = attachment.id
+        self.main_paper_attachment_id = attachment.id
 
     def action_print_pdf(self):
         self.ensure_one()
