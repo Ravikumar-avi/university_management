@@ -16,17 +16,13 @@
                     <button name="action_download" type="object"
                             string="Download OMR Sheet" class="btn-primary"
                             invisible="state not in ('generated', 'downloaded')"/>
-                    <button name="action_mark_attached" type="object"
-                            string="Mark as Attached to Booklet"
-                            class="btn-secondary"
-                            invisible="state not in ('generated', 'downloaded')"/>
                     <button name="action_reset_draft" type="object"
                             string="Reset to Draft"
                             class="btn-danger"
                             invisible="state == 'draft'"
                             confirm="Reset this OMR sheet to draft?"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,generated,downloaded,attached,scanned"/>
+                           statusbar_visible="draft,generated,downloaded,scanned"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -80,6 +76,8 @@
                         <field name="download_count"/>
                     </group>
                 </sheet>
+                <field name="message_main_attachment_id" invisible="1"/>
+                <div class="o_attachment_preview"/>
                 <chatter/>
             </form>
         </field>
@@ -101,7 +99,6 @@
                 <field name="state" widget="badge"
                        decoration-info="state == 'draft'"
                        decoration-success="state in ('generated', 'downloaded')"
-                       decoration-warning="state == 'attached'"
                        decoration-muted="state == 'scanned'"/>
             </list>
         </field>
@@ -123,8 +120,6 @@
                         domain="[('state', '=', 'draft')]"/>
                 <filter name="generated" string="Generated"
                         domain="[('state', '=', 'generated')]"/>
-                <filter name="attached" string="Attached"
-                        domain="[('state', '=', 'attached')]"/>
                 <filter name="scanned" string="Scanned"
                         domain="[('state', '=', 'scanned')]"/>
                 <group expand="0" string="Group By">

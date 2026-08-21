@@ -9976,7 +9976,7 @@ BtGeDXUw1s7ByKJonCmtGN4xtabpQJZCl/rQSms7BiXL7+BEsI1//MWFJUniDf/8i/AJJ4dt/uMvFYQg
 class OMRSheet(models.Model):
     _name = 'exam.omr.sheet'
     _description = 'Student OMR Sheet'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread.main.attachment', 'mail.activity.mixin']
     _order = 'serial_number'
     # Exact page size of the vector PDF generated from OMR.drawio.xml.
     # These are CLASS constants; never assign to self.PAGE_W/self.PAGE_H in Odoo.
@@ -10014,7 +10014,7 @@ class OMRSheet(models.Model):
 
     state = fields.Selection([
         ('draft', 'Draft'), ('generated', 'Generated'), ('downloaded', 'Downloaded'),
-        ('attached', 'Attached to Booklet'), ('scanned', 'Scanned')
+        ('scanned', 'Scanned')
     ], string='Status', default='draft', tracking=True)
     download_count = fields.Integer(default=0)
     company_id = fields.Many2one('res.company', default=lambda s: s.env.company)
@@ -10100,7 +10100,29 @@ class OMRSheet(models.Model):
         pdf_data = self._render_omr_pdf()
         filename = f"OMR_{self.serial_number}_{self.registration_number or 'REG'}.pdf"
         self.write({'omr_pdf': base64.b64encode(pdf_data), 'omr_pdf_filename': filename, 'state': 'generated'})
+        self._set_main_attachment_from_omr_pdf(pdf_data, filename)
         return True
+
+    def _set_main_attachment_from_omr_pdf(self, pdf_data, filename):
+        """Wrap the generated PDF as its own ir.attachment and point
+        message_main_attachment_id at it, the same way
+        exam.question.paper does for its generated paper, so
+        o_attachment_preview shows the sheet right after Generate OMR PDF.
+
+        This is a plain, independent attachment (not the res_field
+        companion attachment that `omr_pdf` gets automatically from
+        attachment=True) so its existence and timing don't depend on
+        the internals of how Binary(attachment=True) persists data.
+        """
+        self.ensure_one()
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'datas': base64.b64encode(pdf_data),
+            'res_model': self._name,
+            'res_id': self.id,
+            'mimetype': 'application/pdf',
+        })
+        self.message_main_attachment_id = attachment.id
 
     def action_download(self):
         self.ensure_one()
@@ -10108,9 +10130,6 @@ class OMRSheet(models.Model):
             self.action_generate_pdf()
         self.write({'download_count': self.download_count + 1, 'state': 'downloaded'})
         return {'type': 'ir.actions.act_url', 'url': f'/web/content?model=exam.omr.sheet&id={self.id}&field=omr_pdf&filename_field=omr_pdf_filename&download=true', 'target': 'self'}
-
-    def action_mark_attached(self):
-        self.write({'state': 'attached'})
 
     def action_reset_draft(self):
         self.write({'state': 'draft'})
