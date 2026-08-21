@@ -10019,10 +10019,33 @@ class OMRSheet(models.Model):
     download_count = fields.Integer(default=0)
     company_id = fields.Many2one('res.company', default=lambda s: s.env.company)
 
+    scan_id = fields.Many2one('exam.omr.scanner', string='Scan Record',
+                              compute='_compute_scan_id', store=False)
+    scan_count = fields.Integer(string='Scans', compute='_compute_scan_id', store=False)
+
     _sql_constraints = [
         ('unique_student_exam_subject', 'unique(student_id, examination_id, subject_id)',
          'OMR sheet already exists for this student, exam, and subject!'),
     ]
+
+    def _compute_scan_id(self):
+        for rec in self:
+            scan = self.env['exam.omr.scanner'].search(
+                [('omr_sheet_id', '=', rec.id)], limit=1, order='id desc')
+            rec.scan_id = scan.id if scan else False
+            rec.scan_count = 1 if scan else 0
+
+    def action_view_scan(self):
+        self.ensure_one()
+        scan = self.env['exam.omr.scanner'].search([('omr_sheet_id', '=', self.id)], limit=1)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('OMR Scan'),
+            'res_model': 'exam.omr.scanner',
+            'view_mode': 'list,form',
+            'domain': [('omr_sheet_id', '=', self.id)],
+            'res_id': scan.id if scan else False,
+        }
 
     @api.depends('student_id', 'subject_id', 'serial_number')
     def _compute_name(self):

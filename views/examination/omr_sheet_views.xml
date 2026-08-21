@@ -11,22 +11,32 @@
             <form string="OMR Sheet">
                 <header>
                     <button name="action_generate_pdf" type="object"
-                            string="Generate OMR PDF" class="oe_highlight"
+                            string="Generate OMR PDF" class="btn-primary"
                             invisible="state not in ('draft',)"/>
                     <button name="action_download" type="object"
-                            string="Download OMR Sheet" class="oe_highlight"
+                            string="Download OMR Sheet" class="btn-primary"
                             invisible="state not in ('generated', 'downloaded')"/>
                     <button name="action_mark_attached" type="object"
                             string="Mark as Attached to Booklet"
+                            class="btn-secondary"
                             invisible="state not in ('generated', 'downloaded')"/>
                     <button name="action_reset_draft" type="object"
                             string="Reset to Draft"
+                            class="btn-danger"
                             invisible="state == 'draft'"
                             confirm="Reset this OMR sheet to draft?"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,generated,downloaded,attached,scanned"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_scan" type="object"
+                                class="oe_stat_button text-info"
+                                icon="fa-search"
+                                invisible="not scan_count">
+                            <field name="scan_count" widget="statinfo" string="Scan"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name" readonly="1"/>
