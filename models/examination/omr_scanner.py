@@ -508,6 +508,26 @@ class OMRScanner(models.Model):
     def action_reset_draft(self):
         self.write({'state': 'draft', 'error_message': False})
 
+    def action_view_sheet(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('OMR Sheet'),
+            'res_model': 'exam.omr.sheet',
+            'view_mode': 'form',
+            'res_id': self.omr_sheet_id.id,
+        }
+
+    def action_view_result(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Result'),
+            'res_model': 'examination.result',
+            'view_mode': 'form',
+            'res_id': self.result_id.id,
+        }
+
     # ==================================================================
     # Batch processing
     # ==================================================================
