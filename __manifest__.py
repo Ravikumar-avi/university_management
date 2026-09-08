@@ -380,6 +380,9 @@
             'university_management/static/src/js/ai_assistant.js',
             'university_management/static/src/css/omr_scanner.css',
             'university_management/static/src/js/omr_scanner_widget.js',
+            'university_management/static/src/css/bulk_omr_multi_upload.css',
+            'university_management/static/src/js/bulk_omr_multi_upload_widget.js',
+            'university_management/static/src/xml/bulk_omr_multi_upload_templates.xml',
         ],
     },
 

@@ -31,6 +31,13 @@ class BulkOMRScanWizard(models.TransientModel):
     scan_line_ids = fields.One2many('exam.omr.bulk.scan.wizard.line', 'wizard_id',
                                     string='Scanned Files')
 
+    # Not stored, not used server-side. It only exists so the
+    # "bulk_omr_multi_upload" JS widget has a field to attach to and can
+    # let the user pick/drop many files (e.g. 100 PDFs) at once; each
+    # selected file is turned into a scan_line_ids record automatically.
+    bulk_upload_helper = fields.Binary(string='Upload Multiple Scanned Sheets',
+                                       store=False)
+
     auto_confirm = fields.Boolean(string='Auto-Confirm Marks', default=False,
                                   help='Automatically confirm and update results after OCR.')
 
