@@ -86,6 +86,7 @@
         'data/sequence.xml',
         'data/online_exam_sequences.xml',
         'data/omr_sequences.xml',
+        'data/omr_scanner_export_template.xml',
         'data/email_templates.xml',
         'data/sms_templates.xml',
         'data/automated_actions.xml',
@@ -383,6 +384,7 @@
             'university_management/static/src/css/bulk_omr_multi_upload.css',
             'university_management/static/src/js/bulk_omr_multi_upload_widget.js',
             'university_management/static/src/xml/bulk_omr_multi_upload_templates.xml',
+            'university_management/static/src/js/omr_export_template_autoselect.js',
         ],
     },
 

@@ -109,10 +109,140 @@
 
                     <notebook>
                         <page string="Question-wise Marks" name="marks_detail">
+                            <p class="text-muted">
+                                Edit a value below if OCR detected it incorrectly. Every question below
+                                is its own stored field, so it also appears as its own column in list
+                                views and in the Export Data wizard — just like Grand Total Marks.
+                            </p>
+                            <group string="Part A — Q1 (A - J)">
+                                <group>
+                                    <field name="pa_q1_a"/>
+                                    <field name="pa_q1_b"/>
+                                    <field name="pa_q1_c"/>
+                                    <field name="pa_q1_d"/>
+                                    <field name="pa_q1_e"/>
+                                    <field name="pa_q1_f"/>
+                                </group>
+                                <group>
+                                    <field name="pa_q1_g"/>
+                                    <field name="pa_q1_h"/>
+                                    <field name="pa_q1_i"/>
+                                    <field name="pa_q1_j"/>
+                                    <field name="pa_q1_extra"/>
+                                    <field name="pa_q1_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q1">
+                                <group col="5">
+                                    <field name="pb_q1_a"/>
+                                    <field name="pb_q1_b"/>
+                                    <field name="pb_q1_c"/>
+                                    <field name="pb_q1_d"/>
+                                    <field name="pb_q1_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q2">
+                                <group col="5">
+                                    <field name="pb_q2_a"/>
+                                    <field name="pb_q2_b"/>
+                                    <field name="pb_q2_c"/>
+                                    <field name="pb_q2_d"/>
+                                    <field name="pb_q2_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q3">
+                                <group col="5">
+                                    <field name="pb_q3_a"/>
+                                    <field name="pb_q3_b"/>
+                                    <field name="pb_q3_c"/>
+                                    <field name="pb_q3_d"/>
+                                    <field name="pb_q3_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q4">
+                                <group col="5">
+                                    <field name="pb_q4_a"/>
+                                    <field name="pb_q4_b"/>
+                                    <field name="pb_q4_c"/>
+                                    <field name="pb_q4_d"/>
+                                    <field name="pb_q4_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q5">
+                                <group col="5">
+                                    <field name="pb_q5_a"/>
+                                    <field name="pb_q5_b"/>
+                                    <field name="pb_q5_c"/>
+                                    <field name="pb_q5_d"/>
+                                    <field name="pb_q5_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q6">
+                                <group col="5">
+                                    <field name="pb_q6_a"/>
+                                    <field name="pb_q6_b"/>
+                                    <field name="pb_q6_c"/>
+                                    <field name="pb_q6_d"/>
+                                    <field name="pb_q6_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q7">
+                                <group col="5">
+                                    <field name="pb_q7_a"/>
+                                    <field name="pb_q7_b"/>
+                                    <field name="pb_q7_c"/>
+                                    <field name="pb_q7_d"/>
+                                    <field name="pb_q7_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q8">
+                                <group col="5">
+                                    <field name="pb_q8_a"/>
+                                    <field name="pb_q8_b"/>
+                                    <field name="pb_q8_c"/>
+                                    <field name="pb_q8_d"/>
+                                    <field name="pb_q8_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q9">
+                                <group col="5">
+                                    <field name="pb_q9_a"/>
+                                    <field name="pb_q9_b"/>
+                                    <field name="pb_q9_c"/>
+                                    <field name="pb_q9_d"/>
+                                    <field name="pb_q9_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q10">
+                                <group col="5">
+                                    <field name="pb_q10_a"/>
+                                    <field name="pb_q10_b"/>
+                                    <field name="pb_q10_c"/>
+                                    <field name="pb_q10_d"/>
+                                    <field name="pb_q10_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q11">
+                                <group col="5">
+                                    <field name="pb_q11_a"/>
+                                    <field name="pb_q11_b"/>
+                                    <field name="pb_q11_c"/>
+                                    <field name="pb_q11_d"/>
+                                    <field name="pb_q11_total"/>
+                                </group>
+                            </group>
+                            <group string="Part B — Q12">
+                                <group col="5">
+                                    <field name="pb_q12_a"/>
+                                    <field name="pb_q12_b"/>
+                                    <field name="pb_q12_c"/>
+                                    <field name="pb_q12_d"/>
+                                    <field name="pb_q12_total"/>
+                                </group>
+                            </group>
                             <group>
-                                <field name="question_marks_display"
-                                       placeholder="Q1a=5, Q1b=3, Q2a=7 …"
-                                       help="Edit these values if OCR detected incorrectly."/>
+                                <field name="unread_questions_display" readonly="1"
+                                       invisible="not unread_questions_display"/>
                             </group>
                             <group string="Raw OCR Data (JSON)"
                                    invisible="not detected_marks_json">
@@ -140,6 +270,78 @@
                 <field name="decoded_subject_code"/>
                 <field name="grand_total"/>
                 <field name="valuation_part"/>
+                <field name="pa_q1_a" optional="show"/>
+                <field name="pa_q1_b" optional="show"/>
+                <field name="pa_q1_c" optional="show"/>
+                <field name="pa_q1_d" optional="show"/>
+                <field name="pa_q1_e" optional="show"/>
+                <field name="pa_q1_f" optional="show"/>
+                <field name="pa_q1_g" optional="show"/>
+                <field name="pa_q1_h" optional="show"/>
+                <field name="pa_q1_i" optional="show"/>
+                <field name="pa_q1_j" optional="show"/>
+                <field name="pa_q1_extra" optional="show"/>
+                <field name="pa_q1_total" optional="show"/>
+                <field name="pb_q1_a" optional="show"/>
+                <field name="pb_q1_b" optional="show"/>
+                <field name="pb_q1_c" optional="show"/>
+                <field name="pb_q1_d" optional="show"/>
+                <field name="pb_q1_total" optional="show"/>
+                <field name="pb_q2_a" optional="show"/>
+                <field name="pb_q2_b" optional="show"/>
+                <field name="pb_q2_c" optional="show"/>
+                <field name="pb_q2_d" optional="show"/>
+                <field name="pb_q2_total" optional="show"/>
+                <field name="pb_q3_a" optional="show"/>
+                <field name="pb_q3_b" optional="show"/>
+                <field name="pb_q3_c" optional="show"/>
+                <field name="pb_q3_d" optional="show"/>
+                <field name="pb_q3_total" optional="show"/>
+                <field name="pb_q4_a" optional="show"/>
+                <field name="pb_q4_b" optional="show"/>
+                <field name="pb_q4_c" optional="show"/>
+                <field name="pb_q4_d" optional="show"/>
+                <field name="pb_q4_total" optional="show"/>
+                <field name="pb_q5_a" optional="show"/>
+                <field name="pb_q5_b" optional="show"/>
+                <field name="pb_q5_c" optional="show"/>
+                <field name="pb_q5_d" optional="show"/>
+                <field name="pb_q5_total" optional="show"/>
+                <field name="pb_q6_a" optional="show"/>
+                <field name="pb_q6_b" optional="show"/>
+                <field name="pb_q6_c" optional="show"/>
+                <field name="pb_q6_d" optional="show"/>
+                <field name="pb_q6_total" optional="show"/>
+                <field name="pb_q7_a" optional="show"/>
+                <field name="pb_q7_b" optional="show"/>
+                <field name="pb_q7_c" optional="show"/>
+                <field name="pb_q7_d" optional="show"/>
+                <field name="pb_q7_total" optional="show"/>
+                <field name="pb_q8_a" optional="show"/>
+                <field name="pb_q8_b" optional="show"/>
+                <field name="pb_q8_c" optional="show"/>
+                <field name="pb_q8_d" optional="show"/>
+                <field name="pb_q8_total" optional="show"/>
+                <field name="pb_q9_a" optional="show"/>
+                <field name="pb_q9_b" optional="show"/>
+                <field name="pb_q9_c" optional="show"/>
+                <field name="pb_q9_d" optional="show"/>
+                <field name="pb_q9_total" optional="show"/>
+                <field name="pb_q10_a" optional="show"/>
+                <field name="pb_q10_b" optional="show"/>
+                <field name="pb_q10_c" optional="show"/>
+                <field name="pb_q10_d" optional="show"/>
+                <field name="pb_q10_total" optional="show"/>
+                <field name="pb_q11_a" optional="show"/>
+                <field name="pb_q11_b" optional="show"/>
+                <field name="pb_q11_c" optional="show"/>
+                <field name="pb_q11_d" optional="show"/>
+                <field name="pb_q11_total" optional="show"/>
+                <field name="pb_q12_a" optional="show"/>
+                <field name="pb_q12_b" optional="show"/>
+                <field name="pb_q12_c" optional="show"/>
+                <field name="pb_q12_d" optional="show"/>
+                <field name="pb_q12_total" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-info="state == 'draft'"
                        decoration-warning="state in ('decoded', 'ocr_done')"

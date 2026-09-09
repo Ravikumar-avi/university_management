@@ -177,12 +177,221 @@ class OMRScanner(models.Model):
     )
     detected_grand_total = fields.Integer(string='Detected Grand Total', readonly=True)
 
-    # Editable fields for manual correction before confirmation
-    question_marks_display = fields.Text(
-        string='Question-wise Marks',
-        help='Edit if OCR detection was incorrect. Format: Q1a=5, Q1b=3 …',
+    # Editable — one Char field per printed question box. Edit a value
+    # here if OCR detected it incorrectly (see QUESTION_FIELD_MAP below).
+    # ------------------------------------------------------------------
+    # Question-wise marks — ONE FIELD PER QUESTION (fixed columns)
+    # ------------------------------------------------------------------
+    # Matches the fixed, printed grid geometry in _COLS_PART_A /
+    # _COLS_PART_B_LEFT / _COLS_PART_B_RIGHT above: every question box
+    # printed on the OMR sheet gets its own stored Char field here (Q1A,
+    # Q1B, ... Q12total), instead of being packed into one text blob or
+    # one2many. Because they're real fields on this model, they behave
+    # exactly like 'Grand Total Marks': they show as their own columns in
+    # the list view and are picked up automatically by the Export Data
+    # wizard (see QUESTION_FIELD_MAP below, and views/.../omr_scanner_views.xml).
+    #
+    # NOTE — bug fixed while adding these: _ocr_marks_grid() used to write
+    # Part-A's own 'Q1total' cell and Part-B question 1's 'Q1total' cell to
+    # the exact same dict key ('Q1total'), so Part-B silently overwrote
+    # Part-A's total. Part-A's total cell is now read into 'Q1PAtotal'
+    # instead, so both are captured correctly (see pa_q1_total below).
+    pa_q1_a = fields.Char(string='Q1A')
+    pa_q1_b = fields.Char(string='Q1B')
+    pa_q1_c = fields.Char(string='Q1C')
+    pa_q1_d = fields.Char(string='Q1D')
+    pa_q1_e = fields.Char(string='Q1E')
+    pa_q1_f = fields.Char(string='Q1F')
+    pa_q1_g = fields.Char(string='Q1G')
+    pa_q1_h = fields.Char(string='Q1H')
+    pa_q1_i = fields.Char(string='Q1I')
+    pa_q1_j = fields.Char(string='Q1J')
+    pa_q1_extra = fields.Char(string='Q1 Extra')
+    pa_q1_total = fields.Char(string='Q1 Total (Part-A)')
+    pb_q1_a = fields.Char(string='Q1a')
+    pb_q1_b = fields.Char(string='Q1b')
+    pb_q1_c = fields.Char(string='Q1c')
+    pb_q1_d = fields.Char(string='Q1d')
+    pb_q1_total = fields.Char(string='Q1 Total')
+    pb_q2_a = fields.Char(string='Q2a')
+    pb_q2_b = fields.Char(string='Q2b')
+    pb_q2_c = fields.Char(string='Q2c')
+    pb_q2_d = fields.Char(string='Q2d')
+    pb_q2_total = fields.Char(string='Q2 Total')
+    pb_q3_a = fields.Char(string='Q3a')
+    pb_q3_b = fields.Char(string='Q3b')
+    pb_q3_c = fields.Char(string='Q3c')
+    pb_q3_d = fields.Char(string='Q3d')
+    pb_q3_total = fields.Char(string='Q3 Total')
+    pb_q4_a = fields.Char(string='Q4a')
+    pb_q4_b = fields.Char(string='Q4b')
+    pb_q4_c = fields.Char(string='Q4c')
+    pb_q4_d = fields.Char(string='Q4d')
+    pb_q4_total = fields.Char(string='Q4 Total')
+    pb_q5_a = fields.Char(string='Q5a')
+    pb_q5_b = fields.Char(string='Q5b')
+    pb_q5_c = fields.Char(string='Q5c')
+    pb_q5_d = fields.Char(string='Q5d')
+    pb_q5_total = fields.Char(string='Q5 Total')
+    pb_q6_a = fields.Char(string='Q6a')
+    pb_q6_b = fields.Char(string='Q6b')
+    pb_q6_c = fields.Char(string='Q6c')
+    pb_q6_d = fields.Char(string='Q6d')
+    pb_q6_total = fields.Char(string='Q6 Total')
+    pb_q7_a = fields.Char(string='Q7a')
+    pb_q7_b = fields.Char(string='Q7b')
+    pb_q7_c = fields.Char(string='Q7c')
+    pb_q7_d = fields.Char(string='Q7d')
+    pb_q7_total = fields.Char(string='Q7 Total')
+    pb_q8_a = fields.Char(string='Q8a')
+    pb_q8_b = fields.Char(string='Q8b')
+    pb_q8_c = fields.Char(string='Q8c')
+    pb_q8_d = fields.Char(string='Q8d')
+    pb_q8_total = fields.Char(string='Q8 Total')
+    pb_q9_a = fields.Char(string='Q9a')
+    pb_q9_b = fields.Char(string='Q9b')
+    pb_q9_c = fields.Char(string='Q9c')
+    pb_q9_d = fields.Char(string='Q9d')
+    pb_q9_total = fields.Char(string='Q9 Total')
+    pb_q10_a = fields.Char(string='Q10a')
+    pb_q10_b = fields.Char(string='Q10b')
+    pb_q10_c = fields.Char(string='Q10c')
+    pb_q10_d = fields.Char(string='Q10d')
+    pb_q10_total = fields.Char(string='Q10 Total')
+    pb_q11_a = fields.Char(string='Q11a')
+    pb_q11_b = fields.Char(string='Q11b')
+    pb_q11_c = fields.Char(string='Q11c')
+    pb_q11_d = fields.Char(string='Q11d')
+    pb_q11_total = fields.Char(string='Q11 Total')
+    pb_q12_a = fields.Char(string='Q12a')
+    pb_q12_b = fields.Char(string='Q12b')
+    pb_q12_c = fields.Char(string='Q12c')
+    pb_q12_d = fields.Char(string='Q12d')
+    pb_q12_total = fields.Char(string='Q12 Total')
+
+    # (field_name, marks_data key, question label) — single source of
+    # truth used by _sync_question_mark_fields() to fill the fields above
+    # from the OCR result, and by _compute_question_marks_display() to
+    # rebuild the readable 'Q1A=3, Q1B=2 ...' summary posted to the result.
+    QUESTION_FIELD_MAP = [
+        ('pa_q1_a', 'Q1A'),
+        ('pa_q1_b', 'Q1B'),
+        ('pa_q1_c', 'Q1C'),
+        ('pa_q1_d', 'Q1D'),
+        ('pa_q1_e', 'Q1E'),
+        ('pa_q1_f', 'Q1F'),
+        ('pa_q1_g', 'Q1G'),
+        ('pa_q1_h', 'Q1H'),
+        ('pa_q1_i', 'Q1I'),
+        ('pa_q1_j', 'Q1J'),
+        ('pa_q1_extra', 'Q1extra'),
+        ('pa_q1_total', 'Q1PAtotal'),
+        ('pb_q1_a', 'Q1a'),
+        ('pb_q1_b', 'Q1b'),
+        ('pb_q1_c', 'Q1c'),
+        ('pb_q1_d', 'Q1d'),
+        ('pb_q1_total', 'Q1total'),
+        ('pb_q2_a', 'Q2a'),
+        ('pb_q2_b', 'Q2b'),
+        ('pb_q2_c', 'Q2c'),
+        ('pb_q2_d', 'Q2d'),
+        ('pb_q2_total', 'Q2total'),
+        ('pb_q3_a', 'Q3a'),
+        ('pb_q3_b', 'Q3b'),
+        ('pb_q3_c', 'Q3c'),
+        ('pb_q3_d', 'Q3d'),
+        ('pb_q3_total', 'Q3total'),
+        ('pb_q4_a', 'Q4a'),
+        ('pb_q4_b', 'Q4b'),
+        ('pb_q4_c', 'Q4c'),
+        ('pb_q4_d', 'Q4d'),
+        ('pb_q4_total', 'Q4total'),
+        ('pb_q5_a', 'Q5a'),
+        ('pb_q5_b', 'Q5b'),
+        ('pb_q5_c', 'Q5c'),
+        ('pb_q5_d', 'Q5d'),
+        ('pb_q5_total', 'Q5total'),
+        ('pb_q6_a', 'Q6a'),
+        ('pb_q6_b', 'Q6b'),
+        ('pb_q6_c', 'Q6c'),
+        ('pb_q6_d', 'Q6d'),
+        ('pb_q6_total', 'Q6total'),
+        ('pb_q7_a', 'Q7a'),
+        ('pb_q7_b', 'Q7b'),
+        ('pb_q7_c', 'Q7c'),
+        ('pb_q7_d', 'Q7d'),
+        ('pb_q7_total', 'Q7total'),
+        ('pb_q8_a', 'Q8a'),
+        ('pb_q8_b', 'Q8b'),
+        ('pb_q8_c', 'Q8c'),
+        ('pb_q8_d', 'Q8d'),
+        ('pb_q8_total', 'Q8total'),
+        ('pb_q9_a', 'Q9a'),
+        ('pb_q9_b', 'Q9b'),
+        ('pb_q9_c', 'Q9c'),
+        ('pb_q9_d', 'Q9d'),
+        ('pb_q9_total', 'Q9total'),
+        ('pb_q10_a', 'Q10a'),
+        ('pb_q10_b', 'Q10b'),
+        ('pb_q10_c', 'Q10c'),
+        ('pb_q10_d', 'Q10d'),
+        ('pb_q10_total', 'Q10total'),
+        ('pb_q11_a', 'Q11a'),
+        ('pb_q11_b', 'Q11b'),
+        ('pb_q11_c', 'Q11c'),
+        ('pb_q11_d', 'Q11d'),
+        ('pb_q11_total', 'Q11total'),
+        ('pb_q12_a', 'Q12a'),
+        ('pb_q12_b', 'Q12b'),
+        ('pb_q12_c', 'Q12c'),
+        ('pb_q12_d', 'Q12d'),
+        ('pb_q12_total', 'Q12total'),
+    ]
+
+    unread_questions_display = fields.Char(
+        string='Unread Questions',
+        help='Question codes where OCR found ink but could not confidently '
+             'read a digit — check the scanned sheet and type the value into '
+             'the matching field above by hand.',
+    )
+
+    # Kept for anything still reading the old field name / for a readable
+    # one-line summary posted to the result record's chatter (see
+    # action_confirm_marks). Rebuilt automatically from the per-question
+    # fields above — not edited directly.
+    question_marks_display = fields.Char(
+        string='Question-wise Marks (text)',
+        compute='_compute_question_marks_display', store=True,
     )
     grand_total = fields.Integer(string='Grand Total Marks')
+
+    @api.depends(
+        'pa_q1_a', 'pa_q1_b', 'pa_q1_c', 'pa_q1_d', 'pa_q1_e', 'pa_q1_f',
+        'pa_q1_g', 'pa_q1_h', 'pa_q1_i', 'pa_q1_j', 'pa_q1_extra',
+        'pa_q1_total', 'pb_q1_a', 'pb_q1_b', 'pb_q1_c', 'pb_q1_d',
+        'pb_q1_total', 'pb_q2_a', 'pb_q2_b', 'pb_q2_c', 'pb_q2_d',
+        'pb_q2_total', 'pb_q3_a', 'pb_q3_b', 'pb_q3_c', 'pb_q3_d',
+        'pb_q3_total', 'pb_q4_a', 'pb_q4_b', 'pb_q4_c', 'pb_q4_d',
+        'pb_q4_total', 'pb_q5_a', 'pb_q5_b', 'pb_q5_c', 'pb_q5_d',
+        'pb_q5_total', 'pb_q6_a', 'pb_q6_b', 'pb_q6_c', 'pb_q6_d',
+        'pb_q6_total', 'pb_q7_a', 'pb_q7_b', 'pb_q7_c', 'pb_q7_d',
+        'pb_q7_total', 'pb_q8_a', 'pb_q8_b', 'pb_q8_c', 'pb_q8_d',
+        'pb_q8_total', 'pb_q9_a', 'pb_q9_b', 'pb_q9_c', 'pb_q9_d',
+        'pb_q9_total', 'pb_q10_a', 'pb_q10_b', 'pb_q10_c', 'pb_q10_d',
+        'pb_q10_total', 'pb_q11_a', 'pb_q11_b', 'pb_q11_c', 'pb_q11_d',
+        'pb_q11_total', 'pb_q12_a', 'pb_q12_b', 'pb_q12_c', 'pb_q12_d',
+        'pb_q12_total', 'unread_questions_display'
+    )
+    def _compute_question_marks_display(self):
+        for omr in self:
+            parts = [
+                f'{key}={getattr(omr, fname)}'
+                for fname, key in omr.QUESTION_FIELD_MAP
+                if getattr(omr, fname)
+            ]
+            if omr.unread_questions_display:
+                parts.append('UNREAD(check sheet)=' + omr.unread_questions_display)
+            omr.question_marks_display = ', '.join(parts)
 
     # ---- Valuation part detected ----
     valuation_part = fields.Selection([
@@ -407,26 +616,38 @@ class OMRScanner(models.Model):
 
         marks_data, grand_total, needs_review, review_notes, unread_cells, engine_used = self._ocr_marks_grid(img)
 
-        display_lines = []
-        for key in sorted(marks_data.keys()):
-            display_lines.append(f"{key}={marks_data[key]}")
-        if unread_cells:
-            # Surface unread-but-inked cells explicitly instead of just
-            # omitting them, so the examiner knows exactly which boxes on
-            # the sheet still need to be typed in by hand.
-            display_lines.append('UNREAD(check sheet)=' + ','.join(sorted(unread_cells)))
-
-        self.write({
+        vals = {
             'detected_marks_json': json.dumps(marks_data, indent=2),
             'detected_grand_total': grand_total,
-            'question_marks_display': ', '.join(display_lines),
             'grand_total': grand_total,
             'state': 'ocr_done',
             'needs_review': needs_review,
             'review_notes': review_notes,
             'reviewed_manually': False,
             'error_message': False,
-        })
+        }
+        vals.update(self._build_question_field_vals(marks_data, unread_cells))
+        self.write(vals)
+
+    def _build_question_field_vals(self, marks_data, unread_cells=None):
+        """Map a {question_code: mark} dict (as returned by
+        _ocr_marks_grid) onto this model's fixed per-question fields
+        (see QUESTION_FIELD_MAP), so every question gets its own
+        stored, exportable field/column instead of one comma-separated
+        blob or a one2many. Any question NOT present in marks_data
+        (blank on the sheet) is cleared.
+        """
+        unread_cells = set(unread_cells or [])
+        vals = {}
+        for fname, key in self.QUESTION_FIELD_MAP:
+            if key in marks_data:
+                vals[fname] = str(marks_data[key])
+            elif key in unread_cells:
+                vals[fname] = False
+            else:
+                vals[fname] = False
+        vals['unread_questions_display'] = ','.join(sorted(unread_cells)) if unread_cells else False
+        return vals
 
     # ==================================================================
     # 3. CONFIRM & UPDATE RESULT
@@ -855,9 +1076,14 @@ class OMRScanner(models.Model):
                 unread_cells.append(key)
 
         # PART-A: single row, columns A-J (+ one unlabeled column) + Total.
+        # NOTE: Part-A's own total cell is read into 'Q1PAtotal', NOT
+        # 'Q1total' — 'Q1total' is Part-B question 1's total cell (read
+        # below). Using the same key for both used to make Part-B silently
+        # overwrite Part-A's total in marks_dict.
         a_y0, a_y1 = layout['part_a_row']
         for label, (x0, x1) in self._COLS_PART_A.items():
-            read_cell(f'Q1{label}', x0, a_y0, x1, a_y1)
+            key = 'Q1PAtotal' if label == 'total' else f'Q1{label}'
+            read_cell(key, x0, a_y0, x1, a_y1)
 
         # PART-B: 6 printed rows, each holding two question numbers
         # side by side (odd on the left, even on the right).
