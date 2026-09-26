@@ -3,9 +3,36 @@ from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import AccessError, MissingError
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
+from odoo.addons.web.controllers.home import Home
 import logging
 
 _logger = logging.getLogger(__name__)
+
+
+class UniversityLoginRedirect(Home):
+    """Send Faculty / Student / Parent users straight to their own
+    dashboard the moment they log in, instead of the backend or the
+    website homepage. Admins and any explicit ``redirect`` target
+    (e.g. a shared deep link) are left untouched.
+
+    This hooks into ``_login_redirect``, the helper Odoo's own
+    ``web_login`` already calls right after a successful
+    authentication to decide where to send the user, so the login
+    response, session and cookies are still built exactly once, the
+    normal Odoo way.
+    """
+
+    def _login_redirect(self, uid, redirect=None):
+        if not redirect:
+            user = request.env['res.users'].sudo().browse(uid)
+            if user.has_group('university_management.group_student_portal'):
+                redirect = '/my/student/dashboard'
+            elif user.has_group('university_management.group_parent_portal'):
+                redirect = '/my/parent/dashboard'
+            elif user.has_group('university_management.group_faculty') and not \
+                    user.has_group('university_management.group_university_admin'):
+                redirect = '/my/faculty/dashboard'
+        return super()._login_redirect(uid, redirect=redirect)
 
 
 class UniversityWebsiteController(http.Controller):
