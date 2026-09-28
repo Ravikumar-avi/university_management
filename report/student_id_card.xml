@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- Custom Paper Format for ID Card (CR80: 54 x 86 mm portrait) -->
     <record id="paperformat_id_card" model="report.paperformat">
         <field name="name">ID Card Format</field>
@@ -16,7 +15,6 @@
         <field name="header_spacing">0</field>
         <field name="dpi">96</field>
     </record>
-
     <!-- Report Action -->
     <record id="action_report_student_id_card" model="ir.actions.report">
         <field name="name">Student ID Card</field>
@@ -28,97 +26,358 @@
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="paperformat_id_card"/>
     </record>
-
     <!-- Report Template -->
     <template id="report_student_id_card">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="company" t-value="o.student_id.company_id or env.company"/>
-
                 <!-- FRONT -->
-<div class="page" style="page-break-after: always;">
-  <div style="width: 52mm; height: 83mm; overflow: hidden; position: relative; font-family: Arial, Helvetica, sans-serif; text-rendering: geometricPrecision;">
-    <div style="width: 156mm; height: 249mm; position: absolute; top: 0; left: 0; -webkit-transform: scale(0.333333); -webkit-transform-origin: 0 0; transform: scale(0.333333); transform-origin: 0 0;">
-
-<div style="width: 156mm; height: 249mm; box-sizing: border-box; border-radius: 9mm; background-color: #ffffff; position: relative;">
-  <div style="background-color: #0b2545; height: 42mm; padding: 6mm 7.5mm; box-sizing: border-box; border-radius: 9mm 9mm 0 0;">
-    <table style="width: 100%; border-collapse: collapse;"><tr>
-      <td style="width: 33mm; vertical-align: middle;">
-        <div t-if="company.logo" t-attf-style="width: 30mm; height: 30mm; border-radius: 15mm; background-color: #ffffff; background-image: url(#{image_data_uri(company.logo)}); background-repeat: no-repeat; background-position: center; background-size: 80% auto;"></div>
-      </td>
-      <td style="vertical-align: middle; padding-left: 4.5mm; color: #ffffff; font-size: 19.5pt; font-weight: bold; line-height: 1.25; text-transform: uppercase;"><t t-esc="company.name or 'University'"/></td>
-    </tr></table>
-  </div>
-  <div style="height: 2.4mm; background-color: #c9a227;"></div>
-  <div style="text-align: center; font-size: 18pt; font-weight: bold; color: #0b2545; padding-top: 3.6mm;">STUDENT IDENTITY CARD</div>
-  <div style="margin-top: 3.6mm;">
-    <div t-if="o.student_id.student_photo" t-attf-style="width: 66mm; height: 81mm; margin: 0 auto; border: 1.2mm solid #0b2545; border-radius: 6mm; background-color: #f0f0f0; background-image: url(#{image_data_uri(o.student_id.student_photo)}); background-repeat: no-repeat; background-position: center top; background-size: cover;"></div>
-    <div t-else="" style="width: 66mm; height: 81mm; margin: 0 auto; border: 1.2mm solid #0b2545; border-radius: 6mm; background-color: #f0f0f0; text-align: center; font-size: 18pt; color: #999999; line-height: 81mm;">No Photo</div>
-  </div>
-  <div style="padding: 0 9mm; margin-top: 4.5mm;">
-    <table style="width: 100%; border-collapse: collapse; font-size: 19.8pt; line-height: 9.6mm;">
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Name</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; font-weight: bold; text-transform: uppercase;"><t t-esc="o.student_id.name"/></td></tr>
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Reg. No</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; "><t t-esc="o.student_id.registration_number"/></td></tr>
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Program</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; "><t t-esc="o.student_id.program_id.code or o.student_id.program_id.name or 'N/A'"/></td></tr>
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Batch</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; "><t t-esc="o.student_id.batch_id.name or 'N/A'"/></td></tr>
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Blood Group</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; "><t t-esc="(o.student_id.blood_group or 'N/A').upper()"/></td></tr>
-      <tr><td style="font-weight: bold; color: #0b2545; padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; white-space: nowrap;">Valid Till</td><td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; "><t t-esc="o.expiry_date"/></td></tr>
-    </table>
-  </div>
-  <div style="position: absolute; left: 0; right: 0; bottom: 0;">
-    <div style="height: 1.8mm; background-color: #c9a227;"></div>
-    <div style="height: 13.2mm; background-color: #0b2545; border-radius: 0 0 9mm 9mm; text-align: center; color: #ffffff; font-size: 16.5pt; line-height: 13.2mm;"><t t-esc="company.website or ''"/></div>
-  </div>
-</div>
-    </div>
-  </div>
-</div>
-
+                <div class="page" style="page-break-after: always;">
+                    <div
+                            style="width: 52mm;
+                  height: 83mm;
+                  overflow: hidden;
+                  position: relative;
+                  font-family: Arial, Helvetica, sans-serif;
+                  text-rendering: geometricPrecision;">
+                        <div
+                                style="width: 156mm;
+                    height: 249mm;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    -webkit-transform: scale(0.333333);
+                    -webkit-transform-origin: 0 0;
+                    transform: scale(0.333333);
+                    transform-origin: 0 0;">
+                            <div
+                                    style="width: 156mm;
+                      height: 249mm;
+                      box-sizing: border-box;
+                      border-radius: 9mm;
+                      background-color: #ffffff;
+                      position: relative;">
+                                <div
+                                        style="background-color: #0b2545;
+                        height: 42mm;
+                        padding: 6mm 7.5mm;
+                        box-sizing: border-box;
+                        border-radius: 9mm 9mm 0 0;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="width: 33mm; vertical-align: middle;">
+                                                <div
+                                                        t-if="company.logo"
+                                                        t-attf-style="width: 30mm;
+                                height: 30mm;
+                                border-radius: 15mm;
+                                background-color: #ffffff;
+                                background-image: url(#{image_data_uri(company.logo)});
+                                background-repeat: no-repeat;
+                                background-position: center;
+                                background-size: 80% auto;"/>
+                                            </td>
+                                            <td
+                                                    style="vertical-align: middle;
+                              padding-left: 4.5mm;
+                              color: #ffffff;
+                              font-size: 19.5pt;
+                              font-weight: bold;
+                              line-height: 1.25;
+                              text-transform: uppercase;">
+                                                <t t-esc="company.name or 'University'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="height: 2.4mm; background-color: #c9a227;"/>
+                                <div
+                                        style="text-align: center;
+                        font-size: 18pt;
+                        font-weight: bold;
+                        color: #0b2545;
+                        padding-top: 3.6mm;">STUDENT IDENTITY CARD
+                                </div>
+                                <div style="margin-top: 3.6mm;">
+                                    <div
+                                            t-if="o.student_id.student_photo"
+                                            t-attf-style="width: 66mm;
+                          height: 81mm;
+                          margin: 0 auto;
+                          border: 1.2mm solid #0b2545;
+                          border-radius: 6mm;
+                          background-color: #f0f0f0;
+                          background-image: url(#{image_data_uri(o.student_id.student_photo)});
+                          background-repeat: no-repeat;
+                          background-position: center top;
+                          background-size: cover;"/>
+                                    <div
+                                            t-else=""
+                                            style="width: 66mm;
+                          height: 81mm;
+                          margin: 0 auto;
+                          border: 1.2mm solid #0b2545;
+                          border-radius: 6mm;
+                          background-color: #f0f0f0;
+                          text-align: center;
+                          font-size: 18pt;
+                          color: #999999;
+                          line-height: 81mm;">No Photo
+                                    </div>
+                                </div>
+                                <div style="padding: 0 9mm; margin-top: 4.5mm;">
+                                    <table
+                                            style="width: 100%;
+                          border-collapse: collapse;
+                          font-size: 19.8pt;
+                          line-height: 9.6mm;">
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Name
+                                            </td>
+                                            <td
+                                                    style="padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              font-weight: bold;
+                              text-transform: uppercase;">
+                                                <t t-esc="o.student_id.name"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Reg. No
+                                            </td>
+                                            <td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; ">
+                                                <t t-esc="o.student_id.registration_number"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Program
+                                            </td>
+                                            <td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; ">
+                                                <t t-esc="o.student_id.program_id.code or o.student_id.program_id.name or 'N/A'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Batch
+                                            </td>
+                                            <td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; ">
+                                                <t t-esc="o.student_id.batch_id.name or 'N/A'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Blood Group
+                                            </td>
+                                            <td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; ">
+                                                <t t-esc="(o.student_id.blood_group or 'N/A').upper()"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    style="font-weight: bold;
+                              color: #0b2545;
+                              padding: 0.9mm 0;
+                              height: 11.4mm;
+                              vertical-align: middle;
+                              white-space: nowrap;">Valid Till
+                                            </td>
+                                            <td style="padding: 0.9mm 0; height: 11.4mm; vertical-align: middle; ">
+                                                <t t-esc="o.expiry_date"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="position: absolute; left: 0; right: 0; bottom: 0;">
+                                    <div style="height: 1.8mm; background-color: #c9a227;"/>
+                                    <div
+                                            style="height: 13.2mm;
+                          background-color: #0b2545;
+                          border-radius: 0 0 9mm 9mm;
+                          text-align: center;
+                          color: #ffffff;
+                          font-size: 16.5pt;
+                          line-height: 13.2mm;">
+                                        <t t-esc="company.website or ''"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- BACK -->
-<div class="page" t-att-style="'page-break-after: %s;' % ('auto' if o_last else 'always')">
-  <div style="width: 52mm; height: 83mm; overflow: hidden; position: relative; font-family: Arial, Helvetica, sans-serif; text-rendering: geometricPrecision;">
-    <div style="width: 156mm; height: 249mm; position: absolute; top: 0; left: 0; -webkit-transform: scale(0.333333); -webkit-transform-origin: 0 0; transform: scale(0.333333); transform-origin: 0 0;">
-
-<div style="width: 156mm; height: 249mm; box-sizing: border-box; border-radius: 9mm; background-color: #ffffff; position: relative;">
-  <div style="background-color: #0b2545; height: 18mm; text-align: center; color: #ffffff; font-size: 19.5pt; font-weight: bold; line-height: 18mm; border-radius: 9mm 9mm 0 0;">IMPORTANT INFORMATION</div>
-  <div style="height: 2.4mm; background-color: #c9a227;"></div>
-  <div style="padding: 6mm 9mm 0 9mm;">
-    <div style="font-size: 19.5pt; font-weight: bold; color: #0b2545; border-bottom: 0.9mm solid #c9a227; padding-bottom: 1.5mm;">INSTRUCTIONS</div>
-    <ul style="margin: 3mm 0 6mm 0; padding-left: 10.5mm; font-size: 17.4pt; line-height: 1.45;">
-      <li>This card is the property of the institution</li><li>Must be carried at all times on campus</li>
-      <li>Report loss immediately to admin office</li><li>Not transferable to any other person</li>
-    </ul>
-    <div style="font-size: 19.5pt; font-weight: bold; color: #0b2545; border-bottom: 0.9mm solid #c9a227; padding-bottom: 1.5mm;">EMERGENCY CONTACT</div>
-    <table style="width: 100%; border-collapse: collapse; font-size: 18.6pt; line-height: 1.45; margin: 3mm 0 6mm 0;">
-      <tr><td style="width: 28%; font-weight: bold;">Contact</td><td><t t-esc="o.student_id.emergency_contact_name or 'N/A'"/></td></tr>
-      <tr><td style="font-weight: bold;">Phone</td><td><t t-esc="o.student_id.emergency_contact or 'N/A'"/></td></tr>
-      <tr><td style="font-weight: bold;">Student</td><td><t t-esc="o.student_id.mobile or 'N/A'"/></td></tr>
-    </table>
-    <div style="font-size: 19.5pt; font-weight: bold; color: #0b2545; border-bottom: 0.9mm solid #c9a227; padding-bottom: 1.5mm;">ADDRESS</div>
-    <p style="margin: 3mm 0 0 0; font-size: 18.6pt; line-height: 1.45;"><t t-esc="o.student_id.permanent_address or 'Not provided'"/></p>
-  </div>
-  <div style="position: absolute; left: 9mm; right: 9mm; bottom: 51mm;">
-    <table style="width: 100%; border-collapse: collapse; font-size: 16.5pt;"><tr>
-      <td style="width: 46%; border-top: 0.9mm solid #333333; padding-top: 1.5mm; text-align: left;">Student Signature</td>
-      <td></td>
-      <td style="width: 46%; border-top: 0.9mm solid #333333; padding-top: 1.5mm; text-align: right;">Authorized Signatory</td>
-    </tr></table>
-  </div>
-  <div style="position: absolute; left: 0; right: 0; bottom: 0;">
-    <div style="height: 1.8mm; background-color: #c9a227;"></div>
-    <div style="height: 40.2mm; box-sizing: border-box; background-color: #0b2545; border-radius: 0 0 9mm 9mm; text-align: center; color: #ffffff; font-size: 16.5pt; line-height: 1.4; padding-top: 4.5mm;">
-      <strong style="text-transform: uppercase;"><t t-esc="company.name or 'University'"/></strong><br/>
-      <t t-esc="company.phone or ''"/><span t-if="company.phone and company.email"> | </span><t t-esc="company.email or ''"/><br/>
-      <t t-esc="company.website or ''"/>
-    </div>
-  </div>
-</div>
-    </div>
-  </div>
-</div>
-
+                <div class="page" t-att-style="'page-break-after: %s;' % ('auto' if o_last else 'always')">
+                    <div
+                            style="width: 52mm;
+                  height: 83mm;
+                  overflow: hidden;
+                  position: relative;
+                  font-family: Arial, Helvetica, sans-serif;
+                  text-rendering: geometricPrecision;">
+                        <div
+                                style="width: 156mm;
+                    height: 249mm;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    -webkit-transform: scale(0.333333);
+                    -webkit-transform-origin: 0 0;
+                    transform: scale(0.333333);
+                    transform-origin: 0 0;">
+                            <div
+                                    style="width: 156mm;
+                      height: 249mm;
+                      box-sizing: border-box;
+                      border-radius: 9mm;
+                      background-color: #ffffff;
+                      position: relative;">
+                                <div
+                                        style="background-color: #0b2545;
+                        height: 18mm;
+                        text-align: center;
+                        color: #ffffff;
+                        font-size: 19.5pt;
+                        font-weight: bold;
+                        line-height: 18mm;
+                        border-radius: 9mm 9mm 0 0;">IMPORTANT INFORMATION
+                                </div>
+                                <div style="height: 2.4mm; background-color: #c9a227;"/>
+                                <div style="padding: 6mm 9mm 0 9mm;">
+                                    <div
+                                            style="font-size: 19.5pt;
+                          font-weight: bold;
+                          color: #0b2545;
+                          border-bottom: 0.9mm solid #c9a227;
+                          padding-bottom: 1.5mm;">INSTRUCTIONS
+                                    </div>
+                                    <ul
+                                            style="margin: 3mm 0 6mm 0;
+                          padding-left: 10.5mm;
+                          font-size: 17.4pt;
+                          line-height: 1.45;">
+                                        <li>This card is the property of the institution</li>
+                                        <li>Must be carried at all times on campus</li>
+                                        <li>Report loss immediately to admin office</li>
+                                        <li>Not transferable to any other person</li>
+                                    </ul>
+                                    <div
+                                            style="font-size: 19.5pt;
+                          font-weight: bold;
+                          color: #0b2545;
+                          border-bottom: 0.9mm solid #c9a227;
+                          padding-bottom: 1.5mm;">EMERGENCY CONTACT
+                                    </div>
+                                    <table
+                                            style="width: 100%;
+                          border-collapse: collapse;
+                          font-size: 18.6pt;
+                          line-height: 1.45;
+                          margin: 3mm 0 6mm 0;">
+                                        <tr>
+                                            <td style="width: 28%; font-weight: bold;">Contact</td>
+                                            <td>
+                                                <t t-esc="o.student_id.emergency_contact_name or 'N/A'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: bold;">Phone</td>
+                                            <td>
+                                                <t t-esc="o.student_id.emergency_contact or 'N/A'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: bold;">Student</td>
+                                            <td>
+                                                <t t-esc="o.student_id.mobile or 'N/A'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <div
+                                            style="font-size: 19.5pt;
+                          font-weight: bold;
+                          color: #0b2545;
+                          border-bottom: 0.9mm solid #c9a227;
+                          padding-bottom: 1.5mm;">ADDRESS
+                                    </div>
+                                    <p style="margin: 3mm 0 0 0; font-size: 18.6pt; line-height: 1.45;">
+                                        <t t-esc="o.student_id.permanent_address or 'Not provided'"/>
+                                    </p>
+                                </div>
+                                <div style="position: absolute; left: 9mm; right: 9mm; bottom: 51mm;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 16.5pt;">
+                                        <tr>
+                                            <td
+                                                    style="width: 46%;
+                              border-top: 0.9mm solid #333333;
+                              padding-top: 1.5mm;
+                              text-align: left;">Student Signature
+                                            </td>
+                                            <td/>
+                                            <td
+                                                    style="width: 46%;
+                              border-top: 0.9mm solid #333333;
+                              padding-top: 1.5mm;
+                              text-align: right;">Authorized Signatory
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="position: absolute; left: 0; right: 0; bottom: 0;">
+                                    <div style="height: 1.8mm; background-color: #c9a227;"/>
+                                    <div
+                                            style="height: 40.2mm;
+                          box-sizing: border-box;
+                          background-color: #0b2545;
+                          border-radius: 0 0 9mm 9mm;
+                          text-align: center;
+                          color: #ffffff;
+                          font-size: 16.5pt;
+                          line-height: 1.4;
+                          padding-top: 4.5mm;">
+                                        <strong style="text-transform: uppercase;">
+                                            <t t-esc="company.name or 'University'"/>
+                                        </strong>
+                                        <br/>
+                                        <t t-esc="company.phone or ''"/>
+                                        <span t-if="company.phone and company.email">|</span>
+                                        <t t-esc="company.email or ''"/>
+                                        <br/>
+                                        <t t-esc="company.website or ''"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </t>
         </t>
     </template>
-
 </odoo>
