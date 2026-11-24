@@ -204,13 +204,52 @@
     font-size: 22px;
     flex-shrink: 0;
     box-shadow: 0 8px 16px rgba(245,166,35,0.25);
-    transition: all 0.3s ease;
-    animation: float 3s ease-in-out infinite;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+    transform: none;
+    transition: box-shadow 0.3s ease, filter 0.3s ease;
 }
 
 .uni-logo:hover {
-    transform: rotate(5deg) scale(1.05);
+    filter: brightness(1.06);
     box-shadow: 0 12px 24px rgba(245,166,35,0.3);
+}
+
+.uni-logo:focus-visible {
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.45);
+}
+
+/* ---- Collapsed sidebar (icons only) ---- */
+.uni-sidebar.collapsed {
+    width: 72px;
+}
+
+.uni-sidebar.collapsed .uni-sidebar-header {
+    justify-content: center;
+    padding: 24px 0;
+}
+
+.uni-sidebar.collapsed .uni-brand,
+.uni-sidebar.collapsed .uni-nav-item span,
+.uni-sidebar.collapsed .uni-nav-section-label {
+    display: none;
+}
+
+.uni-sidebar.collapsed .uni-nav-item {
+    justify-content: center;
+    width: 48px;
+    margin: 4px auto;
+    padding: 12px 0;
+}
+
+.uni-sidebar.collapsed .uni-nav-item:hover {
+    transform: none;
+}
+
+.uni-sidebar.collapsed .uni-nav-item i {
+    margin: 0;
 }
 
 .uni-brand {

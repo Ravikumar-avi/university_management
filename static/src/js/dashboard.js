@@ -18,6 +18,7 @@ class UniversityDashboard extends Component {
             activeModule: "overview",
             isLoading: true,
             theme: savedTheme,
+            sidebarCollapsed: localStorage.getItem('university_sidebar_collapsed') === '1',
             overview: {
                 total_students: 0,
                 total_faculty: 0,
@@ -265,6 +266,11 @@ class UniversityDashboard extends Component {
         this.state.departmentStats = data.department_stats || [];
         this.state.feeCollectionMonthly = data.fee_monthly || [];
         this.state.semesterAdmissions = data.semester_admissions || [];
+    }
+
+    toggleSidebar() {
+        this.state.sidebarCollapsed = !this.state.sidebarCollapsed;
+        localStorage.setItem('university_sidebar_collapsed', this.state.sidebarCollapsed ? '1' : '0');
     }
 
     setActiveModule(moduleKey) {

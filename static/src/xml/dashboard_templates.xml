@@ -15,11 +15,11 @@
             <!--  MAIN LAYOUT: Sidebar + Content  -->
             <div t-else="" class="uni-dashboard-layout">
                 <!--  ===================== SIDEBAR =====================  -->
-                <aside class="uni-sidebar">
+                <aside t-attf-class="uni-sidebar #{state.sidebarCollapsed ? 'collapsed' : ''}">
                     <div class="uni-sidebar-header">
-                        <div class="uni-logo">
+                        <button type="button" class="uni-logo" t-on-click="toggleSidebar" t-att-title="state.sidebarCollapsed ? 'Expand menu' : 'Collapse menu'">
                             <i class="fa fa-university"/>
-                        </div>
+                        </button>
                         <div class="uni-brand">
                             <span class="uni-brand-title">University</span>
                             <span class="uni-brand-sub">Management System</span>
@@ -27,7 +27,7 @@
                     </div>
                     <nav class="uni-nav">
                         <t t-foreach="navModules" t-as="mod" t-key="mod.key">
-                            <button t-attf-class="uni-nav-item #{state.activeModule === mod.key ? 'active' : ''}" t-on-click="() => this.setActiveModule(mod.key)">
+                            <button t-attf-class="uni-nav-item #{state.activeModule === mod.key ? 'active' : ''}" t-att-title="mod.label" t-on-click="() => this.setActiveModule(mod.key)">
                                 <i t-attf-class="fa #{mod.icon}"/>
                                 <span t-esc="mod.label"/>
                             </button>
